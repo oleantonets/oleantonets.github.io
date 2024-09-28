@@ -2,103 +2,138 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Snake Game</title>
+    <title>П'ятнашки</title>
     <style>
-        canvas {
-            background: #000;
-            display: block;
-            margin: 0 auto;
+        body {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8f8f8;
+        }
+        #puzzle {
+            width: 400px;
+            height: 400px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 2px;
+        }
+        .tile {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2em;
+            background-color: #deb887; /* Колір дерева */
+            border: 1px solid #8b4513; /* Колір темного дерева */
+            cursor: pointer;
+            box-shadow: inset 0 0 5px #8b4513;
+            
+            background-size: 20px 20px;
+        }
+        .empty {
+            background-color: #fff;
+            cursor: default;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 1.5em;
+            cursor: pointer;
+            background-color: #4CAF50; /* Зелений колір */
+            color: white; /* Білий текст */
+            border: none; /* Без рамки */
+            border-radius: 5px; /* Закруглені кути */
+        }
+        button:hover {
+            background-color: #45a049; /* Темніший зелений при наведенні */
+        }
+        #timer {
+            font-size: 2em;
+            margin-top: 20px;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="puzzle"></div>
+    <button onclick="shuffle()">Перемішати</button>
+    <div id="timer">00:00</div>
+
     <script>
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        const box = 20;
-        let snake = [];
-        snake[0] = { x: 9 * box, y: 10 * box };
-        let food = {
-            x: Math.floor(Math.random() * 19 + 1) * box,
-            y: Math.floor(Math.random() * 19 + 1) * box
-        };
-        let score = 0;
-        let d;
+        const puzzle = document.getElementById('puzzle');
+        const timerElement = document.getElementById('timer');
+        const size = 4;
+        let tiles = [];
+        let timer;
+        let seconds = 0;
 
-        document.addEventListener('keydown', direction);
+        function createTiles() {
+            for (let i = 1; i < size * size; i++) {
+                const tile = document.createElement('div');
+                tile.className = 'tile';
+                tile.textContent = i;
+                tile.addEventListener('click', () => moveTile(i));
+                tiles.push(tile);
+                puzzle.appendChild(tile);
+            }
+            const emptyTile = document.createElement('div');
+            emptyTile.className = 'tile empty';
+            tiles.push(emptyTile);
+            puzzle.appendChild(emptyTile);
+        }
 
-        function direction(event) {
-            if (event.keyCode == 37 && d != 'RIGHT') {
-                d = 'LEFT';
-            } else if (event.keyCode == 38 && d != 'DOWN') {
-                d = 'UP';
-            } else if (event.keyCode == 39 && d != 'LEFT') {
-                d = 'RIGHT';
-            } else if (event.keyCode == 40 && d != 'UP') {
-                d = 'DOWN';
+        function moveTile(index) {
+            const emptyIndex = tiles.findIndex(tile => tile.classList.contains('empty'));
+            const targetIndex = tiles.findIndex(tile => tile.textContent == index);
+            const [emptyRow, emptyCol] = [Math.floor(emptyIndex / size), emptyIndex % size];
+            const [targetRow, targetCol] = [Math.floor(targetIndex / size), targetIndex % size];
+
+            if ((Math.abs(emptyRow - targetRow) + Math.abs(emptyCol - targetCol)) === 1) {
+                [tiles[emptyIndex], tiles[targetIndex]] = [tiles[targetIndex], tiles[emptyIndex]];
+                renderTiles();
             }
         }
 
-        function collision(newHead, snake) {
-            for (let i = 0; i < snake.length; i++) {
-                if (newHead.x == snake[i].x && newHead.y == snake[i].y) {
-                    return true;
-                }
-            }
-            return false;
+        function renderTiles() {
+            puzzle.innerHTML = '';
+            tiles.forEach(tile => puzzle.appendChild(tile));
         }
 
-        function draw() {
-            ctx.fillStyle = '#000';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            for (let i = 0; i < snake.length; i++) {
-                ctx.fillStyle = (i == 0) ? 'green' : 'white';
-                ctx.fillRect(snake[i].x, snake[i].y, box, box);
-                ctx.strokeStyle = 'red';
-                ctx.strokeRect(snake[i].x, snake[i].y, box, box);
+        function shuffle() {
+            for (let i = tiles.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
             }
-
-            ctx.fillStyle = 'red';
-            ctx.fillRect(food.x, food.y, box, box);
-
-            let snakeX = snake[0].x;
-            let snakeY = snake[0].y;
-
-            if (d == 'LEFT') snakeX -= box;
-            if (d == 'UP') snakeY -= box;
-            if (d == 'RIGHT') snakeX += box;
-            if (d == 'DOWN') snakeY += box;
-
-            if (snakeX == food.x && snakeY == food.y) {
-                score++;
-                food = {
-                    x: Math.floor(Math.random() * 19 + 1) * box,
-                    y: Math.floor(Math.random() * 19 + 1) * box
-                };
-            } else {
-                snake.pop();
-            }
-
-            let newHead = {
-                x: snakeX,
-                y: snakeY
-            };
-
-            if (snakeX < 0 || snakeY < 0 || snakeX >= canvas.width || snakeY >= canvas.height || collision(newHead, snake)) {
-                clearInterval(game);
-            }
-
-            snake.unshift(newHead);
-
-            ctx.fillStyle = 'white';
-            ctx.font = '45px Changa one';
-            ctx.fillText(score, 2 * box, 1.6 * box);
+            renderTiles();
+            resetTimer();
+            startTimer();
         }
 
-        let game = setInterval(draw, 100);
+        function startTimer() {
+            timer = setInterval(() => {
+                seconds++;
+                timerElement.textContent = formatTime(seconds);
+            }, 1000);
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            seconds = 0;
+            timerElement.textContent = '00:00';
+        }
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        createTiles();
+        renderTiles();
     </script>
 </body>
 </html>
