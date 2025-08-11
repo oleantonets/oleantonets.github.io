@@ -218,20 +218,48 @@
       selection: [], // [cellId, cellId]
     };
 
-    // Persistence
-    const LS_KEY = 'number-match-mobile-v1';
-    const save = () => localStorage.setItem(LS_KEY, JSON.stringify(state));
+    // Persistence (robust against QuotaExceededError / private mode)
+    const LS_KEY = 'number-match-mobile-v2';
+    const PERSIST_VERSION = 2;
+    let storageDisabled = false;
+
+    const persistable = () => ({
+      v: PERSIST_VERSION,
+      level: state.level,
+      cols: state.cols,
+      grid: state.grid,
+      moves: state.moves,
+      pairs: state.pairs
+    });
+
+    const save = () => {
+      if (storageDisabled) return false;
+      try {
+        localStorage.setItem(LS_KEY, JSON.stringify(persistable()));
+        return true;
+      } catch (e) {
+        storageDisabled = true; // stop future writes
+        toast('Збереження вимкнено (обмеження сховища). Гра працює без збереження.');
+        return false;
+      }
+    };
+
     const load = () => {
       try {
         const raw = localStorage.getItem(LS_KEY);
         if (!raw) return false;
         const obj = JSON.parse(raw);
         if (!obj || !Array.isArray(obj.grid)) return false;
-        state = { ...state, ...obj };
-        // ensure cols aligns with device now
-        state.cols = computeCols();
+        state.level = obj.level || 1;
+        state.cols = computeCols(); // адаптуємо під пристрій
+        state.grid = obj.grid;
+        state.moves = obj.moves || 0;
+        state.pairs = obj.pairs || 0;
         return true;
-      } catch { return false; }
+      } catch (e) {
+        storageDisabled = true;
+        return false;
+      }
     };
 
     // Helpers
@@ -256,7 +284,6 @@
         history: [],
         selection: [],
       };
-      // Start with 6 rows for a nice board density
       for (let i=0; i<6; i++) state.grid.push(freshRow(state.cols));
       render();
       save();
@@ -282,7 +309,6 @@
       if (a.n == null || b.n == null) return false;
       const ruleOK = (a.n === b.n) || (a.n + b.n === 10);
       if (!ruleOK) return false;
-      // must be same row or same column
       const A = coordsOf(a.id), B = coordsOf(b.id);
       if (!A || !B) return false;
       if (A.r === B.r) {
@@ -295,12 +321,14 @@
         for (let y = from; y <= to; y++) if (!isRemoved(cellAt(y, A.c))) return false;
         return true;
       }
-      return false; // different row & column
+      return false;
     };
 
     const removePair = (a, b) => {
-      // push to history for undo
-      state.history.push(JSON.stringify(state));
+      // compact snapshot for Undo (not saved to localStorage)
+      state.history.push(JSON.stringify({ grid: state.grid.map(r=>r.map(t=>t?{n:t.n,id:t.id}:t)), moves: state.moves, pairs: state.pairs, cols: state.cols }));
+      if (state.history.length > 40) state.history.shift();
+
       const A = coordsOf(a.id), B = coordsOf(b.id);
       state.grid[A.r][A.c] = { ...a, n: null };
       state.grid[B.r][B.c] = { ...b, n: null };
@@ -311,16 +339,14 @@
       save();
     };
 
-    // Remove empty rows at the bottom and tidy any fully empty rows inside
     const compactBoard = () => {
-      // Drop rows that are entirely removed
       state.grid = state.grid.filter(row => row.some(t => t && t.n != null));
-      // Ensure at least 1 row exists
       if (state.grid.length === 0) state.grid.push(freshRow(state.cols));
     };
 
     const addRow = () => {
-      state.history.push(JSON.stringify(state));
+      state.history.push(JSON.stringify({ grid: state.grid.map(r=>r.map(t=>t?{n:t.n,id:t.id}:t)), moves: state.moves, pairs: state.pairs, cols: state.cols }));
+      if (state.history.length > 40) state.history.shift();
       state.grid.push(freshRow(state.cols));
       render();
       save();
@@ -330,10 +356,19 @@
     const undo = () => {
       const snap = state.history.pop();
       if (!snap) return toast('Немає що скасовувати.');
-      state = JSON.parse(snap);
-      render();
-      save();
-      toast('Попередній хід скасовано.');
+      try {
+        const prev = JSON.parse(snap);
+        state.grid = prev.grid || state.grid;
+        state.moves = prev.moves ?? state.moves;
+        state.pairs = prev.pairs ?? state.pairs;
+        state.cols = prev.cols || state.cols;
+        state.selection = [];
+        render();
+        save();
+        toast('Попередній хід скасовано.');
+      } catch {
+        toast('Не вдалося скасувати хід.');
+      }
     };
 
     const findHint = () => {
@@ -367,14 +402,11 @@
       levelEl.textContent = String(state.level);
       movesEl.textContent = String(state.moves);
       pairsEl.textContent = String(state.pairs);
-      // Show sum of selected
       const s = state.selection
         .map(id => coordsOf(id))
         .map(pos => pos ? cellAt(pos.r, pos.c)?.n ?? 0 : 0)
         .reduce((a,b) => a+b, 0);
       sumEl.textContent = String(s);
-
-      // Status message
       const left = countNumbers();
       statusEl.textContent = left === 0 ? 'Поле очищене!' : (findHint() ? 'Хід існує' : 'Ходів немає');
     };
@@ -388,7 +420,6 @@
     const render = () => {
       setColsCSS();
       boardEl.innerHTML = '';
-      // Build DOM grid
       for (let r=0; r<state.grid.length; r++) {
         const row = state.grid[r];
         for (let c=0; c<state.cols; c++) {
@@ -408,7 +439,6 @@
           }
           boardEl.appendChild(div);
         }
-        // Visual row divider to help eyes on mobile
         if (r < state.grid.length - 1) {
           const sep = document.createElement('div');
           sep.className = 'row-divider';
@@ -432,7 +462,6 @@
       toast('Знайдено можливу пару.');
     };
 
-    // User interactions
     boardEl.addEventListener('click', (e) => {
       const btn = e.target.closest('.tile');
       if (!btn) return;
@@ -440,7 +469,6 @@
       const tile = cellAt(r, c);
       if (!tile || tile.n == null) return;
 
-      // Toggle selection
       const idx = state.selection.indexOf(tile.id);
       if (idx >= 0) state.selection.splice(idx, 1);
       else {
@@ -448,7 +476,6 @@
         state.selection.push(tile.id);
       }
 
-      // If two selected, attempt match
       if (state.selection.length === 2) {
         const [idA, idB] = state.selection;
         const Apos = coordsOf(idA), Bpos = coordsOf(idB);
@@ -458,9 +485,7 @@
           removePair(A, B);
           toast('Пара прибрана!');
         } else {
-          // Small feedback
           btn.animate([{ transform: 'translateY(0)' }, { transform: 'translateY(2px)' }, { transform: 'translateY(0)' }], { duration: 120 });
-          // Keep last clicked + closest compatible if exists
           if (state.selection.length === 2) state.selection = [tile.id];
           render();
           toast('Не підходить. Потрібно однакові або у сумі 10 і в одному рядку/колонці без перешкод.');
@@ -470,17 +495,14 @@
       }
     }, { passive: true });
 
-    // Controls
     newGameBtn.addEventListener('click', () => newGame());
     addRowBtn.addEventListener('click', () => addRow());
     hintBtn.addEventListener('click', () => showHint());
     undoBtn.addEventListener('click', () => undo());
 
-    // Resize handling: reflow columns but keep data
     window.addEventListener('resize', () => {
       const newCols = computeCols();
       if (newCols === state.cols) return;
-      // Re-wrap each row to new column count while preserving items order
       const flat = state.grid.flat().filter(t => t && (t.n != null || t.n === null));
       state.cols = newCols;
       state.grid = [];
@@ -491,7 +513,6 @@
       save();
     });
 
-    // Init
     if (!load()) newGame();
     else { setColsCSS(); render(); toast('Продовжуємо збережену гру.'); }
   })();
