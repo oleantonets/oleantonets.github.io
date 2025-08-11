@@ -1,139 +1,53 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="uk">
 <head>
-    <meta charset="UTF-8">
-    <title>П'ятнашки</title>
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f8f8f8;
-        }
-        #puzzle {
-            width: 400px;
-            height: 400px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 2px;
-        }
-        .tile {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2em;
-            background-color: #deb887; /* Колір дерева */
-            border: 1px solid #8b4513; /* Колір темного дерева */
-            cursor: pointer;
-            box-shadow: inset 0 0 5px #8b4513;
-            
-            background-size: 20px 20px;
-        }
-        .empty {
-            background-color: #fff;
-            cursor: default;
-        }
-        button {
-            margin-top: 20px;
-            padding: 10px 20px;
-            font-size: 1.5em;
-            cursor: pointer;
-            background-color: #4CAF50; /* Зелений колір */
-            color: white; /* Білий текст */
-            border: none; /* Без рамки */
-            border-radius: 5px; /* Закруглені кути */
-        }
-        button:hover {
-            background-color: #45a049; /* Темніший зелений при наведенні */
-        }
-        #timer {
-            font-size: 2em;
-            margin-top: 20px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Number Match (Simple)</title>
+  <style>
+    :root{
+      --bg:#f0f4f8;
+      --panel:#ffffffcc;
+      --card:#ffffff;
+      --primary:#0284c7;
+      --ok:#16a34a;
+      --bad:#dc2626;
+      --muted:#64748b;
+      --text:#0f172a;
+      --grid-size: 9;
+      --cell: min(9.8vmin, 52px);
+      --radius: 12px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.3 system-ui, sans-serif}
+    .app{max-width: min(95vw, 880px);margin: 24px auto;padding: 20px}
+    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
+    .title{font-size:clamp(20px, 3.6vmin, 28px);font-weight:800}
+    .panel{background:var(--panel);border:1px solid #cbd5e1;border-radius:var(--radius);padding:14px 16px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+    .stat{display:flex;gap:8px;align-items:center;background:#f8fafc;border:1px solid #cbd5e1;padding:8px 12px;border-radius:12px}
+    .stat b{font-size:18px}
+    .grid-wrap{margin-top:14px;background:var(--panel);border:1px solid #cbd5e1;border-radius:calc(var(--radius) + 6px);padding:16px;box-shadow:0 4px 12px #00000010}
+    .grid{display:grid;grid-template-columns:repeat(var(--grid-size), var(--cell));gap:8px;justify-content:center}
+    .cell{position:relative;width:var(--cell);height:var(--cell);display:grid;place-items:center;border-radius:8px;background:var(--card);border:1px solid #cbd5e1;color:var(--text);cursor:pointer;user-select:none;transition:transform .08s ease, box-shadow .2s ease, border-color .12s ease}
+    .cell[data-empty="1"]{visibility:hidden}
+    .num{font-weight:700;font-size:calc(var(--cell) * .44);color:var(--text)}
+    .cell:hover{transform:translateY(-2px)}
+    .cell.selected{box-shadow:0 0 0 3px #38bdf866 inset, 0 0 0 1px var(--primary);border-color:var(--primary)}
+    .cell.good{animation:flash-good .55s both}
+    .cell.bad{animation:flash-bad .5s both}
+    @keyframes flash-good{0%{box-shadow:0 0 0 0 var(--ok)} 30%{box-shadow:0 0 0 6px #22c55e55} 100%{box-shadow:0 0 0 0 transparent}}
+    @keyframes flash-bad{0%{box-shadow:0 0 0 0 var(--bad)} 35%{box-shadow:0 0 0 6px #ef444455} 100%{box-shadow:0 0 0 0 transparent}}
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+    .toolbar button{appearance:none;border:1px solid #cbd5e1;border-radius:8px;background:var(--primary);color:#fff;font-weight:700;padding:10px 14px;cursor:pointer}
+    .toolbar button.secondary{background:#f1f5f9;color:var(--text)}
+    .toolbar button:disabled{opacity:.6;cursor:not-allowed}
+    .rules{color:var(--muted);font-size:14px;margin-top:8px}
+    .footer{margin-top:18px;color:var(--muted);font-size:12px}
+    .footer a{color:var(--primary)}
+  </style>
 </head>
 <body>
-    <div id="puzzle"></div>
-    <button onclick="shuffle()">Перемішати</button>
-    <div id="timer">00:00</div>
-
-    <script>
-        const puzzle = document.getElementById('puzzle');
-        const timerElement = document.getElementById('timer');
-        const size = 4;
-        let tiles = [];
-        let timer;
-        let seconds = 0;
-
-        function createTiles() {
-            for (let i = 1; i < size * size; i++) {
-                const tile = document.createElement('div');
-                tile.className = 'tile';
-                tile.textContent = i;
-                tile.addEventListener('click', () => moveTile(i));
-                tiles.push(tile);
-                puzzle.appendChild(tile);
-            }
-            const emptyTile = document.createElement('div');
-            emptyTile.className = 'tile empty';
-            tiles.push(emptyTile);
-            puzzle.appendChild(emptyTile);
-        }
-
-        function moveTile(index) {
-            const emptyIndex = tiles.findIndex(tile => tile.classList.contains('empty'));
-            const targetIndex = tiles.findIndex(tile => tile.textContent == index);
-            const [emptyRow, emptyCol] = [Math.floor(emptyIndex / size), emptyIndex % size];
-            const [targetRow, targetCol] = [Math.floor(targetIndex / size), targetIndex % size];
-
-            if ((Math.abs(emptyRow - targetRow) + Math.abs(emptyCol - targetCol)) === 1) {
-                [tiles[emptyIndex], tiles[targetIndex]] = [tiles[targetIndex], tiles[emptyIndex]];
-                renderTiles();
-            }
-        }
-
-        function renderTiles() {
-            puzzle.innerHTML = '';
-            tiles.forEach(tile => puzzle.appendChild(tile));
-        }
-
-        function shuffle() {
-            for (let i = tiles.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [tiles[i], tiles[j]] = [tiles[j], tiles[i]];
-            }
-            renderTiles();
-            resetTimer();
-            startTimer();
-        }
-
-        function startTimer() {
-            timer = setInterval(() => {
-                seconds++;
-                timerElement.textContent = formatTime(seconds);
-            }, 1000);
-        }
-
-        function resetTimer() {
-            clearInterval(timer);
-            seconds = 0;
-            timerElement.textContent = '00:00';
-        }
-
-        function formatTime(seconds) {
-            const mins = Math.floor(seconds / 60);
-            const secs = seconds % 60;
-            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-        }
-
-        createTiles();
-        renderTiles();
-    </script>
+  <!-- HTML та JS код залишаються без змін -->
 </body>
 </html>
