@@ -1,289 +1,302 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Number Match (Simple)</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Number Match — HTML</title>
   <style>
     :root{
-      --bg:#f0f4f8;            /* світлий фон */
-      --panel:#ffffffcc;       /* світла панель */
-      --card:#ffffff;          /* світлі клітинки */
-      --primary:#0284c7;       /* синій */
-      --ok:#16a34a;            /* зелений */
-      --bad:#dc2626;           /* червоний */
-      --muted:#64748b;         /* сірий */
-      --text:#0f172a;          /* темний текст */
-      --grid-size: 9;
-      --cell: min(9.8vmin, 52px);
-      --radius: 12px;
+      --bg:#0f1220; /* deep indigo */
+      --panel:#171a2b;
+      --ink:#e7ecff;
+      --muted:#9aa3c7;
+      --accent:#7aa2ff;
+      --accent-2:#19d2b8;
+      --danger:#ff6b6b;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
-    body{margin:0;background:var(--bg);color:var(--text);font:16px/1.3 system-ui, sans-serif}
-    .app{max-width: min(95vw, 880px);margin: 24px auto;padding: 20px}
-    .header{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:14px}
-    .title{font-size:clamp(20px, 3.6vmin, 28px);font-weight:800}
-    .panel{background:var(--panel);border:1px solid #cbd5e1;border-radius:var(--radius);padding:14px 16px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
-    .stat{display:flex;gap:8px;align-items:center;background:#f8fafc;border:1px solid #cbd5e1;padding:8px 12px;border-radius:12px}
-    .stat b{font-size:18px}
-    .grid-wrap{margin-top:14px;background:var(--panel);border:1px solid #cbd5e1;border-radius:calc(var(--radius) + 6px);padding:16px;box-shadow:0 4px 12px #00000010}
-    .grid{display:grid;grid-template-columns:repeat(var(--grid-size), var(--cell));gap:8px;justify-content:center}
-    .cell{color: var(--text);position:relative;width:var(--cell);height:var(--cell);display:grid;place-items:center;border-radius:8px;background:var(--card);border:1px solid #cbd5e1;cursor:pointer;user-select:none;transition:transform .08s ease, box-shadow .2s ease, border-color .12s ease}
-    .cell[data-empty="1"]{visibility:hidden}
-    .num{font-weight:700;font-size:calc(var(--cell) * .44)}
-    .cell:hover{transform:translateY(-2px)}
-    .cell.selected{box-shadow:0 0 0 3px #38bdf866 inset, 0 0 0 1px var(--primary);border-color:var(--primary)}
-    .cell.good{animation:flash-good .55s both}
-    .cell.bad{animation:flash-bad .5s both}
-    @keyframes flash-good{0%{box-shadow:0 0 0 0 var(--ok)} 30%{box-shadow:0 0 0 6px #22c55e55} 100%{box-shadow:0 0 0 0 transparent}}
-    @keyframes flash-bad{0%{box-shadow:0 0 0 0 var(--bad)} 35%{box-shadow:0 0 0 6px #ef444455} 100%{box-shadow:0 0 0 0 transparent}}
-    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
-    .toolbar button{appearance:none;border:1px solid #cbd5e1;border-radius:8px;background:var(--primary);color:#fff;font-weight:700;padding:10px 14px;cursor:pointer}
-    .toolbar button.secondary{background:#f1f5f9;color:var(--text)}
-    button:disabled{opacity:.6;cursor:not-allowed}
-    .rules{color:var(--muted);font-size:14px;margin-top:8px}
-    .footer{margin-top:18px;color:var(--muted);font-size:12px}
-    .footer a{color:var(--primary)}
+    body{margin:0;background:linear-gradient(180deg,#0e1120,#0a0d16 60%);color:var(--ink);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;-webkit-tap-highlight-color:transparent}
+    .app{max-width:680px;margin:0 auto;padding:12px 12px 86px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 0 12px}
+    .title{font-weight:800;letter-spacing:.5px}
+    .score-box{display:flex;gap:10px;align-items:center}
+    .pill{background:var(--panel);padding:8px 12px;border-radius:999px;font-size:14px;color:var(--muted)}.pill b{color:var(--ink)}
+    .board-wrap{background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.06);border-radius:18px;padding:8px 8px 12px}
+    .row{display:grid;grid-template-columns:repeat(var(--cols),1fr);gap:6px;margin:6px 8px}
+    #board{padding-bottom:6px}
+    .cell{position:relative;display:flex;align-items:center;justify-content:center;border-radius:12px;user-select:none;-webkit-user-select:none;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);aspect-ratio:1/1;font-weight:800;font-size:clamp(18px,8vw,28px);transition:.12s transform ease,.12s background-color ease,.12s border-color ease,.12s box-shadow ease}
+    .cell:active{transform:scale(.98)}
+    .cell.empty{opacity:.18;background:transparent;border-style:dashed}
+    /* Підсвітку можливих ходів вимкнено */
+    .cell.selectable{}
+    .cell.selected{background:rgba(122,162,255,.16);border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+    .cell.good{animation:flash .35s ease}
+    .cell.bad{animation:shake .28s ease}
+    .cell .num{filter:drop-shadow(0 1px 0 rgba(0,0,0,.25))}
+    .cell .num.dark{color:#9fb4ff}
+    @keyframes flash{0%{background:rgba(25,210,184,.1)}70%{background:rgba(25,210,184,.35)}100%{background:rgba(25,210,184,.1)}}
+    @keyframes shake{0%,100%{transform:translateX(0)}30%{transform:translateX(-2px)}60%{transform:translateX(2px)}}
+    .controls{position:sticky;bottom:0;left:0;right:0;backdrop-filter:blur(8px);background:linear-gradient(180deg,rgba(15,18,32,0),rgba(13,16,28,.9) 30%,rgba(13,16,28,.98));padding:10px 8px 16px;border-top:1px solid rgba(255,255,255,.06)}
+    .bar{max-width:680px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+    button{appearance:none;border:0;border-radius:14px;padding:14px 12px;font-weight:700;color:#0b0e1a;background:var(--accent);box-shadow:0 6px 18px rgba(122,162,255,.25);font-size:16px}
+    button.secondary{background:#2a2f4b;color:var(--ink);box-shadow:none;border:1px solid rgba(255,255,255,.08)}
+    button.ghost{background:transparent;color:var(--ink);border:1px dashed rgba(255,255,255,.2)}
+    button.warn{background:var(--danger);color:#fff}
+    button:disabled{opacity:.5;filter:grayscale(20%)}
+    .topbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);padding:6px 10px;border-radius:999px;font-size:12px;color:var(--muted)}
+    .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--accent-2)}
+    .help{margin:10px 8px 0;font-size:13px;color:var(--muted)}
   </style>
 </head>
 <body>
-  <div class="app">
-    <div class="header">
-      <div class="title">Number Match — спрощена версія</div>
-      <div class="panel" id="panel">
-        <div class="stat">Очки: <b id="score">0</b></div>
-        <div class="stat">Хід: <b id="moves">0</b></div>
-        <div class="stat">Рівень: <b id="level">1</b></div>
-        <div class="stat">Час: <b id="time">00:00</b></div>
+  <div class="app" id="app">
+    <header>
+      <div class="topbar">
+        <div class="title">
+          <div style="font-size:12px;color:var(--muted);line-height:1">Mini-грайлик</div>
+          <div style="font-size:20px">Number Match</div>
+        </div>
+        <span class="badge"><span class="dot"></span>Мобільна версія</span>
       </div>
+      <div class="score-box">
+        <div class="pill">Очки: <b id="score">0</b></div>
+        <div class="pill">Етап: <b id="stage">1</b></div>
+      </div>
+    </header>
+
+    <div class="board-wrap">
+      <div class="help">Правила: знищуй пари <b>однакових чисел</b> або тих, що <b>у сумі дають 10</b>. Пара має бути <b>в одному рядку або колонці</b> і між ними не повинно бути інших чисел (порожні клітинки дозволені). Коли застряг — додай рядок.</div>
+      <div id="board"></div>
     </div>
 
-    <div class="grid-wrap">
-      <div id="grid" class="grid" aria-label="Ігрове поле"></div>
-      <div class="toolbar">
-        <button id="newGame">Нова гра</button>
-        <button id="hintBtn" class="secondary">Підказка</button>
-        <button id="shuffleBtn" class="secondary">Перемішати</button>
+    <div class="controls">
+      <div class="bar">
+        <button id="btnAdd">+ Рядок</button>
+        <button id="btnHint" class="secondary">Підказка</button>
+        <button id="btnUndo" class="secondary">Відміна</button>
+        <button id="btnNew" class="ghost">Нова гра</button>
       </div>
-      <div class="rules">Правила (спрощені): виберіть дві клітинки з однаковими числами <u>або</u> такими, що в сумі дають 10. Пара має бути <b>сусідньою</b> (по діагоналі теж можна). Успішна пара зникає, числа падають вниз, зверху зʼявляються нові. Набирайте очки якомога швидше.</div>
     </div>
-
-    <div class="footer">Це навчальний клон під мобільний/десктоп браузер. Можу додати повні правила, збереження прогресу й таблицю рекордів.</div>
   </div>
 
-<script>
-(() => {
-  const size = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--grid-size')) || 9;
-  const gridEl = document.getElementById('grid');
-  const scoreEl = document.getElementById('score');
-  const movesEl = document.getElementById('moves');
-  const levelEl = document.getElementById('level');
-  const timeEl  = document.getElementById('time');
-  const hintBtn = document.getElementById('hintBtn');
-  const shuffleBtn = document.getElementById('shuffleBtn');
-  const newGameBtn = document.getElementById('newGame');
+  <script>
+  document.addEventListener('DOMContentLoaded', ()=>{
+    const COLS = 9;         // кількість колонок
+    const INITIAL_ROWS = 7; // стартова висота
+    const SCORE_PAIR = 10;
 
-  /*** State ***/
-  let board = [];           // 2D array of ints (1..9) or null
-  let selected = [];        // [r,c] pairs
-  let score = 0, moves = 0, level = 1;
-  let timer = null, seconds = 0;
+    const elBoard = document.getElementById('board');
+    const elScore = document.getElementById('score');
+    const elStage = document.getElementById('stage');
 
-  function rand() { return 1 + Math.floor(Math.random()*9); }
-
-  function startTimer(){
-    if (timer) clearInterval(timer);
-    seconds = 0;
-    timer = setInterval(() => { seconds++; timeEl.textContent = fmtTime(seconds); }, 1000);
-  }
-  const fmtTime = s => `${String(Math.floor(s/60)).padStart(2,'0')}:${String(s%60).padStart(2,'0')}`;
-
-  function newBoard(){
-    board = Array.from({length:size}, () => Array.from({length:size}, rand));
-    selected = []; score = 0; moves = 0; level = 1;
-    updateHUD();
-    render();
-    startTimer();
-  }
-
-  function updateHUD(){
-    scoreEl.textContent = score;
-    movesEl.textContent = moves;
-    levelEl.textContent = level;
-  }
-
-  function render(){
-    gridEl.innerHTML = '';
-    for (let r=0;r<size;r++) for (let c=0;c<size;c++) {
-      const val = board[r][c];
-      const cell = document.createElement('button');
-      cell.className = 'cell';
-      cell.setAttribute('data-row', r);
-      cell.setAttribute('data-col', c);
-      cell.setAttribute('aria-label', val ? `Клітинка ${r+1},${c+1}, число ${val}` : `Порожня`);
-      if (val == null) cell.dataset.empty = '1';
-      const span = document.createElement('div');
-      span.className = 'num';
-      span.textContent = val ?? '';
-      cell.appendChild(span);
-      cell.addEventListener('click', onCellClick);
-      gridEl.appendChild(cell);
+    const state = {
+      grid: [],          // масив рядків; 0 = порожньо
+      score: 0,
+      stage: 1,
+      selection: null,   // {r,c,v}
+      history: [],       // для відміни
+      seed: Date.now()
     }
-  }
 
-  function onCellClick(e){
-    const cell = e.currentTarget;
-    const r = +cell.dataset.row, c = +cell.dataset.col;
-    if (board[r][c] == null) return;
-
-    const idx = selected.findIndex(([sr,sc]) => sr===r && sc===c);
-    if (idx>=0){ // deselect
-      selected.splice(idx,1); cell.classList.remove('selected'); return;
+    function rng(){ // простий PRNG для відтворюваності між сесіями
+      state.seed ^= state.seed << 13; state.seed ^= state.seed >> 17; state.seed ^= state.seed << 5;
+      return Math.abs(state.seed) / 0x7fffffff;
     }
-    if (selected.length===2) clearSelection();
+    const rand1to9 = () => 1 + Math.floor(rng()*9);
 
-    selected.push([r,c]);
-    cell.classList.add('selected');
+    function save(){
+      try{ localStorage.setItem('nm_state', JSON.stringify(state)); }catch{}
+    }
+    function load(){
+      try{
+        const raw = localStorage.getItem('nm_state');
+        if(!raw) return false;
+        const s = JSON.parse(raw);
+        if(!s || !Array.isArray(s.grid)) return false;
+        Object.assign(state, s);
+        return true;
+      }catch{ return false }
+    }
 
-    if (selected.length===2){
-      const ok = isValidPair(selected[0], selected[1]);
-      flashPair(selected, ok);
-      if (ok){
-        removePair(selected[0], selected[1]);
+    function newGame(){
+      state.grid = Array.from({length: INITIAL_ROWS}, ()=> Array.from({length: COLS}, rand1to9));
+      state.stage = 1; state.score = 0; state.selection = null; state.history = []; state.seed = Date.now();
+      render(); save();
+    }
+
+    function render(){
+      elBoard.innerHTML = '';
+      elScore.textContent = state.score;
+      elStage.textContent = state.stage;
+      for(let r=0;r<state.grid.length;r++){
+        const row = document.createElement('div');
+        row.className = 'row';
+        row.style.setProperty('--cols', COLS);
+        for(let c=0;c<COLS;c++){
+          const v = state.grid[r]?.[c]||0;
+          const cell = document.createElement('div');
+          cell.className = 'cell' + (v===0 ? ' empty' : '');
+          cell.dataset.r = r; cell.dataset.c = c; cell.tabIndex = 0;
+          if(v!==0){
+            const num = document.createElement('div');
+            num.className = 'num' + (v>=7? ' dark':'');
+            num.textContent = v;
+            cell.appendChild(num);
+          }
+          cell.addEventListener('click', onCellClick);
+          row.appendChild(cell);
+        }
+        elBoard.appendChild(row);
       }
-      setTimeout(() => clearSelection(), 180);
+      updateSelectableHints();
     }
-  }
 
-  function clearSelection(){
-    document.querySelectorAll('.cell.selected').forEach(el=>el.classList.remove('selected'));
-    selected = [];
-  }
-
-  /** Rules: same number OR sum to 10 AND adjacent (8-neighbourhood) **/
-  function isValidPair(a,b){
-    const [r1,c1]=a,[r2,c2]=b;
-    if (r1===r2 && c1===c2) return false;
-    const v1 = board[r1][c1], v2 = board[r2][c2];
-    if (v1==null || v2==null) return false;
-    const same = v1===v2; const sum10 = v1+v2===10;
-    const dr = Math.abs(r1-r2), dc = Math.abs(c1-c2);
-    const adjacent = dr<=1 && dc<=1; // includes diagonals
-    return adjacent && (same || sum10);
-  }
-
-  function flashPair(pair, ok){
-    pair.forEach(([r,c]) => {
-      const el = getCellEl(r,c);
-      el.classList.add(ok? 'good':'bad');
-      setTimeout(()=>el.classList.remove('good','bad'), 420);
-    });
-  }
-
-  function getCellEl(r,c){
-    return gridEl.children[r*size + c];
-  }
-
-  function removePair(a,b){
-    const cells = [a,b];
-    cells.forEach(([r,c])=> board[r][c]=null);
-    moves++; score += 10; // base points
-    collapseAndFill();
-    updateHUD();
-    if (!anyMovesLeft()){
-      // make it a bit harder each clear
-      level++; addRandomObstacles();
-      if (!anyMovesLeft()) shuffleBoard();
-    }
-  }
-
-  function collapseAndFill(){
-    // gravity: numbers fall down in each column, then new numbers appear on top
-    for (let c=0;c<size;c++){
-      const col = [];
-      for (let r=0;r<size;r++) if (board[r][c]!=null) col.push(board[r][c]);
-      for (let r=size-1;r>=0;r--){
-        board[r][c] = col.pop() ?? null;
+    function canPair(r1,c1,r2,c2){
+      if(r1===r2 && c1===c2) return false;
+      const v1 = get(r1,c1), v2 = get(r2,c2);
+      if(!v1 || !v2) return false;
+      const goodValue = (v1===v2) || (v1+v2===10);
+      if(!goodValue) return false;
+      if(r1===r2){
+        const [a,b] = c1<c2 ? [c1,c2] : [c2,c1];
+        for(let c=a+1;c<b;c++){ if(get(r1,c)!==0) return false; }
+        return true;
       }
-      for (let r=0;r<size;r++) if (board[r][c]==null) board[r][c]=rand();
+      if(c1===c2){
+        const [a,b] = r1<r2 ? [r1,r2] : [r2,r1];
+        for(let r=a+1;r<b;r++){ if(get(r,c1)!==0) return false; }
+        return true;
+      }
+      return false;
     }
-    render();
-  }
 
-  function neighbours(r,c){
-    const res=[];
-    for (let dr=-1;dr<=1;dr++) for (let dc=-1;dc<=1;dc++){
-      if (dr===0 && dc===0) continue;
-      const rr=r+dr, cc=c+dc;
-      if (rr>=0&&rr<size&&cc>=0&&cc<size) res.push([rr,cc]);
+    function get(r,c){
+      if(r<0||c<0||r>=state.grid.length||c>=COLS) return 0;
+      return state.grid[r][c]||0;
     }
-    return res;
-  }
+    function set(r,c,val){ state.grid[r][c]=val }
 
-  function anyMovesLeft(){
-    for (let r=0;r<size;r++) for (let c=0;c<size;c++){
-      const v = board[r][c];
-      for (const [rr,cc] of neighbours(r,c)){
-        const w = board[rr][cc];
-        if (v===w || v+w===10) return true;
+    function onCellClick(e){
+      const cell = e.currentTarget;
+      const r = +cell.dataset.r; const c = +cell.dataset.c;
+      const v = get(r,c); if(!v) return;
+      if(!state.selection){
+        state.selection = {r,c,v};
+        cell.classList.add('selected');
+        return;
+      }
+      const {r:rr,c:cc} = state.selection;
+      if(rr===r && cc===c){
+        state.selection = null;
+        cell.classList.remove('selected');
+        return;
+      }
+      const ok = canPair(rr,cc,r,c);
+      const cellA = qCell(rr,cc);
+      if(ok){
+        pushHistory();
+        set(rr,cc,0); set(r,c,0);
+        flash(cellA,'good'); flash(cell,'good');
+        state.score += SCORE_PAIR;
+        compactTrailingEmptyRows();
+        state.selection = null;
+        render();
+        save();
+      } else {
+        flash(cellA,'bad'); flash(cell,'bad');
+        state.selection = {r,c,v};
+        document.querySelectorAll('.cell.selected').forEach(n=>n.classList.remove('selected'));
+        cell.classList.add('selected');
       }
     }
-    return false;
-  }
 
-  function findHint(){
-    for (let r=0;r<size;r++) for (let c=0;c<size;c++){
-      const v = board[r][c];
-      for (const n of neighbours(r,c)){
-        const w = board[n[0]][n[1]];
-        if (v===w || v+w===10) return [[r,c], n];
+    function qCell(r,c){ return elBoard.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`) }
+    function flash(el,cls){ if(!el) return; el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls) }
+
+    function compactTrailingEmptyRows(){
+      for(let i=state.grid.length-1;i>=0;i--){
+        if(state.grid[i].every(v=>v===0)) state.grid.pop(); else break;
+      }
+      if(state.grid.length===0){
+        state.stage++;
+        state.grid = Array.from({length: INITIAL_ROWS+state.stage-1}, ()=> Array.from({length: COLS}, rand1to9));
       }
     }
-    return null;
-  }
 
-  function addRandomObstacles(){
-    // As level grows, briefly invert a few cells to make the board different (visual shake-up)
-    const swaps = Math.min(6, 2 + level);
-    for (let i=0;i<swaps;i++){
-      const r1 = Math.floor(Math.random()*size), c1 = Math.floor(Math.random()*size);
-      const r2 = Math.floor(Math.random()*size), c2 = Math.floor(Math.random()*size);
-      const t = board[r1][c1]; board[r1][c1]=board[r2][c2]; board[r2][c2]=t;
-    }
-    render();
-  }
+    document.getElementById('btnAdd').addEventListener('click',()=>{
+      pushHistory();
+      const row = Array.from({length: COLS}, rand1to9);
+      state.grid.push(row);
+      render(); save();
+    })
 
-  function shuffleBoard(){
-    const flat = board.flat();
-    for (let i=flat.length-1;i>0;i--){
-      const j = Math.floor(Math.random()*(i+1));
-      [flat[i], flat[j]] = [flat[j], flat[i]];
-    }
-    for (let i=0;i<flat.length;i++) board[Math.floor(i/size)][i%size] = flat[i];
-    render();
-  }
+    document.getElementById('btnNew').addEventListener('click',()=>{
+      newGame();
+    })
 
-  // Controls
-  hintBtn.addEventListener('click', () => {
-    const h = findHint();
-    if (!h){
-      hintBtn.textContent = 'Немає ходів';
-      setTimeout(()=> hintBtn.textContent = 'Підказка', 900);
-      return;
+    document.getElementById('btnUndo').addEventListener('click',()=>{
+      const prev = state.history.pop();
+      if(!prev) return;
+      Object.assign(state, JSON.parse(prev));
+      render(); save();
+    })
+
+    document.getElementById('btnHint').addEventListener('click',()=>{
+      const hint = findAnyMove();
+      if(!hint){
+        alert('Немає доступних ходів. Додай рядок!');
+        return;
+      }
+      const [a,b] = hint;
+      const ca = qCell(a.r,a.c), cb = qCell(b.r,b.c);
+      ca && ca.classList.add('selected');
+      cb && cb.classList.add('selected');
+      setTimeout(()=>{ ca && ca.classList.remove('selected'); cb && cb.classList.remove('selected'); }, 900);
+    })
+
+    function updateSelectableHints(){
+      // Підсвітку вимкнено: лише прибираємо можливі сліди
+      document.querySelectorAll('.cell').forEach(cell=>{ cell.classList.remove('selectable'); });
     }
-    h.flat().forEach((_,i) => {
-      const [r,c] = i<2 ? h[0] : h[1];
-      const el = getCellEl(r,c);
-      el.classList.add('good'); setTimeout(()=>el.classList.remove('good'), 500);
-    });
+
+    function findAnyMove(){
+      for(let r=0;r<state.grid.length;r++){
+        for(let c=0;c<COLS;c++){
+          const v = get(r,c); if(!v) continue;
+          for(let c2=c+1;c2<COLS;c2++){
+            const v2 = get(r,c2); if(v2===0) continue;
+            if((v===v2 || v+v2===10) && canPair(r,c,r,c2)) return [{r,c,v},{r:r,c:c2,v:v2}];
+            break;
+          }
+          for(let r2=r+1;r2<state.grid.length;r2++){
+            const v2 = get(r2,c); if(v2===0) continue;
+            if((v===v2 || v+v2===10) && canPair(r,c,r2,c)) return [{r,c,v},{r:r2,c,v:v2}];
+            break;
+          }
+        }
+      }
+      return null;
+    }
+
+    function pushHistory(){
+      const clone = JSON.stringify({grid: state.grid.map(r=>r.slice()), score: state.score, stage: state.stage, seed: state.seed});
+      state.history.push(clone);
+      if(state.history.length>20) state.history.shift();
+    }
+
+    function mount(){
+      if(!load()) newGame(); else render();
+      const resize = ()=>{
+        const rows = document.querySelectorAll('.row');
+        rows.forEach(r=>{ r.style.gridAutoRows = '1fr'; });
+      }
+      window.addEventListener('resize', resize); resize();
+    }
+
+    mount();
   });
-  shuffleBtn.addEventListener('click', shuffleBoard);
-  newGameBtn.addEventListener('click', newBoard);
-
-  // Start
-  newBoard();
-})();
-</script>
+  </script>
 </body>
 </html>
