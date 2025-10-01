@@ -36,6 +36,7 @@
     transition: background 0.3s, transform 0.2s;
   }
   .cell.selected { background: #87cefa; transform: scale(1.05); }
+  .cell.hint { background: #90ee90; } /* Підсвітка підказки */
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
   button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
@@ -64,6 +65,7 @@
 <div>
   <button onclick="startGame()">Перезапустити гру</button>
   <button onclick="addRow()">Додати рядок</button>
+  <button onclick="showHint()">Підказка</button>
 </div>
 
 <script>
@@ -233,29 +235,53 @@ function compressRows() {
   renderGrid();
 }
 
-// Додаємо рядок під останнім непорожнім
 function addRow() {
   let matrix = [];
   for (let r = 0; r < rows; r++) {
     matrix.push(numbers.slice(r * cols, (r + 1) * cols));
   }
 
-  // знайти індекс останнього непорожнього рядка
   let lastFilled = -1;
   for (let i = 0; i < matrix.length; i++) {
     if (matrix[i].some(n => n !== null)) lastFilled = i;
   }
 
-  if (lastFilled === -1) lastFilled = -1; // якщо всі пусті, додаємо на верх
   if (lastFilled < rows - 1) {
-    // додаємо новий рядок після lastFilled
     const newRow = [];
     for (let i = 0; i < cols; i++) newRow.push(Math.floor(Math.random() * 9) + 1);
     matrix.splice(lastFilled + 1, 0, newRow);
-    // обрізаємо зайві рядки, щоб залишалося max 11
     if (matrix.length > rows) matrix = matrix.slice(0, rows);
     numbers = matrix.flat();
     renderGrid();
+  }
+}
+
+// Підказка: знайти першу допустиму пару
+function showHint() {
+  removeLine();
+  const cells = document.querySelectorAll('.cell');
+  let found = false;
+  for (let i = 0; i < numbers.length; i++) {
+    if (numbers[i] === null) continue;
+    for (let j = i + 1; j < numbers.length; j++) {
+      if (numbers[j] === null) continue;
+      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
+        cells[i].classList.add('hint');
+        cells[j].classList.add('hint');
+        drawLine(i, j);
+        found = true;
+        setTimeout(() => {
+          cells[i].classList.remove('hint');
+          cells[j].classList.remove('hint');
+          removeLine();
+        }, 1500);
+        return;
+      }
+    }
+  }
+  if (!found) {
+    message.textContent = 'Підказок немає!';
+    setTimeout(() => message.textContent = '', 1000);
   }
 }
 
