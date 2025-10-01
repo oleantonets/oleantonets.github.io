@@ -17,48 +17,39 @@
   h1 { margin-bottom: 10px; text-align: center; }
   #game {
     display: grid;
-    grid-template-columns: repeat(9, 1fr);
-    gap: 10px;
+    grid-template-columns: repeat(9, auto);
     margin-top: 20px;
-    width: 100%;
-    max-width: 600px;
-    position: relative;
+    border: 2px solid #333;
   }
   .cell {
     background: #fff;
-    border: 2px solid #333;
+    border: 1px solid #aaa;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 24px;
+    font-size: 20px;
     cursor: pointer;
     user-select: none;
-    aspect-ratio: 1 / 1;
-    opacity: 0;
-    transform: scale(0.6);
-    animation: appear 0.3s forwards;
+    min-width: 34px;
+    min-height: 34px;
+    padding: 3px;
+    transition: background 0.3s, transform 0.2s;
   }
-  @keyframes appear {
-    to { opacity: 1; transform: scale(1); }
-  }
-  .cell.selected { background: #87cefa; transform: scale(1.1); }
-  .cell.matched {
-    background: #32cd32;
-    transform: scale(0);
-    opacity: 0;
-    transition: transform 0.3s, opacity 0.3s;
-  }
+  .cell.selected { background: #87cefa; transform: scale(1.05); }
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
-  button { margin-top: 15px; padding: 10px 20px; font-size: 16px; cursor: pointer; }
+  button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
   .line {
     position: absolute;
-    height: 4px;
+    height: 3px;
     background: red;
     border-radius: 2px;
     transform-origin: left center;
-    transition: all 0.3s;
     pointer-events: none;
+  }
+  #game-container {
+    position: relative;
+    display: inline-block;
   }
 </style>
 </head>
@@ -66,16 +57,22 @@
 
 <h1>Number Match</h1>
 <div id="level">Рівень: 1</div>
-<div id="game"></div>
+<div id="game-container">
+  <div id="game"></div>
+</div>
 <div id="message"></div>
-<button onclick="startGame()">Перезапустити гру</button>
+<div>
+  <button onclick="startGame()">Перезапустити гру</button>
+  <button onclick="addRow()">Додати рядок</button>
+</div>
 
 <script>
 let level = 1;
-let rows = 4, cols = 9;
+const rows = 11, cols = 9;
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
+const gameContainer = document.getElementById('game-container');
 const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 
@@ -90,7 +87,11 @@ function startGame() {
 
 function generateNumbers() {
   for (let i = 0; i < rows * cols; i++) {
-    numbers.push(Math.floor(Math.random() * 9) + 1);
+    if (i < 5 * cols) {
+      numbers.push(Math.floor(Math.random() * 9) + 1);
+    } else {
+      numbers.push(null);
+    }
   }
 }
 
@@ -101,7 +102,6 @@ function renderGrid() {
     cell.classList.add('cell');
     if (num !== null) cell.textContent = num;
     cell.addEventListener('click', () => selectCell(idx));
-    cell.style.animationDelay = `${idx * 0.02}s`;
     game.appendChild(cell);
   });
   removeLine();
@@ -127,18 +127,17 @@ function selectCell(idx) {
   }
 }
 
-// малюємо лінію між клітинками
 function drawLine(idx1, idx2) {
   removeLine();
   const cells = document.querySelectorAll('.cell');
   const rect1 = cells[idx1].getBoundingClientRect();
   const rect2 = cells[idx2].getBoundingClientRect();
-  const gameRect = game.getBoundingClientRect();
+  const containerRect = gameContainer.getBoundingClientRect();
 
-  const x1 = rect1.left + rect1.width / 2 - gameRect.left;
-  const y1 = rect1.top + rect1.height / 2 - gameRect.top;
-  const x2 = rect2.left + rect2.width / 2 - gameRect.left;
-  const y2 = rect2.top + rect2.height / 2 - gameRect.top;
+  const x1 = rect1.left + rect1.width / 2 - containerRect.left;
+  const y1 = rect1.top + rect1.height / 2 - containerRect.top;
+  const x2 = rect2.left + rect2.width / 2 - containerRect.left;
+  const y2 = rect2.top + rect2.height / 2 - containerRect.top;
 
   const line = document.createElement('div');
   line.classList.add('line');
@@ -148,7 +147,7 @@ function drawLine(idx1, idx2) {
   line.style.transform = `rotate(${angle}deg)`;
   line.style.left = x1 + 'px';
   line.style.top = y1 + 'px';
-  game.appendChild(line);
+  gameContainer.appendChild(line);
 }
 
 function removeLine() {
@@ -156,7 +155,6 @@ function removeLine() {
   if (oldLine) oldLine.remove();
 }
 
-// перевірка правил з'єднання
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
@@ -198,22 +196,16 @@ function checkMatch() {
   const cells = document.querySelectorAll('.cell');
 
   if ((firstNum === secondNum || firstNum + secondNum === 10) && canConnect(firstIdx, secondIdx)) {
-    // додаємо анімацію зникнення
-    cells[firstIdx].classList.add('matched');
-    cells[secondIdx].classList.add('matched');
-
-    setTimeout(() => {
-      // видаляємо текст і клас, залишаємо порожні клітинки
-      cells[firstIdx].textContent = '';
-      cells[secondIdx].textContent = '';
-      cells[firstIdx].classList.remove('matched', 'selected');
-      cells[secondIdx].classList.remove('matched', 'selected');
-      numbers[firstIdx] = null;
-      numbers[secondIdx] = null;
-      selected = [];
-      removeLine();
-      checkLevelComplete();
-    }, 300);
+    numbers[firstIdx] = null;
+    numbers[secondIdx] = null;
+    cells[firstIdx].textContent = '';
+    cells[secondIdx].textContent = '';
+    cells[firstIdx].classList.remove('selected');
+    cells[secondIdx].classList.remove('selected');
+    selected = [];
+    removeLine();
+    compressRows();
+    checkLevelComplete();
   } else {
     message.textContent = 'Не можна поєднати!';
     setTimeout(() => {
@@ -225,10 +217,51 @@ function checkMatch() {
   }
 }
 
+function compressRows() {
+  let matrix = [];
+  for (let r = 0; r < rows; r++) {
+    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  }
+
+  matrix = matrix.filter(row => row.some(n => n !== null));
+
+  while (matrix.length < rows) {
+    matrix.push(new Array(cols).fill(null));
+  }
+
+  numbers = matrix.flat();
+  renderGrid();
+}
+
+// Додаємо рядок під останнім непорожнім
+function addRow() {
+  let matrix = [];
+  for (let r = 0; r < rows; r++) {
+    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  }
+
+  // знайти індекс останнього непорожнього рядка
+  let lastFilled = -1;
+  for (let i = 0; i < matrix.length; i++) {
+    if (matrix[i].some(n => n !== null)) lastFilled = i;
+  }
+
+  if (lastFilled === -1) lastFilled = -1; // якщо всі пусті, додаємо на верх
+  if (lastFilled < rows - 1) {
+    // додаємо новий рядок після lastFilled
+    const newRow = [];
+    for (let i = 0; i < cols; i++) newRow.push(Math.floor(Math.random() * 9) + 1);
+    matrix.splice(lastFilled + 1, 0, newRow);
+    // обрізаємо зайві рядки, щоб залишалося max 11
+    if (matrix.length > rows) matrix = matrix.slice(0, rows);
+    numbers = matrix.flat();
+    renderGrid();
+  }
+}
+
 function checkLevelComplete() {
   if (numbers.every(n => n === null)) {
     level++;
-    rows++;
     levelDisplay.textContent = 'Рівень: ' + level;
     startGame();
   }
