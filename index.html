@@ -12,13 +12,13 @@
     flex-direction: column;
     align-items: center;
     margin: 0;
-    padding: 15px;
+    padding: 20px;
   }
-  h1 { margin-bottom: 10px; text-align: center; font-size: 22px; }
+  h1 { margin-bottom: 10px; text-align: center; }
   #game {
     display: grid;
     grid-template-columns: repeat(9, auto);
-    margin-top: 15px;
+    margin-top: 20px;
     border: 2px solid #333;
   }
   .cell {
@@ -27,28 +27,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 18px;
+    font-size: 20px; /* Шрифт лишився незмінним */
     cursor: pointer;
     user-select: none;
-    min-width: 28px;
-    min-height: 28px;
-    padding: 2px;
+    min-width: 28px;   /* було 34px */
+    min-height: 28px;  /* було 34px */
+    padding: 2px;      /* трохи зменшили */
     transition: background 0.3s, transform 0.2s;
   }
   .cell.selected { background: #87cefa; transform: scale(1.05); }
-  .cell.hint { background: #90ee90; }
-  #level { margin-top: 15px; font-size: 16px; }
-  #message { margin-top: 8px; font-size: 15px; color: #d9534f; }
-  button { 
-    margin-top: 8px; 
-    padding: 8px 14px; 
-    font-size: 15px; 
-    cursor: pointer; 
-    margin-right: 5px; 
-    border-radius: 6px;
-    border: 1px solid #555;
-    background: #fff;
-  }
+  .cell.hint { background: #90ee90; } /* Підсвітка підказки */
+  #level { margin-top: 20px; font-size: 18px; }
+  #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
+  button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
   .line {
     position: absolute;
     height: 3px;
@@ -265,6 +256,7 @@ function addRow() {
   }
 }
 
+// Підказка: знайти першу допустиму пару
 function showHint() {
   removeLine();
   const cells = document.querySelectorAll('.cell');
