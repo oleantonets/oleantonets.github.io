@@ -27,16 +27,16 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px;       /* збільшено шрифт */
+    font-size: 26px;
     cursor: pointer;
     user-select: none;
-    min-width: 33px;       /* зменшено ширину */
-    min-height: 33px;      /* зменшено висоту */
-    padding: 2px;          /* зменшено відступи */
+    min-width: 33px;
+    min-height: 33px;
+    padding: 2px;
     transition: background 0.3s, transform 0.2s;
   }
   .cell.selected { background: #87cefa; transform: scale(1.05); }
-  .cell.hint { background: #90ee90; } /* Підсвітка підказки */
+  .cell.hint { background: #90ee90; }
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
   button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
@@ -157,21 +157,24 @@ function removeLine() {
   if (oldLine) oldLine.remove();
 }
 
+// Функція перевірки можливості поєднання
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
 
+  // 1. Прямі сусіди
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
 
+  // 2. Горизонталь, вертикаль та діагональ
   if (r1 === r2) {
-    const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
+    const start = Math.min(c1, c2), end = Math.max(c1, c2);
     for (let c = start + 1; c < end; c++) {
       if (numbers[r1 * cols + c] !== null) return false;
     }
     return true;
   }
   if (c1 === c2) {
-    const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
+    const start = Math.min(r1, r2), end = Math.max(r1, r2);
     for (let r = start + 1; r < end; r++) {
       if (numbers[r * cols + c1] !== null) return false;
     }
@@ -188,6 +191,15 @@ function canConnect(idx1, idx2) {
     }
     return true;
   }
+
+  // 3. Перехід через край (ліворуч → праворуч між рядками)
+  if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) {
+    if (numbers[r1 * cols + c1] !== null && numbers[r2 * cols + c2] !== null) return true;
+  }
+  if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) {
+    if (numbers[r1 * cols + c1] !== null && numbers[r2 * cols + c2] !== null) return true;
+  }
+
   return false;
 }
 
@@ -256,7 +268,6 @@ function addRow() {
   }
 }
 
-// Підказка
 function showHint() {
   removeLine();
   const cells = document.querySelectorAll('.cell');
