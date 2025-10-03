@@ -27,12 +27,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 26px; /* Шрифт лишився незмінним */
+    font-size: 26px;       /* збільшено шрифт */
     cursor: pointer;
     user-select: none;
-    min-width: 33px;   /* було 34px */
-    min-height: 33px;  /* було 34px */
-    padding: 2px;      /* трохи зменшили */
+    min-width: 33px;       /* зменшено ширину */
+    min-height: 33px;      /* зменшено висоту */
+    padding: 2px;          /* зменшено відступи */
     transition: background 0.3s, transform 0.2s;
   }
   .cell.selected { background: #87cefa; transform: scale(1.05); }
@@ -256,7 +256,7 @@ function addRow() {
   }
 }
 
-// Підказка: знайти першу допустиму пару
+// Підказка
 function showHint() {
   removeLine();
   const cells = document.querySelectorAll('.cell');
