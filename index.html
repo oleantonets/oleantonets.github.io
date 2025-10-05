@@ -157,29 +157,33 @@ function removeLine() {
   if (oldLine) oldLine.remove();
 }
 
-// Функція перевірки можливості поєднання
+// ✅ Правильна логіка перевірки з'єднання
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
 
-  // 1. Прямі сусіди
+  // Якщо поруч
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
 
-  // 2. Горизонталь, вертикаль та діагональ
+  // Горизонталь
   if (r1 === r2) {
-    const start = Math.min(c1, c2), end = Math.max(c1, c2);
+    const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
     for (let c = start + 1; c < end; c++) {
       if (numbers[r1 * cols + c] !== null) return false;
     }
     return true;
   }
+
+  // Вертикаль
   if (c1 === c2) {
-    const start = Math.min(r1, r2), end = Math.max(r1, r2);
+    const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
     for (let r = start + 1; r < end; r++) {
       if (numbers[r * cols + c1] !== null) return false;
     }
     return true;
   }
+
+  // Діагональ
   if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
     const rStep = r1 < r2 ? 1 : -1;
     const cStep = c1 < c2 ? 1 : -1;
@@ -192,13 +196,21 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
-  // 3. Перехід через край (ліворуч → праворуч між рядками)
+  // Wrap-around горизонтально між рядками
   if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) {
-    if (numbers[r1 * cols + c1] !== null && numbers[r2 * cols + c2] !== null) return true;
+    if (numbers[idx1] !== null && numbers[idx2] !== null) return true;
   }
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) {
-    if (numbers[r1 * cols + c1] !== null && numbers[r2 * cols + c2] !== null) return true;
+    if (numbers[idx1] !== null && numbers[idx2] !== null) return true;
   }
+
+  // Якщо на одній лінії по полю (всередині масиву) і всі між ними порожні
+  const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
+  let allEmpty = true;
+  for (let i = minIdx + 1; i < maxIdx; i++) {
+    if (numbers[i] !== null) { allEmpty = false; break; }
+  }
+  if (allEmpty) return true;
 
   return false;
 }
