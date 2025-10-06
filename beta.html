@@ -70,6 +70,15 @@
     transform: scale(1.15);
   }
 
+  /* Анімація блимаючої лампочки */
+  @keyframes blink {
+    0%, 100% { stroke: #FFD700; transform: scale(1); }
+    50% { stroke: #FFA500; transform: scale(1.2); }
+  }
+  .blinking svg {
+    animation: blink 1s infinite;
+  }
+
   .line {
     position: absolute;
     height: 3px;
@@ -113,7 +122,7 @@
   </button>
 
   <!-- Підказка -->
-  <button class="icon-button" onclick="animateIcon(this, 'blink'); showHint();" title="Підказка">
+  <button id="hintBtn" class="icon-button" onclick="animateIcon(this, 'blink'); showHint();" title="Підказка">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
     </svg>
@@ -129,26 +138,18 @@ const game = document.getElementById('game');
 const gameContainer = document.getElementById('game-container');
 const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
+const hintBtn = document.getElementById('hintBtn');
 
 /* --- Анімація піктограм --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   svg.style.transition = "transform 0.3s ease, stroke 0.3s ease";
 
-  if (type === 'rotate') {
-    svg.style.transform = "rotate(360deg)";
-  } else if (type === 'bounce') {
-    svg.style.transform = "scale(1.4)";
-  } else if (type === 'blink') {
-    svg.style.stroke = "#FFD700";
-    svg.style.transform = "scale(1.2)";
-  }
+  if (type === 'rotate') svg.style.transform = "rotate(360deg)";
+  else if (type === 'bounce') svg.style.transform = "scale(1.4)";
+  else if (type === 'blink') { svg.style.stroke = "#FFD700"; svg.style.transform = "scale(1.2)"; }
 
-  // Повернення до початкового стану
-  setTimeout(() => {
-    svg.style.transform = "none";
-    svg.style.stroke = "#333";
-  }, 400);
+  setTimeout(() => { svg.style.transform = "none"; svg.style.stroke = "#333"; }, 400);
 }
 
 /* --- Основна логіка гри --- */
@@ -159,15 +160,12 @@ function startGame() {
   game.innerHTML = '';
   generateNumbers();
   renderGrid();
+  updateHintBlink();
 }
 
 function generateNumbers() {
   for (let i = 0; i < rows * cols; i++) {
-    if (i < 5 * cols) {
-      numbers.push(Math.floor(Math.random() * 9) + 1);
-    } else {
-      numbers.push(null);
-    }
+    numbers.push(i < 5 * cols ? Math.floor(Math.random() * 9) + 1 : null);
   }
 }
 
@@ -181,12 +179,14 @@ function renderGrid() {
     game.appendChild(cell);
   });
   removeLine();
+  updateHintBlink();
 }
 
 function selectCell(idx) {
   if (numbers[idx] === null) return;
+  const cells = document.querySelectorAll('.cell');
   if (selected.includes(idx)) {
-    document.querySelectorAll('.cell')[idx].classList.remove('selected');
+    cells[idx].classList.remove('selected');
     selected = selected.filter(i => i !== idx);
     removeLine();
     return;
@@ -194,7 +194,7 @@ function selectCell(idx) {
 
   if (selected.length < 2) {
     selected.push(idx);
-    document.querySelectorAll('.cell')[idx].classList.add('selected');
+    cells[idx].classList.add('selected');
   }
 
   if (selected.length === 2) {
@@ -209,12 +209,10 @@ function drawLine(idx1, idx2) {
   const rect1 = cells[idx1].getBoundingClientRect();
   const rect2 = cells[idx2].getBoundingClientRect();
   const containerRect = gameContainer.getBoundingClientRect();
-
   const x1 = rect1.left + rect1.width / 2 - containerRect.left;
   const y1 = rect1.top + rect1.height / 2 - containerRect.top;
   const x2 = rect2.left + rect2.width / 2 - containerRect.left;
   const y2 = rect2.top + rect2.height / 2 - containerRect.top;
-
   const line = document.createElement('div');
   line.classList.add('line');
   const length = Math.hypot(x2 - x1, y2 - y1);
@@ -239,17 +237,13 @@ function canConnect(idx1, idx2) {
 
   if (r1 === r2) {
     const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
-    for (let c = start + 1; c < end; c++) {
-      if (numbers[r1 * cols + c] !== null) return false;
-    }
+    for (let c = start + 1; c < end; c++) if (numbers[r1 * cols + c] !== null) return false;
     return true;
   }
 
   if (c1 === c2) {
     const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
-    for (let r = start + 1; r < end; r++) {
-      if (numbers[r * cols + c1] !== null) return false;
-    }
+    for (let r = start + 1; r < end; r++) if (numbers[r * cols + c1] !== null) return false;
     return true;
   }
 
@@ -269,82 +263,49 @@ function canConnect(idx1, idx2) {
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
 
   const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
-  let allEmpty = true;
-  for (let i = minIdx + 1; i < maxIdx; i++) {
-    if (numbers[i] !== null) { allEmpty = false; break; }
-  }
-  return allEmpty;
+  for (let i = minIdx + 1; i < maxIdx; i++) if (numbers[i] !== null) return false;
+  return true;
 }
 
 function checkMatch() {
-  const [firstIdx, secondIdx] = selected;
-  const firstNum = numbers[firstIdx];
-  const secondNum = numbers[secondIdx];
+  const [i1, i2] = selected;
+  const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
-
-  if ((firstNum === secondNum || firstNum + secondNum === 10) && canConnect(firstIdx, secondIdx)) {
-    numbers[firstIdx] = null;
-    numbers[secondIdx] = null;
-    cells[firstIdx].textContent = '';
-    cells[secondIdx].textContent = '';
-    cells[firstIdx].classList.remove('selected');
-    cells[secondIdx].classList.remove('selected');
-    selected = [];
-    removeLine();
-    compressRows();
-    checkLevelComplete();
+  if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
+    numbers[i1] = null; numbers[i2] = null;
+    cells[i1].textContent = ''; cells[i2].textContent = '';
+    selected = []; removeLine(); compressRows(); checkLevelComplete();
   } else {
     message.textContent = 'Не можна поєднати!';
-    setTimeout(() => {
-      selected.forEach(i => cells[i].classList.remove('selected'));
-      selected = [];
-      removeLine();
-      message.textContent = '';
-    }, 500);
+    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
   }
+  updateHintBlink();
 }
 
 function compressRows() {
   let matrix = [];
-  for (let r = 0; r < rows; r++) {
-    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
-  }
-
+  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
   matrix = matrix.filter(row => row.some(n => n !== null));
-
-  while (matrix.length < rows) {
-    matrix.push(new Array(cols).fill(null));
-  }
-
+  while (matrix.length < rows) matrix.push(new Array(cols).fill(null));
   numbers = matrix.flat();
   renderGrid();
 }
 
 function addRow() {
   let matrix = [];
-  for (let r = 0; r < rows; r++) {
-    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
-  }
-
-  let lastFilled = -1;
-  for (let i = 0; i < matrix.length; i++) {
-    if (matrix[i].some(n => n !== null)) lastFilled = i;
-  }
-
+  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  let lastFilled = matrix.map(r => r.some(n => n !== null)).lastIndexOf(true);
   if (lastFilled < rows - 1) {
-    const newRow = [];
-    for (let i = 0; i < cols; i++) newRow.push(Math.floor(Math.random() * 9) + 1);
+    const newRow = Array.from({length: cols}, () => Math.floor(Math.random() * 9) + 1);
     matrix.splice(lastFilled + 1, 0, newRow);
     if (matrix.length > rows) matrix = matrix.slice(0, rows);
-    numbers = matrix.flat();
-    renderGrid();
+    numbers = matrix.flat(); renderGrid();
   }
 }
 
 function showHint() {
   removeLine();
   const cells = document.querySelectorAll('.cell');
-  let found = false;
   for (let i = 0; i < numbers.length; i++) {
     if (numbers[i] === null) continue;
     for (let j = i + 1; j < numbers.length; j++) {
@@ -353,20 +314,29 @@ function showHint() {
         cells[i].classList.add('hint');
         cells[j].classList.add('hint');
         drawLine(i, j);
-        found = true;
-        setTimeout(() => {
-          cells[i].classList.remove('hint');
-          cells[j].classList.remove('hint');
-          removeLine();
-        }, 1500);
+        setTimeout(() => { cells[i].classList.remove('hint'); cells[j].classList.remove('hint'); removeLine(); }, 1500);
         return;
       }
     }
   }
-  if (!found) {
-    message.textContent = 'Підказок немає!';
-    setTimeout(() => message.textContent = '', 1000);
+  message.textContent = 'Підказок немає!';
+  setTimeout(() => message.textContent = '', 1000);
+}
+
+function hasHint() {
+  for (let i = 0; i < numbers.length; i++) {
+    if (numbers[i] === null) continue;
+    for (let j = i + 1; j < numbers.length; j++) {
+      if (numbers[j] === null) continue;
+      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) return true;
+    }
   }
+  return false;
+}
+
+function updateHintBlink() {
+  if (hasHint()) hintBtn.classList.add('blinking');
+  else hintBtn.classList.remove('blinking');
 }
 
 function checkLevelComplete() {
