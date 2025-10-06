@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number Match</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { margin-bottom: 10px; text-align: center; }
+  #game {
+    display: grid;
+    grid-template-columns: repeat(8, auto);
+    margin-top: 20px;
+    border: 2px solid #333;
+  }
+  .cell {
+    background: #fff;
+    border: 1px solid #aaa;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 28px;
+    cursor: pointer;
+    user-select: none;
+    min-width: 35px;
+    min-height: 35px;
+    padding: 2px;
+    transition: background 0.3s, transform 0.2s;
+  }
+  .cell.selected { background: #87cefa; transform: scale(1.05); }
+  .cell.hint { background: #90ee90; }
+  #level { margin-top: 20px; font-size: 18px; }
+  #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
+  button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
+  .line {
+    position: absolute;
+    height: 3px;
+    background: red;
+    border-radius: 2px;
+    transform-origin: left center;
+    pointer-events: none;
+  }
+  #game-container {
+    position: relative;
+    display: inline-block;
+  }
+</style>
+</head>
+<body>
+
+<h1>Number Match</h1>
+<div id="level">Рівень: 1</div>
+<div id="game-container">
+  <div id="game"></div>
+</div>
+<div id="message"></div>
+<div>
+  <button onclick="startGame()">Перезапустити гру</button>
+  <button onclick="addRow()">Додати рядок</button>
+  <button onclick="showHint()">Підказка</button>
+</div>
+
+<script>
+let level = 1;
+const rows = 11, cols = 8; // змінено на 8x11
+let numbers = [];
+let selected = [];
+const game = document.getElementById('game');
+const gameContainer = document.getElementById('game-container');
+const levelDisplay = document.getElementById('level');
+const message = document.getElementById('message');
+
+function startGame() {
+  numbers = [];
+  selected = [];
+  message.textContent = '';
+  game.innerHTML = '';
+  generateNumbers();
+  renderGrid();
+}
+
+function generateNumbers() {
+  for (let i = 0; i < rows * cols; i++) {
+    if (i < 5 * cols) {
+      numbers.push(Math.floor(Math.random() * 9) + 1);
+    } else {
+      numbers.push(null);
+    }
+  }
+}
+
+function renderGrid() {
+  game.innerHTML = '';
+  numbers.forEach((num, idx) => {
+    const cell = document.createElement('div');
+    cell.classList.add('cell');
+    if (num !== null) cell.textContent = num;
+    cell.addEventListener('click', () => selectCell(idx));
+    game.appendChild(cell);
+  });
+  removeLine();
+}
+
+function selectCell(idx) {
+  if (numbers[idx] === null) return;
+  if (selected.includes(idx)) {
+    document.querySelectorAll('.cell')[idx].classList.remove('selected');
+    selected = selected.filter(i => i !== idx);
+    removeLine();
+    return;
+  }
+
+  if (selected.length < 2) {
+    selected.push(idx);
+    document.querySelectorAll('.cell')[idx].classList.add('selected');
+  }
+
+  if (selected.length === 2) {
+    drawLine(selected[0], selected[1]);
+    setTimeout(checkMatch, 300);
+  }
+}
+
+function drawLine(idx1, idx2) {
+  removeLine();
+  const cells = document.querySelectorAll('.cell');
+  const rect1 = cells[idx1].getBoundingClientRect();
+  const rect2 = cells[idx2].getBoundingClientRect();
+  const containerRect = gameContainer.getBoundingClientRect();
+
+  const x1 = rect1.left + rect1.width / 2 - containerRect.left;
+  const y1 = rect1.top + rect1.height / 2 - containerRect.top;
+  const x2 = rect2.left + rect2.width / 2 - containerRect.left;
+  const y2 = rect2.top + rect2.height / 2 - containerRect.top;
+
+  const line = document.createElement('div');
+  line.classList.add('line');
+  const length = Math.hypot(x2 - x1, y2 - y1);
+  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+  line.style.width = length + 'px';
+  line.style.transform = `rotate(${angle}deg)`;
+  line.style.left = x1 + 'px';
+  line.style.top = y1 + 'px';
+  gameContainer.appendChild(line);
+}
+
+function removeLine() {
+  const oldLine = document.querySelector('.line');
+  if (oldLine) oldLine.remove();
+}
+
+// Перевірка з'єднання
+function canConnect(idx1, idx2) {
+  const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
+  const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
+
+  if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
+
+  if (r1 === r2) {
+    const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
+    for (let c = start + 1; c < end; c++) {
+      if (numbers[r1 * cols + c] !== null) return false;
+    }
+    return true;
+  }
+
+  if (c1 === c2) {
+    const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
+    for (let r = start + 1; r < end; r++) {
+      if (numbers[r * cols + c1] !== null) return false;
+    }
+    return true;
+  }
+
+  if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
+    const rStep = r1 < r2 ? 1 : -1;
+    const cStep = c1 < c2 ? 1 : -1;
+    let r = r1 + rStep, c = c1 + cStep;
+    while (r !== r2 && c !== c2) {
+      if (numbers[r * cols + c] !== null) return false;
+      r += rStep;
+      c += cStep;
+    }
+    return true;
+  }
+
+  if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
+  if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
+
+  const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
+  for (let i = minIdx + 1; i < maxIdx; i++) {
+    if (numbers[i] !== null) return false;
+  }
+  return true;
+}
+
+function checkMatch() {
+  const [firstIdx, secondIdx] = selected;
+  const firstNum = numbers[firstIdx];
+  const secondNum = numbers[secondIdx];
+  const cells = document.querySelectorAll('.cell');
+
+  if ((firstNum === secondNum || firstNum + secondNum === 10) && canConnect(firstIdx, secondIdx)) {
+    numbers[firstIdx] = null;
+    numbers[secondIdx] = null;
+    cells[firstIdx].textContent = '';
+    cells[secondIdx].textContent = '';
+    cells[firstIdx].classList.remove('selected');
+    cells[secondIdx].classList.remove('selected');
+    selected = [];
+    removeLine();
+    compressRows();
+    checkLevelComplete();
+  } else {
+    message.textContent = 'Не можна поєднати!';
+    setTimeout(() => {
+      selected.forEach(i => cells[i].classList.remove('selected'));
+      selected = [];
+      removeLine();
+      message.textContent = '';
+    }, 500);
+  }
+}
+
+function compressRows() {
+  let matrix = [];
+  for (let r = 0; r < rows; r++) {
+    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  }
+
+  matrix = matrix.filter(row => row.some(n => n !== null));
+
+  while (matrix.length < rows) {
+    matrix.push(new Array(cols).fill(null));
+  }
+
+  numbers = matrix.flat();
+  renderGrid();
+}
+
+function addRow() {
+  let matrix = [];
+  for (let r = 0; r < rows; r++) {
+    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  }
+
+  let lastFilled = -1;
+  for (let i = 0; i < matrix.length; i++) {
+    if (matrix[i].some(n => n !== null)) lastFilled = i;
+  }
+
+  if (lastFilled < rows - 1) {
+    const newRow = [];
+    for (let i = 0; i < cols; i++) newRow.push(Math.floor(Math.random() * 9) + 1);
+    matrix.splice(lastFilled + 1, 0, newRow);
+    if (matrix.length > rows) matrix = matrix.slice(0, rows);
+    numbers = matrix.flat();
+    renderGrid();
+  }
+}
+
+function showHint() {
+  removeLine();
+  const cells = document.querySelectorAll('.cell');
+  let found = false;
+  for (let i = 0; i < numbers.length; i++) {
+    if (numbers[i] === null) continue;
+    for (let j = i + 1; j < numbers.length; j++) {
+      if (numbers[j] === null) continue;
+      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
+        cells[i].classList.add('hint');
+        cells[j].classList.add('hint');
+        drawLine(i, j);
+        found = true;
+        setTimeout(() => {
+          cells[i].classList.remove('hint');
+          cells[j].classList.remove('hint');
+          removeLine();
+        }, 1500);
+        return;
+      }
+    }
+  }
+  if (!found) {
+    message.textContent = 'Підказок немає!';
+    setTimeout(() => message.textContent = '', 1000);
+  }
+}
+
+function checkLevelComplete() {
+  if (numbers.every(n => n === null)) {
+    level++;
+    levelDisplay.textContent = 'Рівень: ' + level;
+    startGame();
+  }
+}
+
+startGame();
+</script>
+</body>
+</html>
