@@ -29,12 +29,12 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 30px; /* збільшено */
+    font-size: 30px;
     cursor: pointer;
     user-select: none;
-    min-width: 38px;  /* збільшено */
-    min-height: 38px; /* збільшено */
-    padding: 3px;     /* збільшено */
+    min-width: 38px;
+    min-height: 38px;
+    padding: 3px;
     transition: background 0.3s, transform 0.2s;
   }
 
@@ -43,7 +43,32 @@
 
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
-  button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
+
+  .icon-bar {
+    display: flex;
+    gap: 12px;
+    margin-top: 10px;
+  }
+
+  .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 5px;
+    transition: transform 0.2s ease, stroke 0.2s ease;
+  }
+
+  .icon-button svg {
+    stroke: #333;
+    width: 32px;
+    height: 32px;
+    transition: transform 0.2s, stroke 0.2s;
+  }
+
+  .icon-button:hover svg {
+    stroke: #007bff;
+    transform: scale(1.15) rotate(10deg);
+  }
 
   .line {
     position: absolute;
@@ -68,15 +93,36 @@
   <div id="game"></div>
 </div>
 <div id="message"></div>
-<div>
-  <button onclick="startGame()">Перезапустити гру</button>
-  <button onclick="addRow()">Додати рядок</button>
-  <button onclick="showHint()">Підказка</button>
+
+<!-- Панель іконок -->
+<div class="icon-bar">
+  <!-- Перезапуск -->
+  <button class="icon-button" onclick="animateRestart(this); startGame();" title="Перезапустити гру">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="1 4 1 10 7 10"></polyline>
+      <path d="M3.51 15a9 9 0 1 0 3.13-9.36L1 10"></path>
+    </svg>
+  </button>
+
+  <!-- Додати рядок -->
+  <button class="icon-button" onclick="addRow()" title="Додати рядок">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19"></line>
+      <line x1="5" y1="12" x2="19" y2="12"></line>
+    </svg>
+  </button>
+
+  <!-- Підказка -->
+  <button class="icon-button" onclick="showHint()" title="Підказка">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
+    </svg>
+  </button>
 </div>
 
 <script>
 let level = 1;
-const rows = 10, cols = 8; // оновлено
+const rows = 10, cols = 8;
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
@@ -91,6 +137,13 @@ function startGame() {
   game.innerHTML = '';
   generateNumbers();
   renderGrid();
+}
+
+function animateRestart(button) {
+  const svg = button.querySelector("svg");
+  svg.style.transition = "transform 0.6s ease";
+  svg.style.transform = "rotate(360deg)";
+  setTimeout(() => svg.style.transform = "none", 600);
 }
 
 function generateNumbers() {
