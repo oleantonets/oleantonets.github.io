@@ -15,15 +15,17 @@
     padding: 20px;
   }
   h1 { margin-bottom: 10px; text-align: center; }
+
   #game {
     display: grid;
-    grid-template-columns: repeat(10, auto);
+    grid-template-columns: repeat(9, auto);
     margin-top: 20px;
-    border: 2px solid #333;
+    border: 1px solid #d0d0d0; /* зовнішня рамка світло-сіра */
   }
+
   .cell {
     background: #fff;
-    border: 1px solid #aaa;
+    border: 1px solid #d0d0d0; /* внутрішні лінії світло-сірі */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -35,11 +37,14 @@
     padding: 2px;
     transition: background 0.3s, transform 0.2s;
   }
+
   .cell.selected { background: #87cefa; transform: scale(1.05); }
   .cell.hint { background: #90ee90; }
+
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
   button { margin-top: 10px; padding: 10px 20px; font-size: 16px; cursor: pointer; margin-right: 5px; }
+
   .line {
     position: absolute;
     height: 3px;
@@ -48,6 +53,7 @@
     transform-origin: left center;
     pointer-events: none;
   }
+
   #game-container {
     position: relative;
     display: inline-block;
@@ -70,7 +76,7 @@
 
 <script>
 let level = 1;
-const rows = 10, cols = 10;
+const rows = 11, cols = 9;
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
@@ -163,7 +169,6 @@ function canConnect(idx1, idx2) {
 
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
 
-  // Горизонталь
   if (r1 === r2) {
     const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
     for (let c = start + 1; c < end; c++) {
@@ -172,7 +177,6 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
-  // Вертикаль
   if (c1 === c2) {
     const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
     for (let r = start + 1; r < end; r++) {
@@ -181,7 +185,6 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
-  // Діагональ
   if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
     const rStep = r1 < r2 ? 1 : -1;
     const cStep = c1 < c2 ? 1 : -1;
@@ -194,16 +197,17 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
-  // Wrap-around між рядками
   if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
 
-  // Через порожні клітинки у плоскому масиві
   const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
+  let allEmpty = true;
   for (let i = minIdx + 1; i < maxIdx; i++) {
-    if (numbers[i] !== null) return false;
+    if (numbers[i] !== null) { allEmpty = false; break; }
   }
-  return true;
+  if (allEmpty) return true;
+
+  return false;
 }
 
 function checkMatch() {
