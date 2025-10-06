@@ -17,7 +17,7 @@
   h1 { margin-bottom: 10px; text-align: center; }
   #game {
     display: grid;
-    grid-template-columns: repeat(8, auto);
+    grid-template-columns: repeat(10, auto);
     margin-top: 20px;
     border: 2px solid #333;
   }
@@ -27,11 +27,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 28px;
+    font-size: 26px;
     cursor: pointer;
     user-select: none;
-    min-width: 35px;
-    min-height: 35px;
+    min-width: 33px;
+    min-height: 33px;
     padding: 2px;
     transition: background 0.3s, transform 0.2s;
   }
@@ -70,7 +70,7 @@
 
 <script>
 let level = 1;
-const rows = 11, cols = 8; // змінено на 8x11
+const rows = 10, cols = 10;
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
@@ -157,13 +157,13 @@ function removeLine() {
   if (oldLine) oldLine.remove();
 }
 
-// Перевірка з'єднання
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
 
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
 
+  // Горизонталь
   if (r1 === r2) {
     const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
     for (let c = start + 1; c < end; c++) {
@@ -172,6 +172,7 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
+  // Вертикаль
   if (c1 === c2) {
     const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
     for (let r = start + 1; r < end; r++) {
@@ -180,6 +181,7 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
+  // Діагональ
   if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
     const rStep = r1 < r2 ? 1 : -1;
     const cStep = c1 < c2 ? 1 : -1;
@@ -192,9 +194,11 @@ function canConnect(idx1, idx2) {
     return true;
   }
 
+  // Wrap-around між рядками
   if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
 
+  // Через порожні клітинки у плоскому масиві
   const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
   for (let i = minIdx + 1; i < maxIdx; i++) {
     if (numbers[i] !== null) return false;
