@@ -18,7 +18,7 @@
 
   #game {
     display: grid;
-    grid-template-columns: repeat(8, auto); /* 8 колонок */
+    grid-template-columns: repeat(8, auto);
     margin-top: 20px;
     border: 1px solid #d0d0d0;
   }
@@ -70,7 +70,6 @@
     transform: scale(1.15);
   }
 
-  /* Анімація блимаючої лампочки */
   @keyframes blink {
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
@@ -103,7 +102,6 @@
 </div>
 <div id="message"></div>
 
-<!-- Панель іконок -->
 <div class="icon-bar">
   <!-- Перезапуск -->
   <button class="icon-button" onclick="animateIcon(this, 'rotate'); startGame();" title="Перезапустити гру">
@@ -140,19 +138,35 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація піктограм --- */
+/* ---- Звуки ---- */
+function playSound(type) {
+  const ctx = new (window.AudioContext || window.webkitAudioContext)();
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.connect(g);
+  g.connect(ctx.destination);
+
+  if (type === 'success') o.frequency.value = 520;
+  else if (type === 'hint') o.frequency.value = 660;
+  else if (type === 'error') o.frequency.value = 220;
+
+  g.gain.setValueAtTime(0.2, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+  o.start();
+  o.stop(ctx.currentTime + 0.4);
+}
+
+/* ---- Анімації іконок ---- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   svg.style.transition = "transform 0.3s ease, stroke 0.3s ease";
-
   if (type === 'rotate') svg.style.transform = "rotate(360deg)";
   else if (type === 'bounce') svg.style.transform = "scale(1.4)";
   else if (type === 'blink') { svg.style.stroke = "#FFD700"; svg.style.transform = "scale(1.2)"; }
-
   setTimeout(() => { svg.style.transform = "none"; svg.style.stroke = "#333"; }, 400);
 }
 
-/* --- Основна логіка гри --- */
+/* ---- Основна логіка гри ---- */
 function startGame() {
   numbers = [];
   selected = [];
@@ -272,10 +286,12 @@ function checkMatch() {
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
+    playSound('success');
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
     selected = []; removeLine(); compressRows(); checkLevelComplete();
   } else {
+    playSound('error');
     message.textContent = 'Не можна поєднати!';
     setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
   }
@@ -304,6 +320,7 @@ function addRow() {
 }
 
 function showHint() {
+  playSound('hint');
   removeLine();
   const cells = document.querySelectorAll('.cell');
   for (let i = 0; i < numbers.length; i++) {
