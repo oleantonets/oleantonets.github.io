@@ -18,7 +18,7 @@
 
   #game {
     display: grid;
-    grid-template-columns: repeat(8, auto);
+    grid-template-columns: repeat(8, auto); /* 8 колонок */
     margin-top: 20px;
     border: 1px solid #d0d0d0;
   }
@@ -62,7 +62,7 @@
     stroke: #333;
     width: 32px;
     height: 32px;
-    transition: transform 0.3s, stroke 0.3s;
+    transition: transform 0.3s ease, stroke 0.3s ease;
   }
 
   .icon-button:hover svg {
@@ -70,13 +70,32 @@
     transform: scale(1.15);
   }
 
+  /* --- Анімації кнопок --- */
+  .rotate svg { animation: rotateAnim 0.5s ease; }
+  @keyframes rotateAnim {
+    from { transform: rotate(0deg); stroke: #007bff; }
+    to { transform: rotate(360deg); stroke: #333; }
+  }
+
+  .bounce svg { animation: bounceAnim 0.4s ease; }
+  @keyframes bounceAnim {
+    0% { transform: scale(1); stroke: #007bff; }
+    50% { transform: scale(1.4); stroke: #007bff; }
+    100% { transform: scale(1); stroke: #333; }
+  }
+
+  .blink svg { animation: blinkAnim 0.4s ease; }
+  @keyframes blinkAnim {
+    0% { stroke: #FFD700; transform: scale(1.1); }
+    100% { stroke: #333; transform: scale(1); }
+  }
+
+  /* --- Блимання лампочки, коли є ходи --- */
   @keyframes blink {
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
   }
-  .blinking svg {
-    animation: blink 1s infinite;
-  }
+  .blinking svg { animation: blink 1s infinite; }
 
   .line {
     position: absolute;
@@ -102,10 +121,11 @@
 </div>
 <div id="message"></div>
 
+<!-- Панель іконок -->
 <div class="icon-bar">
   <!-- Перезапуск -->
   <button class="icon-button" onclick="animateIcon(this, 'rotate'); startGame();" title="Перезапустити гру">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="1 4 1 10 7 10"></polyline>
       <path d="M3.51 15a9 9 0 1 0 3.13-9.36L1 10"></path>
     </svg>
@@ -113,7 +133,7 @@
 
   <!-- Додати рядок -->
   <button class="icon-button" onclick="animateIcon(this, 'bounce'); addRow();" title="Додати рядок">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
@@ -121,7 +141,7 @@
 
   <!-- Підказка -->
   <button id="hintBtn" class="icon-button" onclick="animateIcon(this, 'blink'); showHint();" title="Підказка">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
     </svg>
   </button>
@@ -138,35 +158,14 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* ---- Звуки ---- */
-function playSound(type) {
-  const ctx = new (window.AudioContext || window.webkitAudioContext)();
-  const o = ctx.createOscillator();
-  const g = ctx.createGain();
-  o.connect(g);
-  g.connect(ctx.destination);
-
-  if (type === 'success') o.frequency.value = 520;
-  else if (type === 'hint') o.frequency.value = 660;
-  else if (type === 'error') o.frequency.value = 220;
-
-  g.gain.setValueAtTime(0.2, ctx.currentTime);
-  g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-  o.start();
-  o.stop(ctx.currentTime + 0.4);
-}
-
-/* ---- Анімації іконок ---- */
+/* --- Анімація іконок через класи --- */
 function animateIcon(button, type) {
-  const svg = button.querySelector("svg");
-  svg.style.transition = "transform 0.3s ease, stroke 0.3s ease";
-  if (type === 'rotate') svg.style.transform = "rotate(360deg)";
-  else if (type === 'bounce') svg.style.transform = "scale(1.4)";
-  else if (type === 'blink') { svg.style.stroke = "#FFD700"; svg.style.transform = "scale(1.2)"; }
-  setTimeout(() => { svg.style.transform = "none"; svg.style.stroke = "#333"; }, 400);
+  button.classList.remove('rotate', 'bounce', 'blink');
+  void button.offsetWidth; // перезапуск анімації
+  button.classList.add(type);
 }
 
-/* ---- Основна логіка гри ---- */
+/* --- Основна логіка гри --- */
 function startGame() {
   numbers = [];
   selected = [];
@@ -286,12 +285,10 @@ function checkMatch() {
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
-    playSound('success');
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
     selected = []; removeLine(); compressRows(); checkLevelComplete();
   } else {
-    playSound('error');
     message.textContent = 'Не можна поєднати!';
     setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
   }
@@ -320,7 +317,6 @@ function addRow() {
 }
 
 function showHint() {
-  playSound('hint');
   removeLine();
   const cells = document.querySelectorAll('.cell');
   for (let i = 0; i < numbers.length; i++) {
