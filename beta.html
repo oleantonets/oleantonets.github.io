@@ -18,23 +18,23 @@
 
   #game {
     display: grid;
-    grid-template-columns: repeat(8, auto);
+    grid-template-columns: repeat(8, auto); /* 8 колонок */
     margin-top: 20px;
-    border: 1px solid #d0d0d0; /* зовнішня рамка світло-сіра */
+    border: 1px solid #d0d0d0;
   }
 
   .cell {
     background: #fff;
-    border: 1px solid #d0d0d0; /* внутрішні лінії світло-сірі */
+    border: 1px solid #d0d0d0;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 32px;
+    font-size: 30px; /* збільшено */
     cursor: pointer;
     user-select: none;
-    min-width: 45px;
-    min-height: 45px;
-    padding: 5px;
+    min-width: 38px;  /* збільшено */
+    min-height: 38px; /* збільшено */
+    padding: 3px;     /* збільшено */
     transition: background 0.3s, transform 0.2s;
   }
 
@@ -76,7 +76,7 @@
 
 <script>
 let level = 1;
-const rows = 10, cols = 8;
+const rows = 10, cols = 8; // оновлено
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
