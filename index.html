@@ -77,12 +77,12 @@
   }
 
   @keyframes rotate360 {
-    0% { transform: rotate(0deg); }
-    50% { transform: rotate(360deg); }
-    100% { transform: rotate(0deg); }
+    0% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(360deg) scale(1); }
+    100% { transform: rotate(0deg) scale(1); }
   }
   .rotate-animation svg {
-    animation: rotate360 0.6s ease;
+    animation: rotate360 0.6s ease forwards;
   }
 
   .line {
@@ -134,9 +134,6 @@
   </button>
 </div>
 
-<!-- Аудіо для неправильного ходу -->
-<audio id="wrongSound" src="https://www.soundjay.com/button/sounds/button-10.mp3" preload="auto"></audio>
-
 <script>
 let level = 1;
 const rows = 10, cols = 8;
@@ -152,8 +149,12 @@ const hintBtn = document.getElementById('hintBtn');
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
+    svg.style.transform = 'scale(1)'; // гарантія початкового розміру
     button.classList.add('rotate-animation');
-    setTimeout(() => button.classList.remove('rotate-animation'), 600);
+    setTimeout(() => {
+      button.classList.remove('rotate-animation');
+      svg.style.transform = 'none'; // повертаємо початковий стан
+    }, 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
     svg.style.transform = "scale(1.4)";
@@ -284,16 +285,12 @@ function checkMatch() {
   const [i1, i2] = selected;
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
-  const wrongSound = document.getElementById('wrongSound');
-
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
     selected = []; removeLine(); compressRows(); checkLevelComplete();
   } else {
     message.textContent = 'Не можна поєднати!';
-    wrongSound.currentTime = 0; 
-    wrongSound.play();  // Відтворення звуку
     setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
   }
   updateHintBlink();
