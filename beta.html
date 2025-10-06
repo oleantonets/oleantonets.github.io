@@ -18,21 +18,23 @@
 
   #game {
     display: grid;
-    grid-template-columns: repeat(8, 50px); /* 8 клітинок по ширині */
-    grid-auto-rows: 50px; /* висота клітинки фіксована */
+    grid-template-columns: repeat(8, auto);
     margin-top: 20px;
-    border: 1px solid #d0d0d0; /* світло-сіра зовнішня рамка */
+    border: 1px solid #d0d0d0; /* зовнішня рамка світло-сіра */
   }
 
   .cell {
     background: #fff;
-    border: 1px solid #d0d0d0; /* світло-сірі внутрішні лінії */
+    border: 1px solid #d0d0d0; /* внутрішні лінії світло-сірі */
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 32px;
+    font-size: 26px;
     cursor: pointer;
     user-select: none;
+    min-width: 33px;
+    min-height: 33px;
+    padding: 2px;
     transition: background 0.3s, transform 0.2s;
   }
 
@@ -74,7 +76,7 @@
 
 <script>
 let level = 1;
-const rows = 11, cols = 8; // тепер 8x11
+const rows = 10, cols = 8;  // Змінено розмір сітки на 8x10
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
@@ -93,7 +95,7 @@ function startGame() {
 
 function generateNumbers() {
   for (let i = 0; i < rows * cols; i++) {
-    if (i < 5 * cols) { // перші 5 рядків заповнені
+    if (i < 5 * cols) {
       numbers.push(Math.floor(Math.random() * 9) + 1);
     } else {
       numbers.push(null);
@@ -169,13 +171,17 @@ function canConnect(idx1, idx2) {
 
   if (r1 === r2) {
     const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
-    for (let c = start + 1; c < end; c++) if (numbers[r1 * cols + c] !== null) return false;
+    for (let c = start + 1; c < end; c++) {
+      if (numbers[r1 * cols + c] !== null) return false;
+    }
     return true;
   }
 
   if (c1 === c2) {
     const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
-    for (let r = start + 1; r < end; r++) if (numbers[r * cols + c1] !== null) return false;
+    for (let r = start + 1; r < end; r++) {
+      if (numbers[r * cols + c1] !== null) return false;
+    }
     return true;
   }
 
@@ -234,11 +240,15 @@ function checkMatch() {
 
 function compressRows() {
   let matrix = [];
-  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  for (let r = 0; r < rows; r++) {
+    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  }
 
   matrix = matrix.filter(row => row.some(n => n !== null));
 
-  while (matrix.length < rows) matrix.push(new Array(cols).fill(null));
+  while (matrix.length < rows) {
+    matrix.push(new Array(cols).fill(null));
+  }
 
   numbers = matrix.flat();
   renderGrid();
@@ -246,10 +256,14 @@ function compressRows() {
 
 function addRow() {
   let matrix = [];
-  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  for (let r = 0; r < rows; r++) {
+    matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  }
 
   let lastFilled = -1;
-  for (let i = 0; i < matrix.length; i++) if (matrix[i].some(n => n !== null)) lastFilled = i;
+  for (let i = 0; i < matrix.length; i++) {
+    if (matrix[i].some(n => n !== null)) lastFilled = i;
+  }
 
   if (lastFilled < rows - 1) {
     const newRow = [];
