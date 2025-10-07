@@ -14,11 +14,7 @@
     margin: 0;
     padding: 20px;
   }
-
-  h1 {
-    margin-bottom: 10px;
-    text-align: center;
-  }
+  h1 { margin-bottom: 10px; text-align: center; }
 
   #game {
     display: grid;
@@ -42,25 +38,11 @@
     transition: background 0.3s, transform 0.2s;
   }
 
-  .cell.selected {
-    background: #87cefa;
-    transform: scale(1.05);
-  }
+  .cell.selected { background: #87cefa; transform: scale(1.05); }
+  .cell.hint { background: #90ee90; }
 
-  .cell.hint {
-    background: #90ee90;
-  }
-
-  #level {
-    margin-top: 20px;
-    font-size: 18px;
-  }
-
-  #message {
-    margin-top: 10px;
-    font-size: 16px;
-    color: #d9534f;
-  }
+  #level { margin-top: 20px; font-size: 18px; }
+  #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
 
   .icon-bar {
     display: flex;
@@ -80,48 +62,29 @@
     stroke: #333;
     width: 32px;
     height: 32px;
-    transform: scale(1);
-    transform-origin: center center;
+    transform: none; /* початковий scale */
   }
 
-  .icon-button:hover svg {
+  /* Hover без конфлікту з анімацією */
+  .icon-button:not(.rotate-animation):hover svg {
     transform: scale(1.15);
   }
 
   @keyframes blink {
-    0%, 100% {
-      stroke: #FFD700;
-      transform: scale(1);
-    }
-    50% {
-      stroke: #FFA500;
-      transform: scale(1.2);
-    }
+    0%, 100% { stroke: #FFD700; transform: scale(1); }
+    50% { stroke: #FFA500; transform: scale(1.2); }
   }
-
   .blinking svg {
     animation: blink 1s infinite;
   }
 
-  /* --- Виправлена анімація для iOS Safari --- */
   @keyframes rotate360 {
-    0% {
-      transform: rotate(0deg) scale(1);
-    }
-    50% {
-      transform: rotate(360deg) scale(1);
-    }
-    100% {
-      transform: rotate(0deg) scale(1);
-    }
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
   }
-
   .rotate-animation svg {
     animation: rotate360 0.6s ease;
-    will-change: transform;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    transform-origin: center center;
   }
 
   .line {
@@ -184,11 +147,15 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
+/* --- Анімація піктограм через CSS keyframes --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
     button.classList.add('rotate-animation');
-    setTimeout(() => button.classList.remove('rotate-animation'), 600);
+    setTimeout(() => {
+      button.classList.remove('rotate-animation');
+      svg.style.transform = 'none'; // скидання масштабування
+    }, 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
     svg.style.transform = "scale(1.4)";
@@ -200,7 +167,7 @@ function animateIcon(button, type) {
   }
 }
 
-/* --- Ігрова логіка --- */
+/* --- Основна логіка гри --- */
 function startGame() {
   numbers = [];
   selected = [];
@@ -239,10 +206,12 @@ function selectCell(idx) {
     removeLine();
     return;
   }
+
   if (selected.length < 2) {
     selected.push(idx);
     cells[idx].classList.add('selected');
   }
+
   if (selected.length === 2) {
     drawLine(selected[0], selected[1]);
     setTimeout(checkMatch, 300);
@@ -318,22 +287,12 @@ function checkMatch() {
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
-    numbers[i1] = null;
-    numbers[i2] = null;
-    cells[i1].textContent = '';
-    cells[i2].textContent = '';
-    selected = [];
-    removeLine();
-    compressRows();
-    checkLevelComplete();
+    numbers[i1] = null; numbers[i2] = null;
+    cells[i1].textContent = ''; cells[i2].textContent = '';
+    selected = []; removeLine(); compressRows(); checkLevelComplete();
   } else {
     message.textContent = 'Не можна поєднати!';
-    setTimeout(() => {
-      selected.forEach(i => cells[i].classList.remove('selected'));
-      selected = [];
-      removeLine();
-      message.textContent = '';
-    }, 500);
+    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
   }
   updateHintBlink();
 }
@@ -352,11 +311,10 @@ function addRow() {
   for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
   let lastFilled = matrix.map(r => r.some(n => n !== null)).lastIndexOf(true);
   if (lastFilled < rows - 1) {
-    const newRow = Array.from({ length: cols }, () => Math.floor(Math.random() * 9) + 1);
+    const newRow = Array.from({length: cols}, () => Math.floor(Math.random() * 9) + 1);
     matrix.splice(lastFilled + 1, 0, newRow);
     if (matrix.length > rows) matrix = matrix.slice(0, rows);
-    numbers = matrix.flat();
-    renderGrid();
+    numbers = matrix.flat(); renderGrid();
   }
 }
 
@@ -371,17 +329,13 @@ function showHint() {
         cells[i].classList.add('hint');
         cells[j].classList.add('hint');
         drawLine(i, j);
-        setTimeout(() => {
-          cells[i].classList.remove('hint');
-          cells[j].classList.remove('hint');
-          removeLine();
-        }, 1500);
+        setTimeout(() => { cells[i].classList.remove('hint'); cells[j].classList.remove('hint'); removeLine(); }, 1500);
         return;
       }
     }
   }
   message.textContent = 'Підказок немає!';
-  setTimeout(() => (message.textContent = ''), 1000);
+  setTimeout(() => message.textContent = '', 1000);
 }
 
 function hasHint() {
@@ -389,8 +343,7 @@ function hasHint() {
     if (numbers[i] === null) continue;
     for (let j = i + 1; j < numbers.length; j++) {
       if (numbers[j] === null) continue;
-      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j))
-        return true;
+      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) return true;
     }
   }
   return false;
@@ -402,7 +355,7 @@ function updateHintBlink() {
 }
 
 function checkLevelComplete() {
-  if (numbers.every((n) => n === null)) {
+  if (numbers.every(n => n === null)) {
     level++;
     levelDisplay.textContent = 'Рівень: ' + level;
     startGame();
