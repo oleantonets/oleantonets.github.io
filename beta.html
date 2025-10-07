@@ -24,7 +24,7 @@
   }
 
   .cell {
-    background: #fefefe; /* базовий фон для усунення стрибка сірого */
+    background: #fff;
     border: 1px solid #d0d0d0;
     display: flex;
     justify-content: center;
@@ -38,16 +38,19 @@
     transition: background 0.3s, transform 0.2s;
   }
 
-  /* Вибір клітинки та підказка */
   .cell.selected { background: #87cefa; transform: scale(1.05); }
-  .cell.hint { background: #90ee90; animation: jump 0.4s ease; transform: scale(1.05); }
 
-  @keyframes jump {
-    0% { transform: translateY(0) scale(1.05); }
-    25% { transform: translateY(-8px) scale(1.05); }
-    50% { transform: translateY(0) scale(1.05); }
-    75% { transform: translateY(-4px) scale(1.05); }
-    100% { transform: translateY(0) scale(1.05); }
+  /* Підсвічування та підстрибування підказки */
+  @keyframes bounceHint {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-15px); }
+    50% { transform: translateY(0); }
+    70% { transform: translateY(-8px); }
+    100% { transform: translateY(0); }
+  }
+  .cell.hint {
+    background: #90ee90;
+    animation: bounceHint 0.8s ease-out;
   }
 
   #level { margin-top: 20px; font-size: 18px; }
@@ -71,13 +74,22 @@
     stroke: #333;
     width: 32px;
     height: 32px;
-    transform: none;
+    transform: none; /* початковий scale */
   }
 
+  /* Hover тільки на пристроях з мишею */
   @media (hover: hover) and (pointer: fine) {
     .icon-button:not(.rotate-animation):hover svg {
       transform: scale(1.15);
     }
+  }
+
+  @keyframes blink {
+    0%, 100% { stroke: #FFD700; transform: scale(1); }
+    50% { stroke: #FFA500; transform: scale(1.2); }
+  }
+  .blinking svg {
+    animation: blink 1s infinite;
   }
 
   @keyframes rotate360 {
@@ -87,14 +99,6 @@
   }
   .rotate-animation svg {
     animation: rotate360 0.6s ease;
-  }
-
-  @keyframes blink {
-    0%, 100% { stroke: #FFD700; transform: scale(1); }
-    50% { stroke: #FFA500; transform: scale(1.2); }
-  }
-  .blinking svg {
-    animation: blink 1s infinite;
   }
 
   #game-container {
@@ -143,6 +147,7 @@ const rows = 10, cols = 8;
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
+const gameContainer = document.getElementById('game-container');
 const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
@@ -152,7 +157,10 @@ function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
     button.classList.add('rotate-animation');
-    setTimeout(() => { button.classList.remove('rotate-animation'); svg.style.transform = ''; }, 600);
+    setTimeout(() => {
+      button.classList.remove('rotate-animation');
+      svg.style.transform = '';
+    }, 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
     svg.style.transform = "scale(1.4)";
@@ -164,7 +172,7 @@ function animateIcon(button, type) {
   }
 }
 
-/* --- Основна логіка гри --- */
+/* --- Логіка гри --- */
 function startGame() {
   numbers = [];
   selected = [];
@@ -190,12 +198,12 @@ function renderGrid() {
     cell.addEventListener('click', () => selectCell(idx));
     game.appendChild(cell);
   });
+  updateHintBlink();
 }
 
 function selectCell(idx) {
   if (numbers[idx] === null) return;
   const cells = document.querySelectorAll('.cell');
-
   if (selected.includes(idx)) {
     cells[idx].classList.remove('selected');
     selected = selected.filter(i => i !== idx);
@@ -208,7 +216,7 @@ function selectCell(idx) {
   }
 
   if (selected.length === 2) {
-    setTimeout(() => checkMatch(), 300);
+    setTimeout(checkMatch, 300);
   }
 }
 
@@ -217,28 +225,34 @@ function canConnect(idx1, idx2) {
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
 
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
+
   if (r1 === r2) {
     const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
     for (let c = start + 1; c < end; c++) if (numbers[r1 * cols + c] !== null) return false;
     return true;
   }
+
   if (c1 === c2) {
     const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
     for (let r = start + 1; r < end; r++) if (numbers[r * cols + c1] !== null) return false;
     return true;
   }
+
   if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
     const rStep = r1 < r2 ? 1 : -1;
     const cStep = c1 < c2 ? 1 : -1;
     let r = r1 + rStep, c = c1 + cStep;
     while (r !== r2 && c !== c2) {
       if (numbers[r * cols + c] !== null) return false;
-      r += rStep; c += cStep;
+      r += rStep;
+      c += cStep;
     }
     return true;
   }
+
   if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
+
   const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
   for (let i = minIdx + 1; i < maxIdx; i++) if (numbers[i] !== null) return false;
   return true;
@@ -248,16 +262,17 @@ function checkMatch() {
   const [i1, i2] = selected;
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
-
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
+    selected.forEach(i => cells[i].classList.remove('selected'));
+    selected = [];
+    compressRows();
+    checkLevelComplete();
+  } else {
+    message.textContent = 'Не можна поєднати!';
+    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; message.textContent = ''; }, 500);
   }
-
-  selected.forEach(i => cells[i].classList.remove('selected'));
-  selected = [];
-  compressRows();
-  checkLevelComplete();
   updateHintBlink();
 }
 
@@ -291,10 +306,7 @@ function showHint() {
       if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
         cells[i].classList.add('hint');
         cells[j].classList.add('hint');
-        setTimeout(() => {
-          cells[i].classList.remove('hint');
-          cells[j].classList.remove('hint');
-        }, 700);
+        setTimeout(() => { cells[i].classList.remove('hint'); cells[j].classList.remove('hint'); }, 1500);
         return;
       }
     }
