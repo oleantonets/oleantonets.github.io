@@ -77,12 +77,12 @@
   }
 
   @keyframes rotate360 {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(360deg) scale(1); }
-    100% { transform: rotate(0deg) scale(1); }
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
   }
   .rotate-animation svg {
-    animation: rotate360 0.6s ease forwards;
+    animation: rotate360 0.6s ease;
   }
 
   .line {
@@ -149,12 +149,8 @@ const hintBtn = document.getElementById('hintBtn');
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
-    svg.style.transform = 'scale(1)'; // гарантія початкового розміру
     button.classList.add('rotate-animation');
-    setTimeout(() => {
-      button.classList.remove('rotate-animation');
-      svg.style.transform = 'none'; // повертаємо початковий стан
-    }, 600);
+    setTimeout(() => button.classList.remove('rotate-animation'), 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
     svg.style.transform = "scale(1.4)";
