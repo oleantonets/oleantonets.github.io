@@ -24,7 +24,7 @@
   }
 
   .cell {
-    background: #fff;
+    background: #fefefe; /* світлий фон, щоб уникнути короткого сірого спалаху */
     border: 1px solid #d0d0d0;
     display: flex;
     justify-content: center;
@@ -35,18 +35,12 @@
     min-width: 38px;
     min-height: 38px;
     padding: 3px;
-    transition: background 0.3s, transform 0.2s, opacity 0.3s;
+    transition: background 0.3s, transform 0.2s;
+    will-change: background; /* запобігає короткочасному спалаху */
   }
 
   .cell.selected { background: #87cefa; transform: scale(1.05); }
   .cell.hint { background: #90ee90; }
-
-  /* Ефект зникання цифри */
-  .cell.fade-out {
-    opacity: 0;
-    transform: scale(0.3);
-    transition: opacity 0.4s ease, transform 0.4s ease;
-  }
 
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
@@ -72,7 +66,7 @@
     transform: none;
   }
 
-  /* Hover тільки на пристроях з мишею */
+  /* Hover тільки на десктопі */
   @media (hover: hover) and (pointer: fine) {
     .icon-button:not(.rotate-animation):hover svg {
       transform: scale(1.15);
@@ -83,18 +77,14 @@
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
   }
-  .blinking svg {
-    animation: blink 1s infinite;
-  }
+  .blinking svg { animation: blink 1s infinite; }
 
   @keyframes rotate360 {
     0% { transform: rotate(0deg); }
     50% { transform: rotate(360deg); }
     100% { transform: rotate(0deg); }
   }
-  .rotate-animation svg {
-    animation: rotate360 0.6s ease;
-  }
+  .rotate-animation svg { animation: rotate360 0.6s ease; }
 
   .line {
     position: absolute;
@@ -105,10 +95,7 @@
     pointer-events: none;
   }
 
-  #game-container {
-    position: relative;
-    display: inline-block;
-  }
+  #game-container { position: relative; display: inline-block; }
 </style>
 </head>
 <body>
@@ -156,7 +143,7 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація піктограм --- */
+/* --- Анімація кнопок --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
@@ -215,12 +202,10 @@ function selectCell(idx) {
     removeLine();
     return;
   }
-
   if (selected.length < 2) {
     selected.push(idx);
     cells[idx].classList.add('selected');
   }
-
   if (selected.length === 2) {
     drawLine(selected[0], selected[1]);
     setTimeout(checkMatch, 300);
@@ -296,19 +281,12 @@ function checkMatch() {
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
-    cells[i1].classList.add('fade-out');
-    cells[i2].classList.add('fade-out');
-    setTimeout(() => {
-      numbers[i1] = null; numbers[i2] = null;
-      cells[i1].textContent = ''; cells[i2].textContent = '';
-      selected = []; removeLine(); compressRows(); checkLevelComplete();
-    }, 400);
+    numbers[i1] = null; numbers[i2] = null;
+    cells[i1].textContent = ''; cells[i2].textContent = '';
+    selected = []; removeLine(); compressRows(); checkLevelComplete();
   } else {
     message.textContent = 'Не можна поєднати!';
-    setTimeout(() => {
-      selected.forEach(i => cells[i].classList.remove('selected'));
-      selected = []; removeLine(); message.textContent = '';
-    }, 500);
+    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
   }
   updateHintBlink();
 }
