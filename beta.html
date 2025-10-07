@@ -24,7 +24,7 @@
   }
 
   .cell {
-    background: #fefefe; /* базовий колір трохи сірий, щоб уникнути стрибка */
+    background: #fefefe; /* базовий фон для усунення стрибка сірого */
     border: 1px solid #d0d0d0;
     display: flex;
     justify-content: center;
@@ -38,7 +38,7 @@
     transition: background 0.3s, transform 0.2s;
   }
 
-  /* Вибір клітинки та підказка використовують однаковий метод */
+  /* Вибір клітинки та підказка */
   .cell.selected { background: #87cefa; transform: scale(1.05); }
   .cell.hint { background: #90ee90; animation: jump 0.4s ease; transform: scale(1.05); }
 
@@ -143,7 +143,6 @@ const rows = 10, cols = 8;
 let numbers = [];
 let selected = [];
 const game = document.getElementById('game');
-const gameContainer = document.getElementById('game-container');
 const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
@@ -196,6 +195,7 @@ function renderGrid() {
 function selectCell(idx) {
   if (numbers[idx] === null) return;
   const cells = document.querySelectorAll('.cell');
+
   if (selected.includes(idx)) {
     cells[idx].classList.remove('selected');
     selected = selected.filter(i => i !== idx);
@@ -208,7 +208,7 @@ function selectCell(idx) {
   }
 
   if (selected.length === 2) {
-    setTimeout(checkMatch, 300);
+    setTimeout(() => checkMatch(), 300);
   }
 }
 
@@ -248,21 +248,16 @@ function checkMatch() {
   const [i1, i2] = selected;
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
+
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
-    selected.forEach(i => cells[i].classList.remove('selected'));
-    selected = [];
-    compressRows();
-    checkLevelComplete();
-  } else {
-    message.textContent = 'Не можна поєднати!';
-    setTimeout(() => {
-      selected.forEach(i => cells[i].classList.remove('selected'));
-      selected = [];
-      message.textContent = '';
-    }, 500);
   }
+
+  selected.forEach(i => cells[i].classList.remove('selected'));
+  selected = [];
+  compressRows();
+  checkLevelComplete();
   updateHintBlink();
 }
 
