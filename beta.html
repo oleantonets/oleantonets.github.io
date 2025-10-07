@@ -14,7 +14,6 @@
     margin: 0;
     padding: 20px;
   }
-
   h1 { margin-bottom: 10px; text-align: center; }
 
   #game {
@@ -56,24 +55,20 @@
     border: none;
     cursor: pointer;
     padding: 6px;
+    transition: transform 0.2s ease;
   }
 
-  /* --- Іконки --- */
   .icon-button svg {
     stroke: #333;
     width: 32px;
     height: 32px;
-    will-change: transform;
-    backface-visibility: hidden;
-    transform-origin: center center;
-    transition: transform 0.2s ease;
   }
 
   .icon-button:hover svg {
     transform: scale(1.15);
   }
 
-  /* --- Мерехтіння (підказка) --- */
+  /* --- Підказка блимає --- */
   @keyframes blink {
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
@@ -82,17 +77,28 @@
     animation: blink 1s infinite;
   }
 
-  /* --- Обертання (перезапуск) --- */
+  /* --- FIX для Safari: плавне обертання і повернення --- */
   @keyframes rotate360 {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(360deg) scale(1); }
-    100% { transform: rotate(0deg) scale(1); }
-  }
-  .rotate-animation svg {
-    animation: rotate360 0.6s ease;
+    0% {
+      transform: rotate(0deg) scale(1);
+    }
+    50% {
+      transform: rotate(360deg) scale(1);
+    }
+    100% {
+      transform: rotate(0deg) scale(1);
+    }
   }
 
-  /* --- Лінія між клітинками --- */
+  .rotate-animation svg {
+    animation: rotate360 0.6s ease;
+    will-change: transform;
+    transform-origin: center center;
+    animation-fill-mode: none;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+  }
+
   .line {
     position: absolute;
     height: 3px;
@@ -153,7 +159,7 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація іконок --- */
+/* --- Анімація піктограм --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
@@ -247,7 +253,7 @@ function removeLine() {
   if (oldLine) oldLine.remove();
 }
 
-/* --- Логіка з’єднання клітинок --- */
+/* --- Логіка перевірки зв'язку та збігів --- */
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
