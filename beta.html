@@ -24,7 +24,7 @@
   }
 
   .cell {
-    background: #fff;
+    background: #fefefe; /* базовий колір трохи сірий, щоб уникнути стрибка */
     border: 1px solid #d0d0d0;
     display: flex;
     justify-content: center;
@@ -38,18 +38,16 @@
     transition: background 0.3s, transform 0.2s;
   }
 
-  /* Вибір клітинки */
+  /* Вибір клітинки та підказка використовують однаковий метод */
   .cell.selected { background: #87cefa; transform: scale(1.05); }
-
-  /* Підказка */
-  .cell.hint { background: #90ee90; animation: jump 0.4s ease; }
+  .cell.hint { background: #90ee90; animation: jump 0.4s ease; transform: scale(1.05); }
 
   @keyframes jump {
-    0% { transform: translateY(0); }
-    25% { transform: translateY(-8px); }
-    50% { transform: translateY(0); }
-    75% { transform: translateY(-4px); }
-    100% { transform: translateY(0); }
+    0% { transform: translateY(0) scale(1.05); }
+    25% { transform: translateY(-8px) scale(1.05); }
+    50% { transform: translateY(0) scale(1.05); }
+    75% { transform: translateY(-4px) scale(1.05); }
+    100% { transform: translateY(0) scale(1.05); }
   }
 
   #level { margin-top: 20px; font-size: 18px; }
@@ -76,7 +74,6 @@
     transform: none;
   }
 
-  /* Hover тільки на десктопі */
   @media (hover: hover) and (pointer: fine) {
     .icon-button:not(.rotate-animation):hover svg {
       transform: scale(1.15);
