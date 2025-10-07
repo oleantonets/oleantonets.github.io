@@ -24,7 +24,7 @@
   }
 
   .cell {
-    background: #fefefe; /* світлий фон, щоб уникнути короткого сірого спалаху */
+    background: #fff;
     border: 1px solid #d0d0d0;
     display: flex;
     justify-content: center;
@@ -36,11 +36,10 @@
     min-height: 38px;
     padding: 3px;
     transition: background 0.3s, transform 0.2s;
-    will-change: background; /* запобігає короткочасному спалаху */
   }
 
-  .cell.selected { background: #87cefa; transform: scale(1.05); }
-  .cell.hint { background: #90ee90; }
+  .cell.selected { background: #87cefa; transform: scale(1.05); } /* голубий при виборі */
+  .cell.hint { background: #FFD700; } /* жовтий для підказки */
 
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
@@ -66,7 +65,7 @@
     transform: none;
   }
 
-  /* Hover тільки на десктопі */
+  /* Hover тільки для десктопів */
   @media (hover: hover) and (pointer: fine) {
     .icon-button:not(.rotate-animation):hover svg {
       transform: scale(1.15);
@@ -77,14 +76,18 @@
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
   }
-  .blinking svg { animation: blink 1s infinite; }
+  .blinking svg {
+    animation: blink 1s infinite;
+  }
 
   @keyframes rotate360 {
     0% { transform: rotate(0deg); }
     50% { transform: rotate(360deg); }
     100% { transform: rotate(0deg); }
   }
-  .rotate-animation svg { animation: rotate360 0.6s ease; }
+  .rotate-animation svg {
+    animation: rotate360 0.6s ease;
+  }
 
   .line {
     position: absolute;
@@ -95,7 +98,10 @@
     pointer-events: none;
   }
 
-  #game-container { position: relative; display: inline-block; }
+  #game-container {
+    position: relative;
+    display: inline-block;
+  }
 </style>
 </head>
 <body>
@@ -143,14 +149,14 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація кнопок --- */
+/* --- Анімація піктограм через CSS keyframes --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
     button.classList.add('rotate-animation');
     setTimeout(() => {
       button.classList.remove('rotate-animation');
-      svg.style.transform = '';
+      svg.style.transform = ''; // скидання трансформації
     }, 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
@@ -202,10 +208,12 @@ function selectCell(idx) {
     removeLine();
     return;
   }
+
   if (selected.length < 2) {
     selected.push(idx);
     cells[idx].classList.add('selected');
   }
+
   if (selected.length === 2) {
     drawLine(selected[0], selected[1]);
     setTimeout(checkMatch, 300);
