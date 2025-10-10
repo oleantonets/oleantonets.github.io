@@ -39,7 +39,19 @@
   }
 
   .cell.selected { background: #87cefa; transform: scale(1.05); }
-  .cell.hint { background: #90ee90; }
+
+  /* Підсвічування та підстрибування підказки */
+  @keyframes bounceHint {
+    0% { transform: translateY(0); }
+    30% { transform: translateY(-15px); }
+    50% { transform: translateY(0); }
+    70% { transform: translateY(-8px); }
+    100% { transform: translateY(0); }
+  }
+  .cell.hint {
+    background: #90ee90;
+    animation: bounceHint 0.8s ease-out;
+  }
 
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
@@ -62,10 +74,14 @@
     stroke: #333;
     width: 32px;
     height: 32px;
+    transform: none; /* початковий scale */
   }
 
-  .icon-button:hover svg {
-    transform: scale(1.15);
+  /* Hover тільки на пристроях з мишею */
+  @media (hover: hover) and (pointer: fine) {
+    .icon-button:not(.rotate-animation):hover svg {
+      transform: scale(1.15);
+    }
   }
 
   @keyframes blink {
@@ -77,21 +93,12 @@
   }
 
   @keyframes rotate360 {
-    0% { transform: rotate(0deg) scale(1); }
-    50% { transform: rotate(360deg) scale(1); }
-    100% { transform: rotate(0deg) scale(1); }
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
   }
   .rotate-animation svg {
-    animation: rotate360 0.6s ease forwards;
-  }
-
-  .line {
-    position: absolute;
-    height: 3px;
-    background: red;
-    border-radius: 2px;
-    transform-origin: left center;
-    pointer-events: none;
+    animation: rotate360 0.6s ease;
   }
 
   #game-container {
@@ -145,28 +152,27 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація піктограм через CSS keyframes --- */
+/* --- Анімація піктограм --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
-    svg.style.transform = 'scale(1)'; // гарантія початкового розміру
     button.classList.add('rotate-animation');
     setTimeout(() => {
       button.classList.remove('rotate-animation');
-      svg.style.transform = 'none'; // повертаємо початковий стан
+      svg.style.transform = '';
     }, 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
     svg.style.transform = "scale(1.4)";
-    setTimeout(() => svg.style.transform = "none", 400);
+    setTimeout(() => svg.style.transform = "", 400);
   } else if (type === 'blink') {
     svg.style.stroke = "#FFD700";
     svg.style.transform = "scale(1.2)";
-    setTimeout(() => { svg.style.stroke = "#333"; svg.style.transform = "none"; }, 400);
+    setTimeout(() => { svg.style.stroke = "#333"; svg.style.transform = ""; }, 400);
   }
 }
 
-/* --- Основна логіка гри --- */
+/* --- Логіка гри --- */
 function startGame() {
   numbers = [];
   selected = [];
@@ -192,7 +198,6 @@ function renderGrid() {
     cell.addEventListener('click', () => selectCell(idx));
     game.appendChild(cell);
   });
-  removeLine();
   updateHintBlink();
 }
 
@@ -202,7 +207,6 @@ function selectCell(idx) {
   if (selected.includes(idx)) {
     cells[idx].classList.remove('selected');
     selected = selected.filter(i => i !== idx);
-    removeLine();
     return;
   }
 
@@ -212,35 +216,8 @@ function selectCell(idx) {
   }
 
   if (selected.length === 2) {
-    drawLine(selected[0], selected[1]);
     setTimeout(checkMatch, 300);
   }
-}
-
-function drawLine(idx1, idx2) {
-  removeLine();
-  const cells = document.querySelectorAll('.cell');
-  const rect1 = cells[idx1].getBoundingClientRect();
-  const rect2 = cells[idx2].getBoundingClientRect();
-  const containerRect = gameContainer.getBoundingClientRect();
-  const x1 = rect1.left + rect1.width / 2 - containerRect.left;
-  const y1 = rect1.top + rect1.height / 2 - containerRect.top;
-  const x2 = rect2.left + rect2.width / 2 - containerRect.left;
-  const y2 = rect2.top + rect2.height / 2 - containerRect.top;
-  const line = document.createElement('div');
-  line.classList.add('line');
-  const length = Math.hypot(x2 - x1, y2 - y1);
-  const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
-  line.style.width = length + 'px';
-  line.style.transform = `rotate(${angle}deg)`;
-  line.style.left = x1 + 'px';
-  line.style.top = y1 + 'px';
-  gameContainer.appendChild(line);
-}
-
-function removeLine() {
-  const oldLine = document.querySelector('.line');
-  if (oldLine) oldLine.remove();
 }
 
 function canConnect(idx1, idx2) {
@@ -288,10 +265,13 @@ function checkMatch() {
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
-    selected = []; removeLine(); compressRows(); checkLevelComplete();
+    selected.forEach(i => cells[i].classList.remove('selected'));
+    selected = [];
+    compressRows();
+    checkLevelComplete();
   } else {
     message.textContent = 'Не можна поєднати!';
-    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; removeLine(); message.textContent = ''; }, 500);
+    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; message.textContent = ''; }, 500);
   }
   updateHintBlink();
 }
@@ -318,7 +298,6 @@ function addRow() {
 }
 
 function showHint() {
-  removeLine();
   const cells = document.querySelectorAll('.cell');
   for (let i = 0; i < numbers.length; i++) {
     if (numbers[i] === null) continue;
@@ -327,8 +306,7 @@ function showHint() {
       if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
         cells[i].classList.add('hint');
         cells[j].classList.add('hint');
-        drawLine(i, j);
-        setTimeout(() => { cells[i].classList.remove('hint'); cells[j].classList.remove('hint'); removeLine(); }, 1500);
+        setTimeout(() => { cells[i].classList.remove('hint'); cells[j].classList.remove('hint'); }, 1500);
         return;
       }
     }
