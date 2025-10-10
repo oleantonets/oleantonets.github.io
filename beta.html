@@ -53,15 +53,15 @@
     animation: bounceHint 0.8s ease-out;
   }
 
-  /* Анімація помилки для невідповідних клітинок */
-  @keyframes errorPulse {
-    0% { transform: scale(1); background-color: #f8d7da; }
-    50% { transform: scale(1.15); background-color: #f5b7b1; }
-    100% { transform: scale(1); background-color: #f8d7da; }
+  /* Анімація невірного вибору */
+  @keyframes pulseRed {
+    0%, 100% { transform: translateY(0); background: #ffb3b3; }
+    30% { transform: translateY(-10px); background: #ff4d4d; }
+    50% { transform: translateY(0); background: #ff8080; }
+    70% { transform: translateY(-5px); background: #ff4d4d; }
   }
-  .cell.error {
-    animation: errorPulse 0.6s ease-out;
-    background-color: #f8d7da !important;
+  .cell.invalid {
+    animation: pulseRed 0.8s ease-out;
   }
 
   #level { margin-top: 20px; font-size: 18px; }
@@ -85,7 +85,7 @@
     stroke: #333;
     width: 32px;
     height: 32px;
-    transform: none;
+    transform: none; /* початковий scale */
   }
 
   /* Hover тільки на пристроях з мишею */
@@ -273,9 +273,7 @@ function checkMatch() {
   const [i1, i2] = selected;
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
-  const isMatch = (n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2);
-
-  if (isMatch) {
+  if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
     numbers[i1] = null; numbers[i2] = null;
     cells[i1].textContent = ''; cells[i2].textContent = '';
     selected.forEach(i => cells[i].classList.remove('selected'));
@@ -283,13 +281,16 @@ function checkMatch() {
     compressRows();
     checkLevelComplete();
   } else {
-    // ❌ Анімація помилки для невдалих пар
-    cells[i1].classList.add('error');
-    cells[i2].classList.add('error');
-    setTimeout(() => { cells[i1].classList.remove('error'); cells[i2].classList.remove('error'); }, 600);
-    setTimeout(() => { selected.forEach(i => cells[i].classList.remove('selected')); selected = []; }, 300);
+    // Невірна пара: червоний пульс
+    cells[i1].classList.add('invalid');
+    cells[i2].classList.add('invalid');
+    setTimeout(() => {
+      cells[i1].classList.remove('invalid');
+      cells[i2].classList.remove('invalid');
+      selected.forEach(i => cells[i].classList.remove('selected'));
+      selected = [];
+    }, 800);
   }
-
   updateHintBlink();
 }
 
