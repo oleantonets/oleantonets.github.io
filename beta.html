@@ -85,10 +85,9 @@
     stroke: #333;
     width: 32px;
     height: 32px;
-    transform: none; /* початковий scale */
+    transform: none;
   }
 
-  /* Hover тільки на пристроях з мишею */
   @media (hover: hover) and (pointer: fine) {
     .icon-button:not(.rotate-animation):hover svg {
       transform: scale(1.15);
@@ -281,9 +280,13 @@ function checkMatch() {
     compressRows();
     checkLevelComplete();
   } else {
-    // Невірна пара: червоний пульс
-    cells[i1].classList.add('invalid');
-    cells[i2].classList.add('invalid');
+    // Перезапуск анімації для обох клітинок
+    [i1, i2].forEach(i => {
+      cells[i].classList.remove('invalid');
+      void cells[i].offsetWidth; // примусове перезапускання анімації
+      cells[i].classList.add('invalid');
+    });
+
     setTimeout(() => {
       cells[i1].classList.remove('invalid');
       cells[i2].classList.remove('invalid');
