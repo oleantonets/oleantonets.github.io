@@ -65,6 +65,15 @@
     animation: pulseRed 0.8s ease-out;
   }
 
+  /* Анімація плавного зникання */
+  @keyframes fadeOut {
+    0% { opacity: 1; transform: scale(1); }
+    100% { opacity: 0; transform: scale(0.6); }
+  }
+  .cell.fade {
+    animation: fadeOut 0.4s ease forwards;
+  }
+
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
 
@@ -157,14 +166,12 @@ let level = 1;
 const rows = 10, cols = 8;
 let numbers = [];
 let selected = [];
-let blocked = false; // блокування під час анімації
+let blocked = false;
 const game = document.getElementById('game');
-const gameContainer = document.getElementById('game-container');
 const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація піктограм --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
@@ -184,7 +191,6 @@ function animateIcon(button, type) {
   }
 }
 
-/* --- Логіка гри --- */
 function startGame() {
   numbers = [];
   selected = [];
@@ -258,8 +264,7 @@ function canConnect(idx1, idx2) {
     let r = r1 + rStep, c = c1 + cStep;
     while (r !== r2 && c !== c2) {
       if (numbers[r * cols + c] !== null) return false;
-      r += rStep;
-      c += cStep;
+      r += rStep; c += cStep;
     }
     return true;
   }
@@ -277,13 +282,20 @@ function checkMatch() {
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
-    numbers[i1] = null; numbers[i2] = null;
-    cells[i1].textContent = ''; cells[i2].textContent = '';
-    selected.forEach(i => cells[i].classList.remove('selected'));
-    selected = [];
-    compressRows();
-    checkLevelComplete();
-    blocked = false;
+    cells[i1].classList.add('fade');
+    cells[i2].classList.add('fade');
+    setTimeout(() => {
+      numbers[i1] = null;
+      numbers[i2] = null;
+      cells[i1].textContent = '';
+      cells[i2].textContent = '';
+      cells[i1].classList.remove('fade', 'selected');
+      cells[i2].classList.remove('fade', 'selected');
+      selected = [];
+      compressRows();
+      checkLevelComplete();
+      blocked = false;
+    }, 400);
   } else {
     cells[i1].classList.add('wrong');
     cells[i2].classList.add('wrong');
