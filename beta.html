@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Number Match</title>
 <style>
   body {
@@ -40,6 +40,7 @@
 
   .cell.selected { background: #87cefa; transform: scale(1.05); }
 
+  /* Анімація підказки (зелена) */
   @keyframes bounceHint {
     0% { transform: translateY(0); }
     30% { transform: translateY(-15px); }
@@ -52,6 +53,7 @@
     animation: bounceHint 0.8s ease-out;
   }
 
+  /* Анімація помилки (червона) */
   @keyframes pulseRed {
     0% { background: #ffcccc; transform: translateY(0); }
     30% { background: #ff6666; transform: translateY(-10px); }
@@ -59,14 +61,9 @@
     70% { background: #ff6666; transform: translateY(-5px); }
     100% { background: #ffcccc; transform: translateY(0); }
   }
-  .cell.wrong { animation: pulseRed 0.8s ease-out; }
-
-  @keyframes vanish {
-    0% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(1.3); opacity: 0.8; }
-    100% { transform: scale(0); opacity: 0; }
+  .cell.wrong {
+    animation: pulseRed 0.8s ease-out;
   }
-  .cell.vanish { animation: vanish 0.5s ease-out; }
 
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
@@ -102,14 +99,18 @@
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
   }
-  .blinking svg { animation: blink 1s infinite; }
+  .blinking svg {
+    animation: blink 1s infinite;
+  }
 
   @keyframes rotate360 {
     0% { transform: rotate(0deg); }
     50% { transform: rotate(360deg); }
     100% { transform: rotate(0deg); }
   }
-  .rotate-animation svg { animation: rotate360 0.6s ease; }
+  .rotate-animation svg {
+    animation: rotate360 0.6s ease;
+  }
 
   #game-container {
     position: relative;
@@ -118,13 +119,16 @@
 </style>
 </head>
 <body>
+
 <h1>Number Match</h1>
 <div id="level">Рівень: 1</div>
-
-<div id="game-container"><div id="game"></div></div>
+<div id="game-container">
+  <div id="game"></div>
+</div>
 <div id="message"></div>
 
 <div class="icon-bar">
+  <!-- Перезапуск -->
   <button id="restartBtn" class="icon-button" onclick="animateIcon(this, 'rotate'); startGame();" title="Перезапустити гру">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="1 4 1 10 7 10"></polyline>
@@ -132,6 +136,7 @@
     </svg>
   </button>
 
+  <!-- Додати рядок -->
   <button class="icon-button" onclick="animateIcon(this, 'bounce'); addRow();" title="Додати рядок">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
@@ -139,6 +144,7 @@
     </svg>
   </button>
 
+  <!-- Підказка -->
   <button id="hintBtn" class="icon-button" onclick="animateIcon(this, 'blink'); showHint();" title="Підказка">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
@@ -157,7 +163,7 @@ const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімації кнопок --- */
+/* --- Анімація кнопок --- */
 function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
@@ -174,42 +180,48 @@ function animateIcon(button, type) {
   }
 }
 
-/* --- Генерація парних чисел --- */
+/* --- Генерація чисел із гарантованими парами --- */
 function generatePairedNumbers(count) {
-  const nums = [];
-  const possiblePairs = [];
+  const pairs = [];
+  const allPairs = [];
+
+  // Створюємо список усіх можливих пар (однакові або сума = 10)
   for (let i = 1; i <= 9; i++) {
-    possiblePairs.push([i, i]); // пара однакових
-  }
-  for (let i = 1; i <= 9; i++) {
-    if (10 - i <= 9 && 10 - i > i)
-      possiblePairs.push([i, 10 - i]); // пара на суму 10
+    allPairs.push([i, i]); // однакові числа
+    if (10 - i !== i && 10 - i <= 9 && 10 - i >= 1) {
+      allPairs.push([i, 10 - i]); // комбінації, що дають 10
+    }
   }
 
-  while (nums.length < count) {
-    const pair = possiblePairs[Math.floor(Math.random() * possiblePairs.length)];
-    nums.push(pair[0], pair[1]);
+  while (pairs.length < count) {
+    const [a, b] = allPairs[Math.floor(Math.random() * allPairs.length)];
+    pairs.push(a, b);
   }
 
-  return nums.slice(0, count).sort(() => Math.random() - 0.5);
+  return shuffleArray(pairs.slice(0, count));
 }
 
-/* --- Старт гри --- */
+function shuffleArray(arr) {
+  return arr.sort(() => Math.random() - 0.5);
+}
+
+/* --- Ігрова логіка --- */
 function startGame() {
   numbers = [];
   selected = [];
   blocked = false;
   message.textContent = '';
   game.innerHTML = '';
-  const startCount = 5 * cols;
-  const pairedNumbers = generatePairedNumbers(startCount);
+
+  const initialCount = 5 * cols;
+  const pairedNumbers = generatePairedNumbers(initialCount);
   numbers = [...pairedNumbers];
   while (numbers.length < rows * cols) numbers.push(null);
+
   renderGrid();
   updateHintBlink();
 }
 
-/* --- Рендер поля --- */
 function renderGrid() {
   game.innerHTML = '';
   numbers.forEach((num, idx) => {
@@ -219,10 +231,8 @@ function renderGrid() {
     cell.addEventListener('click', () => selectCell(idx));
     game.appendChild(cell);
   });
-  updateHintBlink();
 }
 
-/* --- Вибір клітинок --- */
 function selectCell(idx) {
   if (numbers[idx] === null || blocked) return;
   const cells = document.querySelectorAll('.cell');
@@ -231,65 +241,68 @@ function selectCell(idx) {
     selected = selected.filter(i => i !== idx);
     return;
   }
+
   if (selected.length < 2) {
     selected.push(idx);
     cells[idx].classList.add('selected');
   }
+
   if (selected.length === 2) {
     blocked = true;
     setTimeout(checkMatch, 300);
   }
 }
 
-/* --- Перевірка підключення --- */
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
+
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
+
   if (r1 === r2) {
     const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
     for (let c = start + 1; c < end; c++) if (numbers[r1 * cols + c] !== null) return false;
     return true;
   }
+
   if (c1 === c2) {
     const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
     for (let r = start + 1; r < end; r++) if (numbers[r * cols + c1] !== null) return false;
     return true;
   }
+
   if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
-    const rStep = r1 < r2 ? 1 : -1, cStep = c1 < c2 ? 1 : -1;
+    const rStep = r1 < r2 ? 1 : -1;
+    const cStep = c1 < c2 ? 1 : -1;
     let r = r1 + rStep, c = c1 + cStep;
     while (r !== r2 && c !== c2) {
       if (numbers[r * cols + c] !== null) return false;
-      r += rStep; c += cStep;
+      r += rStep;
+      c += cStep;
     }
     return true;
   }
+
   if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
+
   const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
   for (let i = minIdx + 1; i < maxIdx; i++) if (numbers[i] !== null) return false;
   return true;
 }
 
-/* --- Перевірка пари --- */
 function checkMatch() {
   const [i1, i2] = selected;
   const n1 = numbers[i1], n2 = numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
-    cells[i1].classList.add('vanish');
-    cells[i2].classList.add('vanish');
-    setTimeout(() => {
-      numbers[i1] = null; numbers[i2] = null;
-      cells[i1].textContent = ''; cells[i2].textContent = '';
-      cells[i1].classList.remove('selected','vanish');
-      cells[i2].classList.remove('selected','vanish');
-      selected = [];
-      compressRows();
-      checkLevelComplete();
-      blocked = false;
-    }, 500);
+    numbers[i1] = null; numbers[i2] = null;
+    cells[i1].textContent = ''; cells[i2].textContent = '';
+    selected.forEach(i => cells[i].classList.remove('selected'));
+    selected = [];
+    compressRows();
+    checkLevelComplete();
+    blocked = false;
   } else {
     cells[i1].classList.add('wrong');
     cells[i2].classList.add('wrong');
@@ -305,7 +318,6 @@ function checkMatch() {
   updateHintBlink();
 }
 
-/* --- Стиснення рядів --- */
 function compressRows() {
   let matrix = [];
   for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
@@ -315,7 +327,6 @@ function compressRows() {
   renderGrid();
 }
 
-/* --- Додавання нового рядка --- */
 function addRow() {
   if (blocked) return;
   let matrix = [];
@@ -329,7 +340,6 @@ function addRow() {
   }
 }
 
-/* --- Підказки --- */
 function showHint() {
   if (blocked) return;
   blocked = true;
@@ -371,7 +381,6 @@ function updateHintBlink() {
   else hintBtn.classList.remove('blinking');
 }
 
-/* --- Перевірка завершення рівня --- */
 function checkLevelComplete() {
   if (numbers.every(n => n === null)) {
     level++;
