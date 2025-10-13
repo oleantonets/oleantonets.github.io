@@ -5,98 +5,108 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Number Match</title>
 <style>
-body {
-  font-family: Arial, sans-serif;
-  background: #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin: 0;
-  padding: 20px;
-}
-h1 { margin-bottom: 10px; text-align: center; }
+  body {
+    font-family: Arial, sans-serif;
+    background: #f0f0f0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 { margin-bottom: 10px; text-align: center; }
 
-#game {
-  display: grid;
-  grid-template-columns: repeat(8, auto);
-  margin-top: 20px;
-  border: 1px solid #d0d0d0;
-}
+  #game {
+    display: grid;
+    grid-template-columns: repeat(8, auto);
+    margin-top: 20px;
+    border: 1px solid #d0d0d0;
+  }
 
-.cell {
-  background: #fff;
-  border: 1px solid #d0d0d0;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 30px;
-  cursor: pointer;
-  user-select: none;
-  min-width: 38px;
-  min-height: 38px;
-  padding: 3px;
-  transition: background 0.3s, transform 0.2s;
-}
+  .cell {
+    background: #fff;
+    border: 1px solid #d0d0d0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 30px;
+    cursor: pointer;
+    user-select: none;
+    min-width: 38px;
+    min-height: 38px;
+    padding: 3px;
+    transition: background 0.3s, transform 0.2s;
+  }
 
-.cell.selected { background: #87cefa; transform: scale(1.05); }
+  .cell.selected { background: #87cefa; transform: scale(1.05); }
 
-@keyframes bounceHint {
-  0%, 100% { transform: translateY(0); }
-  30% { transform: translateY(-15px); }
-  50% { transform: translateY(0); }
-  70% { transform: translateY(-8px); }
-}
-.cell.hint {
-  background: #90ee90;
-  animation: bounceHint 0.8s ease-out;
-}
+  /* Анімації */
+  @keyframes bounceHint {
+    0%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-15px); }
+    50% { transform: translateY(0); }
+    70% { transform: translateY(-8px); }
+  }
 
-@keyframes pulseRed {
-  0% { background: #ffcccc; transform: translateY(0); }
-  30% { background: #ff6666; transform: translateY(-10px); }
-  50% { background: #ff9999; transform: translateY(0); }
-  70% { background: #ff6666; transform: translateY(-5px); }
-  100% { background: #ffcccc; transform: translateY(0); }
-}
-.cell.wrong { animation: pulseRed 0.8s ease-out; }
+  .cell.hint {
+    background: #90ee90;
+    animation: bounceHint 0.8s ease-out;
+  }
 
-@keyframes fadeOut {
-  0% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.6; transform: scale(1.3); }
-  100% { opacity: 0; transform: scale(0); }
-}
-.cell.fade { animation: fadeOut 0.5s forwards; }
+  @keyframes pulseRed {
+    0% { background: #ffcccc; transform: translateY(0); }
+    30% { background: #ff6666; transform: translateY(-10px); }
+    50% { background: #ff9999; transform: translateY(0); }
+    70% { background: #ff6666; transform: translateY(-5px); }
+    100% { background: #ffcccc; transform: translateY(0); }
+  }
 
-#level { margin-top: 20px; font-size: 18px; }
-#message { margin-top: 10px; font-size: 16px; color: #d9534f; }
+  .cell.wrong { animation: pulseRed 0.8s ease-out; }
 
-.icon-bar { display: flex; gap: 14px; margin-top: 10px; }
-.icon-button {
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 6px;
-  transition: transform 0.2s ease;
-}
-.icon-button svg { stroke: #333; width: 32px; height: 32px; transform: none; }
+  #level { margin-top: 20px; font-size: 18px; }
+  #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
 
-@media (hover: hover) and (pointer: fine) {
-  .icon-button:not(.rotate-animation):hover svg { transform: scale(1.15); }
-}
+  .icon-bar {
+    display: flex;
+    gap: 14px;
+    margin-top: 10px;
+  }
 
-@keyframes blink {
-  0%,100% { stroke: #FFD700; transform: scale(1); }
-  50% { stroke: #FFA500; transform: scale(1.2); }
-}
-.blinking svg { animation: blink 1s infinite; }
+  .icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 6px;
+    transition: transform 0.2s ease;
+  }
 
-@keyframes rotate360 {
-  0% { transform: rotate(0deg); }
-  50% { transform: rotate(360deg); }
-  100% { transform: rotate(0deg); }
-}
-.rotate-animation svg { animation: rotate360 0.6s ease; }
+  .icon-button svg {
+    stroke: #333;
+    width: 32px;
+    height: 32px;
+    transform: none;
+  }
 
+  @media (hover: hover) and (pointer: fine) {
+    .icon-button:not(.rotate-animation):hover svg {
+      transform: scale(1.15);
+    }
+  }
+
+  @keyframes blink {
+    0%, 100% { stroke: #FFD700; transform: scale(1); }
+    50% { stroke: #FFA500; transform: scale(1.2); }
+  }
+
+  .blinking svg { animation: blink 1s infinite; }
+
+  @keyframes rotate360 {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(360deg); }
+    100% { transform: rotate(0deg); }
+  }
+
+  .rotate-animation svg { animation: rotate360 0.6s ease; }
 </style>
 </head>
 <body>
@@ -113,12 +123,14 @@ h1 { margin-bottom: 10px; text-align: center; }
       <path d="M3.51 15a9 9 0 1 0 3.13-9.36L1 10"></path>
     </svg>
   </button>
+
   <button class="icon-button" onclick="animateIcon(this,'bounce'); addRow();" title="Додати рядок">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
     </svg>
   </button>
+
   <button id="hintBtn" class="icon-button" onclick="animateIcon(this,'blink'); showHint();" title="Підказка">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
@@ -127,133 +139,191 @@ h1 { margin-bottom: 10px; text-align: center; }
 </div>
 
 <script>
-const rows=10,cols=8;
-let numbers=[],selected=[],blocked=false,level=1;
-const game=document.getElementById('game');
-const hintBtn=document.getElementById('hintBtn');
-const message=document.getElementById('message');
-const levelDisplay=document.getElementById('level');
+const rows = 10, cols = 8;
+let numbers = [], selected = [], blocked = false, level = 1;
+const game = document.getElementById('game');
+const hintBtn = document.getElementById('hintBtn');
+const message = document.getElementById('message');
+const levelDisplay = document.getElementById('level');
 
-function animateIcon(button,type){
-  const svg=button.querySelector('svg'); const reset=()=>svg.style.transform='';
-  if(type==='rotate'){ button.classList.add('rotate-animation'); setTimeout(()=>button.classList.remove('rotate-animation'),600);}
-  else if(type==='bounce'){ svg.style.transition='transform 0.3s ease'; svg.style.transform='scale(1.4)'; setTimeout(reset,400);}
-  else if(type==='blink'){ svg.style.stroke='#FFD700'; svg.style.transform='scale(1.2)'; setTimeout(()=>{svg.style.stroke='#333'; reset();},400);}
+/* === UI Анімації кнопок === */
+function animateIcon(button, type) {
+  const svg = button.querySelector('svg');
+  const reset = () => svg.style.transform = '';
+  if (type === 'rotate') {
+    button.classList.add('rotate-animation');
+    setTimeout(() => button.classList.remove('rotate-animation'), 600);
+  } else if (type === 'bounce') {
+    svg.style.transition = 'transform 0.3s ease';
+    svg.style.transform = 'scale(1.4)';
+    setTimeout(reset, 400);
+  } else if (type === 'blink') {
+    svg.style.stroke = '#FFD700';
+    svg.style.transform = 'scale(1.2)';
+    setTimeout(() => { svg.style.stroke = '#333'; reset(); }, 400);
+  }
 }
 
-function startGame(){
-  numbers=Array(rows*cols).fill(null).map((_,i)=>i<cols*5?Math.floor(Math.random()*9)+1:null);
-  selected=[]; blocked=false; message.textContent='';
-  renderGrid(); updateHintBlink();
+/* === Ініціалізація === */
+function startGame() {
+  numbers = Array(rows * cols).fill(null)
+    .map((_, i) => i < cols * 5 ? Math.floor(Math.random() * 9) + 1 : null);
+  selected = [];
+  blocked = false;
+  message.textContent = '';
+  renderGrid();
+  updateHintBlink();
 }
 
-function renderGrid(){
-  game.innerHTML='';
-  numbers.forEach((num,idx)=>{
-    const cell=document.createElement('div');
-    cell.className='cell';
-    if(num!==null) cell.textContent=num;
-    cell.onclick=()=>selectCell(idx);
+/* === Побудова поля === */
+function renderGrid() {
+  game.innerHTML = '';
+  numbers.forEach((num, idx) => {
+    const cell = document.createElement('div');
+    cell.className = 'cell';
+    if (num !== null) cell.textContent = num;
+    cell.onclick = () => selectCell(idx);
     game.appendChild(cell);
   });
 }
 
-function selectCell(i){
-  if(blocked||numbers[i]===null) return;
-  const cells=document.querySelectorAll('.cell');
-  if(selected.includes(i)){ cells[i].classList.remove('selected'); selected=selected.filter(x=>x!==i); return;}
-  selected.push(i); cells[i].classList.add('selected');
-  if(selected.length===2){ blocked=true; setTimeout(checkMatch,300);}
+/* === Логіка вибору === */
+function selectCell(i) {
+  if (blocked || numbers[i] === null) return;
+  const cells = document.querySelectorAll('.cell');
+  if (selected.includes(i)) {
+    cells[i].classList.remove('selected');
+    selected = selected.filter(x => x !== i);
+    return;
+  }
+  selected.push(i);
+  cells[i].classList.add('selected');
+  if (selected.length === 2) {
+    blocked = true;
+    setTimeout(checkMatch, 300);
+  }
 }
 
-function canConnect(a,b){
-  const r1=Math.floor(a/cols),c1=a%cols,r2=Math.floor(b/cols),c2=b%cols;
-  const lineClear=(dr,dc)=>{ let r=r1+dr,c=c1+dc; while(r!==r2||c!==c2){ if(numbers[r*cols+c]!==null)return false; r+=dr;c+=dc;} return true;}
-  if(Math.abs(r1-r2)<=1&&Math.abs(c1-c2)<=1) return true;
-  if(r1===r2) return lineClear(0,c1<c2?1:-1);
-  if(c1===c2) return lineClear(r1<r2?1:-1,0);
-  if(Math.abs(r1-r2)===Math.abs(c1-c2)) return lineClear(r1<r2?1:-1,c1<c2?1:-1);
-  if((c1===cols-1&&c2===0&&r2===r1+1)||(c2===cols-1&&c1===0&&r1===r2+1)) return true;
-  for(let i=Math.min(a,b)+1;i<Math.max(a,b);i++) if(numbers[i]!==null) return false;
+/* === Перевірка зʼєднання === */
+function canConnect(a, b) {
+  const r1 = Math.floor(a / cols), c1 = a % cols;
+  const r2 = Math.floor(b / cols), c2 = b % cols;
+  const lineClear = (dr, dc) => {
+    let r = r1 + dr, c = c1 + dc;
+    while (r !== r2 || c !== c2) {
+      if (numbers[r * cols + c] !== null) return false;
+      r += dr; c += dc;
+    }
+    return true;
+  };
+  if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
+  if (r1 === r2) return lineClear(0, c1 < c2 ? 1 : -1);
+  if (c1 === c2) return lineClear(r1 < r2 ? 1 : -1, 0);
+  if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) return lineClear(r1 < r2 ? 1 : -1, c1 < c2 ? 1 : -1);
+  if ((c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) || (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1)) return true;
+  for (let i = Math.min(a, b) + 1; i < Math.max(a, b); i++) if (numbers[i] !== null) return false;
   return true;
 }
 
-function checkMatch(){
-  const [i1,i2]=selected,n1=numbers[i1],n2=numbers[i2];
-  const cells=document.querySelectorAll('.cell');
-  if((n1===n2||n1+n2===10)&&canConnect(i1,i2)){
-    numbers[i1]=numbers[i2]=null;
-    selected.forEach(i=>{
-      const cell=cells[i];
-      cell.classList.add('fade');
-      setTimeout(()=>{ cell.textContent=''; cell.classList.remove('selected','fade'); },500);
-    });
-    selected=[];
+/* === Перевірка пари === */
+function checkMatch() {
+  const [i1, i2] = selected, n1 = numbers[i1], n2 = numbers[i2];
+  const cells = document.querySelectorAll('.cell');
+  if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
+    numbers[i1] = numbers[i2] = null;
+    cells[i1].textContent = cells[i2].textContent = '';
+    cells[i1].classList.remove('selected');
+    cells[i2].classList.remove('selected');
+    selected = [];
     compressRows();
     checkLevelComplete();
-  }else{
-    message.textContent='Не можна поєднати!';
-    [i1,i2].forEach(i=>cells[i].classList.add('wrong'));
-    setTimeout(()=>{
-      [i1,i2].forEach(i=>cells[i].classList.remove('wrong','selected'));
-      message.textContent=''; selected=[]; blocked=false;
-    },800); return;
+  } else {
+    message.textContent = 'Не можна поєднати!';
+    cells[i1].classList.add('wrong');
+    cells[i2].classList.add('wrong');
+    setTimeout(() => {
+      cells[i1].classList.remove('wrong', 'selected');
+      cells[i2].classList.remove('wrong', 'selected');
+      message.textContent = '';
+      selected = [];
+      blocked = false;
+    }, 800);
+    return;
   }
-  blocked=false; updateHintBlink();
+  blocked = false;
+  updateHintBlink();
 }
 
-function compressRows(){
-  const rowsData=[];
-  for(let r=0;r<rows;r++) rowsData.push(numbers.slice(r*cols,(r+1)*cols));
-  const filtered=rowsData.filter(r=>r.some(x=>x!==null));
-  while(filtered.length<rows) filtered.push(Array(cols).fill(null));
-  numbers=filtered.flat(); renderGrid();
+/* === Стиснення рядків === */
+function compressRows() {
+  const rowsData = [];
+  for (let r = 0; r < rows; r++) rowsData.push(numbers.slice(r * cols, (r + 1) * cols));
+  const filtered = rowsData.filter(r => r.some(x => x !== null));
+  while (filtered.length < rows) filtered.push(Array(cols).fill(null));
+  numbers = filtered.flat();
+  renderGrid();
 }
 
-function addRow(){
-  if(blocked) return;
-  const rowsData=[];
-  for(let r=0;r<rows;r++) rowsData.push(numbers.slice(r*cols,(r+1)*cols));
-  const lastFilled=rowsData.map(r=>r.some(x=>x!==null)).lastIndexOf(true);
-  if(lastFilled<rows-1){
-    rowsData.splice(lastFilled+1,0,Array.from({length:cols},()=>Math.floor(Math.random()*9)+1));
-    numbers=rowsData.slice(0,rows).flat(); renderGrid();
+/* === Додати рядок === */
+function addRow() {
+  if (blocked) return;
+  const rowsData = [];
+  for (let r = 0; r < rows; r++) rowsData.push(numbers.slice(r * cols, (r + 1) * cols));
+  const lastFilled = rowsData.map(r => r.some(x => x !== null)).lastIndexOf(true);
+  if (lastFilled < rows - 1) {
+    rowsData.splice(lastFilled + 1, 0, Array.from({ length: cols }, () => Math.floor(Math.random() * 9) + 1));
+    numbers = rowsData.slice(0, rows).flat();
+    renderGrid();
   }
 }
 
-function showHint(){
-  if(blocked) return;
-  blocked=true;
-  const cells=document.querySelectorAll('.cell');
-  for(let i=0;i<numbers.length;i++){
-    if(numbers[i]===null) continue;
-    for(let j=i+1;j<numbers.length;j++){
-      if(numbers[j]===null) continue;
-      if((numbers[i]===numbers[j]||numbers[i]+numbers[j]===10)&&canConnect(i,j)){
-        [cells[i],cells[j]].forEach(c=>c.classList.add('hint'));
-        setTimeout(()=>{ [cells[i],cells[j]].forEach(c=>c.classList.remove('hint')); blocked=false; },800);
+/* === Підказка === */
+function showHint() {
+  if (blocked) return;
+  blocked = true;
+  const cells = document.querySelectorAll('.cell');
+  for (let i = 0; i < numbers.length; i++) {
+    if (numbers[i] === null) continue;
+    for (let j = i + 1; j < numbers.length; j++) {
+      if (numbers[j] === null) continue;
+      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
+        [cells[i], cells[j]].forEach(c => c.classList.add('hint'));
+        setTimeout(() => {
+          [cells[i], cells[j]].forEach(c => c.classList.remove('hint'));
+          blocked = false;
+        }, 800);
         return;
       }
     }
   }
-  message.textContent='Підказок немає!';
-  setTimeout(()=>message.textContent='',1000); blocked=false;
+  message.textContent = 'Підказок немає!';
+  setTimeout(() => message.textContent = '', 1000);
+  blocked = false;
 }
 
-function hasHint(){
-  for(let i=0;i<numbers.length;i++){
-    if(numbers[i]===null) continue;
-    for(let j=i+1;j<numbers.length;j++){
-      if(numbers[j]===null) continue;
-      if((numbers[i]===numbers[j]||numbers[i]+numbers[j]===10)&&canConnect(i,j)) return true;
+/* === Підказки / Перевірки === */
+function hasHint() {
+  for (let i = 0; i < numbers.length; i++) {
+    if (numbers[i] === null) continue;
+    for (let j = i + 1; j < numbers.length; j++) {
+      if (numbers[j] === null) continue;
+      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) return true;
     }
   }
   return false;
 }
 
-function updateHintBlink(){ hintBtn.classList.toggle('blinking',hasHint()); }
+function updateHintBlink() {
+  hintBtn.classList.toggle('blinking', hasHint());
+}
 
-function checkLevelComplete(){ if(numbers.every(n=>n===null)){ level++; levelDisplay.textContent=`Рівень: ${level}`; startGame(); } }
+function checkLevelComplete() {
+  if (numbers.every(n => n === null)) {
+    level++;
+    levelDisplay.textContent = `Рівень: ${level}`;
+    startGame();
+  }
+}
 
 startGame();
 </script>
