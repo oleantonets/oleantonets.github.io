@@ -19,8 +19,8 @@
   #game {
     display: grid;
     grid-template-columns: repeat(8, auto);
-    margin-top: 20px;
     border: 1px solid #d0d0d0;
+    margin-top: 20px;
   }
 
   .cell {
@@ -40,30 +40,21 @@
 
   .cell.selected { background: #87cefa; transform: scale(1.05); }
 
-  /* Анімація підказки (зелена) */
+  /* Анімації */
   @keyframes bounceHint {
-    0% { transform: translateY(0); }
+    0%,100% { transform: translateY(0); }
     30% { transform: translateY(-15px); }
     50% { transform: translateY(0); }
     70% { transform: translateY(-8px); }
-    100% { transform: translateY(0); }
   }
-  .cell.hint {
-    background: #90ee90;
-    animation: bounceHint 0.8s ease-out;
-  }
+  .hint { background: #90ee90; animation: bounceHint 0.8s ease-out; }
 
-  /* Анімація помилки (червона) */
   @keyframes pulseRed {
-    0% { background: #ffcccc; transform: translateY(0); }
-    30% { background: #ff6666; transform: translateY(-10px); }
+    0%,100% { background: #ffcccc; transform: translateY(0); }
+    30%,70% { background: #ff6666; transform: translateY(-10px); }
     50% { background: #ff9999; transform: translateY(0); }
-    70% { background: #ff6666; transform: translateY(-5px); }
-    100% { background: #ffcccc; transform: translateY(0); }
   }
-  .cell.wrong {
-    animation: pulseRed 0.8s ease-out;
-  }
+  .wrong { animation: pulseRed 0.8s ease-out; }
 
   #level { margin-top: 20px; font-size: 18px; }
   #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
@@ -99,37 +90,27 @@
     0%, 100% { stroke: #FFD700; transform: scale(1); }
     50% { stroke: #FFA500; transform: scale(1.2); }
   }
-  .blinking svg {
-    animation: blink 1s infinite;
-  }
+  .blinking svg { animation: blink 1s infinite; }
 
   @keyframes rotate360 {
     0% { transform: rotate(0deg); }
     50% { transform: rotate(360deg); }
     100% { transform: rotate(0deg); }
   }
-  .rotate-animation svg {
-    animation: rotate360 0.6s ease;
-  }
+  .rotate-animation svg { animation: rotate360 0.6s ease; }
 
-  #game-container {
-    position: relative;
-    display: inline-block;
-  }
 </style>
 </head>
 <body>
 
 <h1>Number Match</h1>
 <div id="level">Рівень: 1</div>
-<div id="game-container">
-  <div id="game"></div>
-</div>
+<div id="game"></div>
 <div id="message"></div>
 
 <div class="icon-bar">
   <!-- Перезапуск -->
-  <button id="restartBtn" class="icon-button" onclick="animateIcon(this, 'rotate'); startGame();" title="Перезапустити гру">
+  <button id="restartBtn" class="icon-button" title="Перезапустити гру">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="1 4 1 10 7 10"></polyline>
       <path d="M3.51 15a9 9 0 1 0 3.13-9.36L1 10"></path>
@@ -137,7 +118,7 @@
   </button>
 
   <!-- Додати рядок -->
-  <button class="icon-button" onclick="animateIcon(this, 'bounce'); addRow();" title="Додати рядок">
+  <button id="addRowBtn" class="icon-button" title="Додати рядок">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <line x1="12" y1="5" x2="12" y2="19"></line>
       <line x1="5" y1="12" x2="19" y2="12"></line>
@@ -145,7 +126,7 @@
   </button>
 
   <!-- Підказка -->
-  <button id="hintBtn" class="icon-button" onclick="animateIcon(this, 'blink'); showHint();" title="Підказка">
+  <button id="hintBtn" class="icon-button" title="Підказка">
     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
       <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
     </svg>
@@ -153,238 +134,206 @@
 </div>
 
 <script>
-let level = 1;
-const rows = 10, cols = 8;
-let numbers = [];
-let selected = [];
-let blocked = false;
+const state = {
+  rows: 10, cols: 8, level: 1,
+  numbers: [], selected: [], blocked: false
+};
 const game = document.getElementById('game');
-const levelDisplay = document.getElementById('level');
+const levelEl = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
 
-/* --- Анімація кнопок --- */
-function animateIcon(button, type) {
-  const svg = button.querySelector("svg");
-  if (type === 'rotate') {
-    button.classList.add('rotate-animation');
-    setTimeout(() => button.classList.remove('rotate-animation'), 600);
-  } else if (type === 'bounce') {
-    svg.style.transition = "transform 0.3s ease";
+document.getElementById('restartBtn').onclick = () => animateIcon('restart');
+document.getElementById('addRowBtn').onclick = () => animateIcon('add');
+hintBtn.onclick = () => animateIcon('hint');
+
+function animateIcon(type) {
+  const btn = {
+    restart: document.getElementById('restartBtn'),
+    add: document.getElementById('addRowBtn'),
+    hint: hintBtn
+  }[type];
+  const svg = btn.querySelector('svg');
+  if (type === 'restart') {
+    btn.classList.add('rotate-animation');
+    setTimeout(() => btn.classList.remove('rotate-animation'), 600);
+    startGame();
+  } else if (type === 'add') {
     svg.style.transform = "scale(1.4)";
     setTimeout(() => svg.style.transform = "", 400);
-  } else if (type === 'blink') {
-    svg.style.stroke = "#FFD700";
-    svg.style.transform = "scale(1.2)";
+    addRow();
+  } else if (type === 'hint') {
+    svg.style.stroke = "#FFD700"; svg.style.transform = "scale(1.2)";
     setTimeout(() => { svg.style.stroke = "#333"; svg.style.transform = ""; }, 400);
+    showHint();
   }
 }
 
-/* --- Генерація чисел із гарантованими парами --- */
-function generatePairedNumbers(count) {
-  const pairs = [];
-  const allPairs = [];
+function getMatrix() {
+  return Array.from({length: state.rows}, (_, r) =>
+    state.numbers.slice(r * state.cols, (r + 1) * state.cols)
+  );
+}
 
-  // Створюємо список усіх можливих пар (однакові або сума = 10)
+function flatten(matrix) { return matrix.flat(); }
+
+function shuffle(arr) { return arr.sort(() => Math.random() - 0.5); }
+
+function generatePairs(count) {
+  const pairs = [], combos = [];
   for (let i = 1; i <= 9; i++) {
-    allPairs.push([i, i]); // однакові числа
-    if (10 - i !== i && 10 - i <= 9 && 10 - i >= 1) {
-      allPairs.push([i, 10 - i]); // комбінації, що дають 10
-    }
+    combos.push([i, i]);
+    if (10 - i !== i && 10 - i <= 9 && 10 - i >= 1) combos.push([i, 10 - i]);
   }
-
-  while (pairs.length < count) {
-    const [a, b] = allPairs[Math.floor(Math.random() * allPairs.length)];
-    pairs.push(a, b);
-  }
-
-  return shuffleArray(pairs.slice(0, count));
-}
-
-function shuffleArray(arr) {
-  return arr.sort(() => Math.random() - 0.5);
-}
-
-/* --- Ігрова логіка --- */
-function startGame() {
-  numbers = [];
-  selected = [];
-  blocked = false;
-  message.textContent = '';
-  game.innerHTML = '';
-
-  const initialCount = 5 * cols;
-  const pairedNumbers = generatePairedNumbers(initialCount);
-  numbers = [...pairedNumbers];
-  while (numbers.length < rows * cols) numbers.push(null);
-
-  renderGrid();
-  updateHintBlink();
+  while (pairs.length < count) pairs.push(...combos[Math.floor(Math.random() * combos.length)]);
+  return shuffle(pairs.slice(0, count));
 }
 
 function renderGrid() {
   game.innerHTML = '';
-  numbers.forEach((num, idx) => {
+  state.numbers.forEach((num, i) => {
     const cell = document.createElement('div');
-    cell.classList.add('cell');
+    cell.className = 'cell';
     if (num !== null) cell.textContent = num;
-    cell.addEventListener('click', () => selectCell(idx));
+    cell.onclick = () => selectCell(i);
     game.appendChild(cell);
   });
 }
 
-function selectCell(idx) {
-  if (numbers[idx] === null || blocked) return;
+function updateCells() {
   const cells = document.querySelectorAll('.cell');
-  if (selected.includes(idx)) {
-    cells[idx].classList.remove('selected');
-    selected = selected.filter(i => i !== idx);
-    return;
-  }
-
-  if (selected.length < 2) {
-    selected.push(idx);
-    cells[idx].classList.add('selected');
-  }
-
-  if (selected.length === 2) {
-    blocked = true;
-    setTimeout(checkMatch, 300);
-  }
+  state.numbers.forEach((n, i) => cells[i].textContent = n ?? '');
 }
 
-function canConnect(idx1, idx2) {
-  const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
-  const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
+function startGame() {
+  state.blocked = false;
+  state.selected = [];
+  const total = state.rows * state.cols;
+  const startCount = 5 * state.cols;
+  const arr = generatePairs(startCount);
+  state.numbers = [...arr, ...Array(total - startCount).fill(null)];
+  renderGrid();
+  updateHintBlink();
+  message.textContent = '';
+}
 
-  if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
-
-  if (r1 === r2) {
-    const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
-    for (let c = start + 1; c < end; c++) if (numbers[r1 * cols + c] !== null) return false;
-    return true;
+function canConnect(i1, i2) {
+  const r1 = Math.floor(i1 / state.cols), c1 = i1 % state.cols;
+  const r2 = Math.floor(i2 / state.cols), c2 = i2 % state.cols;
+  const dr = Math.sign(r2 - r1), dc = Math.sign(c2 - c1);
+  if (dr === 0 && dc === 0) return false;
+  let r = r1 + dr, c = c1 + dc;
+  while (r !== r2 || c !== c2) {
+    if (state.numbers[r * state.cols + c] !== null) return false;
+    r += dr; c += dc;
   }
-
-  if (c1 === c2) {
-    const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
-    for (let r = start + 1; r < end; r++) if (numbers[r * cols + c1] !== null) return false;
-    return true;
-  }
-
-  if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
-    const rStep = r1 < r2 ? 1 : -1;
-    const cStep = c1 < c2 ? 1 : -1;
-    let r = r1 + rStep, c = c1 + cStep;
-    while (r !== r2 && c !== c2) {
-      if (numbers[r * cols + c] !== null) return false;
-      r += rStep;
-      c += cStep;
-    }
-    return true;
-  }
-
-  if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
-  if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
-
-  const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
-  for (let i = minIdx + 1; i < maxIdx; i++) if (numbers[i] !== null) return false;
   return true;
 }
 
-function checkMatch() {
-  const [i1, i2] = selected;
-  const n1 = numbers[i1], n2 = numbers[i2];
+async function selectCell(i) {
+  if (state.blocked || state.numbers[i] === null) return;
+  const cells = document.querySelectorAll('.cell');
+  if (state.selected.includes(i)) {
+    cells[i].classList.remove('selected');
+    state.selected = state.selected.filter(x => x !== i);
+    return;
+  }
+  state.selected.push(i);
+  cells[i].classList.add('selected');
+  if (state.selected.length === 2) {
+    state.blocked = true;
+    await checkMatch();
+  }
+}
+
+async function checkMatch() {
+  const [i1, i2] = state.selected;
+  const n1 = state.numbers[i1], n2 = state.numbers[i2];
   const cells = document.querySelectorAll('.cell');
   if ((n1 === n2 || n1 + n2 === 10) && canConnect(i1, i2)) {
-    numbers[i1] = null; numbers[i2] = null;
-    cells[i1].textContent = ''; cells[i2].textContent = '';
-    selected.forEach(i => cells[i].classList.remove('selected'));
-    selected = [];
+    state.numbers[i1] = null;
+    state.numbers[i2] = null;
+    updateCells();
+    cells[i1].classList.remove('selected');
+    cells[i2].classList.remove('selected');
     compressRows();
     checkLevelComplete();
-    blocked = false;
+    state.selected = [];
   } else {
     cells[i1].classList.add('wrong');
     cells[i2].classList.add('wrong');
     message.textContent = 'Не можна поєднати!';
-    setTimeout(() => {
-      cells[i1].classList.remove('selected','wrong');
-      cells[i2].classList.remove('selected','wrong');
-      selected = [];
-      message.textContent = '';
-      blocked = false;
-    }, 800);
+    await new Promise(r => setTimeout(r, 800));
+    ['wrong', 'selected'].forEach(cls => {
+      cells[i1].classList.remove(cls);
+      cells[i2].classList.remove(cls);
+    });
+    state.selected = [];
+    message.textContent = '';
   }
+  state.blocked = false;
   updateHintBlink();
 }
 
 function compressRows() {
-  let matrix = [];
-  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
-  matrix = matrix.filter(row => row.some(n => n !== null));
-  while (matrix.length < rows) matrix.push(new Array(cols).fill(null));
-  numbers = matrix.flat();
-  renderGrid();
+  const matrix = getMatrix().filter(row => row.some(n => n !== null));
+  while (matrix.length < state.rows) matrix.push(Array(state.cols).fill(null));
+  state.numbers = flatten(matrix);
+  updateCells();
 }
 
 function addRow() {
-  if (blocked) return;
-  let matrix = [];
-  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
-  let lastFilled = matrix.map(r => r.some(n => n !== null)).lastIndexOf(true);
-  if (lastFilled < rows - 1) {
-    const newRow = generatePairedNumbers(cols);
-    matrix.splice(lastFilled + 1, 0, newRow);
-    if (matrix.length > rows) matrix = matrix.slice(0, rows);
-    numbers = matrix.flat(); renderGrid();
+  if (state.blocked) return;
+  const matrix = getMatrix();
+  const last = matrix.map(r => r.some(n => n !== null)).lastIndexOf(true);
+  if (last < state.rows - 1) {
+    const newRow = generatePairs(state.cols);
+    matrix.splice(last + 1, 0, newRow);
+    if (matrix.length > state.rows) matrix.pop();
+    state.numbers = flatten(matrix);
+    updateCells();
   }
-}
-
-function showHint() {
-  if (blocked) return;
-  blocked = true;
-  const cells = document.querySelectorAll('.cell');
-  for (let i = 0; i < numbers.length; i++) {
-    if (numbers[i] === null) continue;
-    for (let j = i + 1; j < numbers.length; j++) {
-      if (numbers[j] === null) continue;
-      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
-        cells[i].classList.add('hint');
-        cells[j].classList.add('hint');
-        setTimeout(() => { 
-          cells[i].classList.remove('hint'); 
-          cells[j].classList.remove('hint'); 
-          blocked = false;
-        }, 800);
-        return;
-      }
-    }
-  }
-  message.textContent = 'Підказок немає!';
-  setTimeout(() => message.textContent = '', 1000);
-  blocked = false;
 }
 
 function hasHint() {
-  for (let i = 0; i < numbers.length; i++) {
-    if (numbers[i] === null) continue;
-    for (let j = i + 1; j < numbers.length; j++) {
-      if (numbers[j] === null) continue;
-      if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) return true;
+  for (let i = 0; i < state.numbers.length; i++) {
+    if (state.numbers[i] === null) continue;
+    for (let j = i + 1; j < state.numbers.length; j++) {
+      if (state.numbers[j] === null) continue;
+      if ((state.numbers[i] === state.numbers[j] || state.numbers[i] + state.numbers[j] === 10) && canConnect(i, j)) return [i, j];
     }
   }
-  return false;
+  return null;
+}
+
+function showHint() {
+  if (state.blocked) return;
+  const cells = document.querySelectorAll('.cell');
+  const pair = hasHint();
+  if (!pair) {
+    message.textContent = 'Підказок немає!';
+    setTimeout(() => message.textContent = '', 1000);
+    return;
+  }
+  state.blocked = true;
+  const [i1, i2] = pair;
+  cells[i1].classList.add('hint');
+  cells[i2].classList.add('hint');
+  setTimeout(() => {
+    cells[i1].classList.remove('hint');
+    cells[i2].classList.remove('hint');
+    state.blocked = false;
+  }, 800);
 }
 
 function updateHintBlink() {
-  if (hasHint()) hintBtn.classList.add('blinking');
-  else hintBtn.classList.remove('blinking');
+  hintBtn.classList.toggle('blinking', !!hasHint());
 }
 
 function checkLevelComplete() {
-  if (numbers.every(n => n === null)) {
-    level++;
-    levelDisplay.textContent = 'Рівень: ' + level;
+  if (state.numbers.every(n => n === null)) {
+    state.level++;
+    levelEl.textContent = 'Рівень: ' + state.level;
     startGame();
   }
 }
