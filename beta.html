@@ -40,7 +40,7 @@
 
   .cell.selected { background: #87cefa; transform: scale(1.05); }
 
-  /* Анімація підказки (зелена) */
+  /* Підказка — зелена анімація */
   @keyframes bounceHint {
     0% { transform: translateY(0); }
     30% { transform: translateY(-15px); }
@@ -53,7 +53,7 @@
     animation: bounceHint 0.8s ease-out;
   }
 
-  /* Анімація помилки (червона) */
+  /* Помилка — червона анімація */
   @keyframes pulseRed {
     0% { background: #ffcccc; transform: translateY(0); }
     30% { background: #ff6666; transform: translateY(-10px); }
@@ -111,20 +111,13 @@
   .rotate-animation svg {
     animation: rotate360 0.6s ease;
   }
-
-  #game-container {
-    position: relative;
-    display: inline-block;
-  }
 </style>
 </head>
 <body>
 
 <h1>Number Match</h1>
 <div id="level">Рівень: 1</div>
-<div id="game-container">
-  <div id="game"></div>
-</div>
+<div id="game"></div>
 <div id="message"></div>
 
 <div class="icon-bar">
@@ -157,9 +150,8 @@ let level = 1;
 const rows = 10, cols = 8;
 let numbers = [];
 let selected = [];
-let blocked = false; // блокування під час анімації
+let blocked = false;
 const game = document.getElementById('game');
-const gameContainer = document.getElementById('game-container');
 const levelDisplay = document.getElementById('level');
 const message = document.getElementById('message');
 const hintBtn = document.getElementById('hintBtn');
@@ -169,10 +161,7 @@ function animateIcon(button, type) {
   const svg = button.querySelector("svg");
   if (type === 'rotate') {
     button.classList.add('rotate-animation');
-    setTimeout(() => {
-      button.classList.remove('rotate-animation');
-      svg.style.transform = '';
-    }, 600);
+    setTimeout(() => button.classList.remove('rotate-animation'), 600);
   } else if (type === 'bounce') {
     svg.style.transition = "transform 0.3s ease";
     svg.style.transform = "scale(1.4)";
@@ -196,12 +185,44 @@ function startGame() {
   updateHintBlink();
 }
 
+/* Генерує пари або числа, що дають суму 10 */
+function generatePairNumbers(count) {
+  const arr = [];
+  const available = [1,2,3,4,5,6,7,8,9];
+  while (arr.length < count) {
+    const n = available[Math.floor(Math.random() * available.length)];
+    const makeSum10 = Math.random() < 0.5;
+    let m = makeSum10 ? 10 - n : n;
+    if (m < 1 || m > 9) m = n;
+    arr.push(n, m);
+  }
+  return arr.slice(0, count).sort(() => Math.random() - 0.5);
+}
+
+/* Початкова генерація */
 function generateNumbers() {
-  for (let i = 0; i < rows * cols; i++) {
-    numbers.push(i < 5 * cols ? Math.floor(Math.random() * 9) + 1 : null);
+  const total = rows * cols;
+  const startCount = 5 * cols;
+  const paired = generatePairNumbers(startCount);
+  for (let i = 0; i < total; i++) numbers.push(i < startCount ? paired[i] : null);
+}
+
+/* Додавання нового ряду */
+function addRow() {
+  if (blocked) return;
+  let matrix = [];
+  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
+  let lastFilled = matrix.map(r => r.some(n => n !== null)).lastIndexOf(true);
+  if (lastFilled < rows - 1) {
+    const newRow = generatePairNumbers(cols);
+    matrix.splice(lastFilled + 1, 0, newRow);
+    if (matrix.length > rows) matrix = matrix.slice(0, rows);
+    numbers = matrix.flat();
+    renderGrid();
   }
 }
 
+/* Відображення */
 function renderGrid() {
   game.innerHTML = '';
   numbers.forEach((num, idx) => {
@@ -222,53 +243,44 @@ function selectCell(idx) {
     selected = selected.filter(i => i !== idx);
     return;
   }
-
   if (selected.length < 2) {
     selected.push(idx);
     cells[idx].classList.add('selected');
   }
-
   if (selected.length === 2) {
     blocked = true;
     setTimeout(checkMatch, 300);
   }
 }
 
+/* Логіка поєднання */
 function canConnect(idx1, idx2) {
   const r1 = Math.floor(idx1 / cols), c1 = idx1 % cols;
   const r2 = Math.floor(idx2 / cols), c2 = idx2 % cols;
-
   if (Math.abs(r1 - r2) <= 1 && Math.abs(c1 - c2) <= 1) return true;
-
   if (r1 === r2) {
-    const [start, end] = [Math.min(c1, c2), Math.max(c1, c2)];
-    for (let c = start + 1; c < end; c++) if (numbers[r1 * cols + c] !== null) return false;
+    const [s, e] = [Math.min(c1, c2), Math.max(c1, c2)];
+    for (let c = s + 1; c < e; c++) if (numbers[r1 * cols + c] !== null) return false;
     return true;
   }
-
   if (c1 === c2) {
-    const [start, end] = [Math.min(r1, r2), Math.max(r1, r2)];
-    for (let r = start + 1; r < end; r++) if (numbers[r * cols + c1] !== null) return false;
+    const [s, e] = [Math.min(r1, r2), Math.max(r1, r2)];
+    for (let r = s + 1; r < e; r++) if (numbers[r * cols + c1] !== null) return false;
     return true;
   }
-
   if (Math.abs(r1 - r2) === Math.abs(c1 - c2)) {
-    const rStep = r1 < r2 ? 1 : -1;
-    const cStep = c1 < c2 ? 1 : -1;
+    const rStep = r1 < r2 ? 1 : -1, cStep = c1 < c2 ? 1 : -1;
     let r = r1 + rStep, c = c1 + cStep;
     while (r !== r2 && c !== c2) {
       if (numbers[r * cols + c] !== null) return false;
-      r += rStep;
-      c += cStep;
+      r += rStep; c += cStep;
     }
     return true;
   }
-
   if (c1 === cols - 1 && c2 === 0 && r2 === r1 + 1) return true;
   if (c2 === cols - 1 && c1 === 0 && r1 === r2 + 1) return true;
-
-  const [minIdx, maxIdx] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
-  for (let i = minIdx + 1; i < maxIdx; i++) if (numbers[i] !== null) return false;
+  const [minI, maxI] = [Math.min(idx1, idx2), Math.max(idx1, idx2)];
+  for (let i = minI + 1; i < maxI; i++) if (numbers[i] !== null) return false;
   return true;
 }
 
@@ -299,6 +311,7 @@ function checkMatch() {
   updateHintBlink();
 }
 
+/* Очищення порожніх рядків */
 function compressRows() {
   let matrix = [];
   for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
@@ -308,19 +321,7 @@ function compressRows() {
   renderGrid();
 }
 
-function addRow() {
-  if (blocked) return;
-  let matrix = [];
-  for (let r = 0; r < rows; r++) matrix.push(numbers.slice(r * cols, (r + 1) * cols));
-  let lastFilled = matrix.map(r => r.some(n => n !== null)).lastIndexOf(true);
-  if (lastFilled < rows - 1) {
-    const newRow = Array.from({length: cols}, () => Math.floor(Math.random() * 9) + 1);
-    matrix.splice(lastFilled + 1, 0, newRow);
-    if (matrix.length > rows) matrix = matrix.slice(0, rows);
-    numbers = matrix.flat(); renderGrid();
-  }
-}
-
+/* Підказка */
 function showHint() {
   if (blocked) return;
   blocked = true;
@@ -332,9 +333,9 @@ function showHint() {
       if ((numbers[i] === numbers[j] || numbers[i] + numbers[j] === 10) && canConnect(i, j)) {
         cells[i].classList.add('hint');
         cells[j].classList.add('hint');
-        setTimeout(() => { 
-          cells[i].classList.remove('hint'); 
-          cells[j].classList.remove('hint'); 
+        setTimeout(() => {
+          cells[i].classList.remove('hint');
+          cells[j].classList.remove('hint');
           blocked = false;
         }, 800);
         return;
@@ -346,6 +347,7 @@ function showHint() {
   blocked = false;
 }
 
+/* Моргаюча іконка підказки */
 function hasHint() {
   for (let i = 0; i < numbers.length; i++) {
     if (numbers[i] === null) continue;
@@ -356,12 +358,12 @@ function hasHint() {
   }
   return false;
 }
-
 function updateHintBlink() {
   if (hasHint()) hintBtn.classList.add('blinking');
   else hintBtn.classList.remove('blinking');
 }
 
+/* Рівень */
 function checkLevelComplete() {
   if (numbers.every(n => n === null)) {
     level++;
