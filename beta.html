@@ -295,6 +295,13 @@
     box-shadow: 0 4px 18px rgba(245,200,66,.35);
   }
 
+  .fab-undo {
+    background: linear-gradient(135deg, #5a6080, #3a3f5e);
+    color: var(--text);
+    box-shadow: 0 4px 18px rgba(90,96,128,.3);
+    font-size: 1.3rem;
+  }
+
   .fab:disabled {
     opacity: 0.35;
     cursor: not-allowed;
@@ -421,7 +428,7 @@
 <body>
 
 <header>
-  <div class="logo">ЧислоЗбіг</div>
+  <div class="logo">Number Match</div>
   <div class="scores">
     <div class="score-box">
       <div class="score-label">Рахунок</div>
@@ -441,18 +448,21 @@
     <div id="grid"></div>
   </div>
   <div class="action-bar">
+    <button class="fab fab-undo" id="btn-undo" title="Скасувати хід" disabled>
+      ↩
+    </button>
     <button class="fab fab-hint" id="btn-hint" title="Підказка">
       💡
       <span class="badge" id="hint-badge">3</span>
     </button>
     <button class="fab fab-add" id="btn-add" title="Додати рядки">
       ＋
-      <span class="badge" id="add-badge">∞</span>
+      <span class="badge" id="add-badge">5</span>
     </button>
   </div>
 </main>
 
-<footer>Знайди пари однакових чисел або числа, що дають у сумі 10</footer>
+<footer>Знайди пари однакових чисел або тих, що дають 10 · Сусіди — поруч або через порожні клітинки</footer>
 
 <div id="modal-overlay">
   <div id="modal">
@@ -469,6 +479,16 @@
 <div id="toast"></div>
 
 <script>
+/* ─────────────────────────────────────────────
+   Safe localStorage wrapper
+   ───────────────────────────────────────────── */
+const Storage = {
+  _ok: (() => { try { localStorage.setItem('_t', '1'); localStorage.removeItem('_t'); return true; } catch(e) { return false; } })(),
+  get(k)    { try { return this._ok ? localStorage.getItem(k) : null; } catch(e) { return null; } },
+  set(k, v) { try { if (this._ok) localStorage.setItem(k, v); } catch(e) {} },
+  remove(k) { try { if (this._ok) localStorage.removeItem(k); } catch(e) {} }
+};
+
 /* ─────────────────────────────────────────────
    GameBoard
    ───────────────────────────────────────────── */
@@ -491,7 +511,7 @@ class GameBoard {
       [seq[i], seq[j]] = [seq[j], seq[i]];
     }
     // pad to full rows
-    while (seq.length % this.cols !== 0) seq.push(seq[seq.length % seq.length] || 1);
+    while (seq.length % this.cols !== 0) seq.push(Math.floor(Math.random() * 9) + 1);
     this.cells = seq;
   }
 
@@ -530,12 +550,16 @@ class GameBoard {
   }
 
   hint() {
-    const total = this.cells.length;
-    for (let i = 0; i < total; i++) {
-      if (this.cells[i] === 0) continue;
+    // Pre-collect non-empty cell indices to avoid iterating empties
+    const nonEmpty = [];
+    for (let i = 0; i < this.cells.length; i++) {
+      if (this.cells[i] !== 0) nonEmpty.push(i);
+    }
+    for (let a = 0; a < nonEmpty.length; a++) {
+      const i = nonEmpty[a];
       const r1 = Math.floor(i / this.cols), c1 = i % this.cols;
-      for (let j = i + 1; j < total; j++) {
-        if (this.cells[j] === 0) continue;
+      for (let b = a + 1; b < nonEmpty.length; b++) {
+        const j = nonEmpty[b];
         const r2 = Math.floor(j / this.cols), c2 = j % this.cols;
         if (Validator.isMatch(this.cells[i], this.cells[j]) &&
             Validator.areNeighbors(this, {r: r1, c: c1}, {r: r2, c: c2})) {
@@ -685,7 +709,10 @@ class GameUI {
     this.bestEl.textContent = best;
   }
 
-  updateHintBadge(n) { this.hintBadge.textContent = n; }
+  updateHintBadge(n) {
+    document.getElementById('hint-badge').textContent = n;
+    document.getElementById('btn-hint').disabled = n <= 0;
+  }
 
   showCombo(n) {
     this.comboCount.textContent = n;
@@ -734,21 +761,25 @@ class GameController {
     this.board = new GameBoard(9);
     this.ui = new GameUI();
     this.score = 0;
-    this.best = parseInt(localStorage.getItem('nm_highscore') || '0');
+    this.best = parseInt(Storage.get('nm_highscore') || '0');
     this.hintsLeft = 3;
+    this.addsLeft = 5;
     this.combo = 0;
     this.selected = null;
     this.busy = false;
+    this.history = []; // undo stack
+    this.maxHistory = 20;
 
     document.getElementById('btn-hint').addEventListener('click', () => this.useHint());
     document.getElementById('btn-add').addEventListener('click', () => this.addRows());
     document.getElementById('btn-restart').addEventListener('click', () => this.confirmRestart());
+    document.getElementById('btn-undo').addEventListener('click', () => this.undo());
 
     this.checkResume();
   }
 
   checkResume() {
-    const saved = localStorage.getItem('nm_board');
+    const saved = Storage.get('nm_board');
     if (saved) {
       try {
         const state = JSON.parse(saved);
@@ -769,26 +800,65 @@ class GameController {
     this.board.cells = s.cells;
     this.score = s.score || 0;
     this.hintsLeft = s.hints !== undefined ? s.hints : 3;
+    this.addsLeft = s.adds !== undefined ? s.adds : 5;
     this.combo = 0;
     this.selected = null;
-    this.best = parseInt(localStorage.getItem('nm_highscore') || '0');
+    this.history = [];
+    this.best = parseInt(Storage.get('nm_highscore') || '0');
   }
 
   saveState() {
-    localStorage.setItem('nm_board', JSON.stringify({
-      cells: this.board.cells, score: this.score, hints: this.hintsLeft
+    Storage.set('nm_board', JSON.stringify({
+      cells: this.board.cells, score: this.score, hints: this.hintsLeft, adds: this.addsLeft
     }));
-    localStorage.setItem('nm_highscore', this.best);
+    Storage.set('nm_highscore', this.best);
+  }
+
+  pushHistory() {
+    this.history.push({
+      cells: [...this.board.cells],
+      score: this.score,
+      hintsLeft: this.hintsLeft,
+      addsLeft: this.addsLeft,
+      combo: this.combo
+    });
+    if (this.history.length > this.maxHistory) this.history.shift();
+    this.updateUndoBtn();
+  }
+
+  undo() {
+    if (this.busy || this.history.length === 0) return;
+    const snap = this.history.pop();
+    this.board.cells = snap.cells;
+    this.score = snap.score;
+    this.hintsLeft = snap.hintsLeft;
+    this.addsLeft = snap.addsLeft;
+    this.combo = snap.combo;
+    this.selected = null;
+    this.saveState();
+    this.renderFull();
+    showToast('Хід скасовано');
+  }
+
+  updateUndoBtn() {
+    document.getElementById('btn-undo').disabled = this.history.length === 0;
+  }
+
+  updateAddBadge() {
+    document.getElementById('add-badge').textContent = this.addsLeft;
+    document.getElementById('btn-add').disabled = this.addsLeft <= 0;
   }
 
   start() {
     this.board.generate();
     this.score = 0;
     this.hintsLeft = 3;
+    this.addsLeft = 5;
     this.combo = 0;
     this.selected = null;
     this.busy = false;
-    localStorage.removeItem('nm_board');
+    this.history = [];
+    Storage.remove('nm_board');
     this.renderFull();
   }
 
@@ -796,7 +866,8 @@ class GameController {
     this.ui.render(this.board, (r, c) => this.handleCellClick(r, c), newRowStartIdx);
     this.ui.updateScore(this.score, this.best);
     this.ui.updateHintBadge(this.hintsLeft);
-    document.getElementById('btn-hint').disabled = this.hintsLeft <= 0;
+    this.updateAddBadge();
+    this.updateUndoBtn();
   }
 
   handleCellClick(r, c) {
@@ -833,11 +904,18 @@ class GameController {
       return;
     }
 
-    // Valid pair!
+    // Valid pair — save state before modifying
+    this.pushHistory();
     this.busy = true;
     this.combo++;
     let pts = 10;
     if (this.combo > 1) { pts += 5 * (this.combo - 1); this.ui.showCombo(this.combo); }
+
+    // Earn a hint every 5 consecutive combos
+    if (this.combo > 0 && this.combo % 5 === 0) {
+      this.hintsLeft++;
+      showToast('+1 підказка за комбо!');
+    }
 
     this.score += pts;
     if (this.score > this.best) { this.best = this.score; }
@@ -851,7 +929,7 @@ class GameController {
       this.saveState();
 
       if (this.board.isCleared()) {
-        localStorage.removeItem('nm_board');
+        Storage.remove('nm_board');
         showModal({
           icon: '🏆', title: 'Перемога!',
           sub: `Фінальний рахунок: <strong>${this.score}</strong>`,
@@ -864,7 +942,16 @@ class GameController {
       this.renderFull();
 
       if (!this.board.hasAnyMoves()) {
-        this.promptAddRows();
+        if (this.addsLeft > 0) {
+          this.promptAddRows();
+        } else {
+          showModal({
+            icon: '😔', title: 'Гра завершена!',
+            sub: `Немає ходів і додавань. Рахунок: <strong>${this.score}</strong>`,
+            yesText: 'Грати знову',
+            onYes: () => this.start()
+          });
+        }
       }
     });
   }
@@ -875,7 +962,6 @@ class GameController {
     if (!pair) { showToast('Немає доступних ходів!'); return; }
     this.hintsLeft--;
     this.ui.updateHintBadge(this.hintsLeft);
-    document.getElementById('btn-hint').disabled = this.hintsLeft <= 0;
     this.ui.clearStates();
     this.selected = null;
     this.ui.showHint(pair[0], pair[1]);
@@ -883,10 +969,12 @@ class GameController {
   }
 
   addRows() {
-    if (this.busy) return;
+    if (this.busy || this.addsLeft <= 0) return;
+    this.pushHistory();
     const prevLen = this.board.cells.length;
     const added = this.board.addRows();
-    if (!added) { showToast('Нічого додавати!'); return; }
+    if (!added) { this.history.pop(); showToast('Нічого додавати!'); this.updateUndoBtn(); return; }
+    this.addsLeft--;
     this.combo = 0;
     this.ui.hideCombo();
     this.saveState();
@@ -896,7 +984,7 @@ class GameController {
   promptAddRows() {
     showModal({
       icon: '🤔', title: 'Немає ходів!',
-      sub: 'Валідних пар не залишилось. Додати рядки?',
+      sub: `Валідних пар не залишилось. Додати рядки? (залишилось: ${this.addsLeft})`,
       yesText: 'Додати рядки', noText: 'Нова гра',
       onYes: () => this.addRows(),
       onNo: () => this.start()
