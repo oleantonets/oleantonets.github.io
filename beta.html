@@ -179,7 +179,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.15rem;
+    font-size: 1.45rem;
     font-weight: 700;
     border-radius: var(--radius);
     background: var(--surface2);
@@ -421,7 +421,7 @@
 <body>
 
 <header>
-  <div class="logo">NumberMatch</div>
+  <div class="logo">ЧислоЗбіг</div>
   <div class="scores">
     <div class="score-box">
       <div class="score-label">Рахунок</div>
@@ -559,10 +559,12 @@ class Validator {
     const i2 = p2.r * cols + p2.c;
     if (i1 === i2) return false;
 
+    const dr = Math.abs(p1.r - p2.r);
+    const dc = Math.abs(p1.c - p2.c);
     const minI = Math.min(i1, i2), maxI = Math.max(i1, i2);
 
-    // 1. Direct adjacent (horizontal or vertical)
-    if (Math.abs(p1.r - p2.r) + Math.abs(p1.c - p2.c) === 1) return true;
+    // 1. Direct adjacent (horizontal, vertical or diagonal)
+    if (dr <= 1 && dc <= 1) return true;
 
     // 2. Same row, all between empty
     if (p1.r === p2.r) {
@@ -584,7 +586,18 @@ class Validator {
       if (allEmpty) return true;
     }
 
-    // 4. Wrap-around (all linear cells between them empty)
+    // 4. Diagonal through empty cells (same step ratio)
+    if (dr === dc) {
+      const stepR = (p2.r - p1.r) / dr;
+      const stepC = (p2.c - p1.c) / dc;
+      let allEmpty = true;
+      for (let k = 1; k < dr; k++) {
+        if (!board.isEmpty(p1.r + k * stepR, p1.c + k * stepC)) { allEmpty = false; break; }
+      }
+      if (allEmpty) return true;
+    }
+
+    // 5. Wrap-around (all linear cells between them empty)
     let allEmpty = true;
     for (let k = minI + 1; k < maxI; k++) {
       if (board.cells[k] !== 0) { allEmpty = false; break; }
