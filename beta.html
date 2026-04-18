@@ -3,235 +3,908 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Match</title>
+<title>Числовий Збіг</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #22263a;
+    --border: #2e3250;
+    --accent: #4f8ef7;
+    --accent2: #7c5aff;
+    --yellow: #f5c842;
+    --green: #3dd68c;
+    --red: #f05a5a;
+    --text: #e8eaf6;
+    --muted: #5a6080;
+    --cell-size: 44px;
+    --gap: 5px;
+    --radius: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
   body {
-    font-family: Arial, sans-serif;
-    background: #f0f0f0;
+    font-family: 'Outfit', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0;
-    padding: 20px;
-  }
-  h1 { margin-bottom: 10px; text-align: center; }
-
-  #game {
-    display: grid;
-    grid-template-columns: repeat(8, auto);
-    margin-top: 20px;
-    border: 1px solid #d0d0d0;
+    overflow-x: hidden;
   }
 
-  .cell {
-    background: #fff;
-    border: 1px solid #d0d0d0;
+  /* Background subtle pattern */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 20%, rgba(79,142,247,.07) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, rgba(124,90,255,.07) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  header {
+    width: 100%;
+    max-width: 480px;
+    padding: 18px 20px 14px;
     display: flex;
-    justify-content: center;
     align-items: center;
-    font-size: 30px;
+    justify-content: space-between;
+    gap: 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .logo {
+    font-size: 1.4rem;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .scores {
+    display: flex;
+    gap: 10px;
+  }
+
+  .score-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 6px 14px;
+    text-align: center;
+    min-width: 70px;
+  }
+
+  .score-label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .score-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  #score-val { color: var(--accent); }
+  #best-val  { color: var(--yellow); }
+
+  .btn-restart {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-size: 1.2rem;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all .2s;
+    flex-shrink: 0;
+  }
+
+  .btn-restart:hover { color: var(--text); border-color: var(--accent); }
+
+  main {
+    flex: 1;
+    width: 100%;
+    max-width: 480px;
+    padding: 0 12px 16px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  /* Combo badge */
+  #combo-badge {
+    display: none;
+    background: linear-gradient(135deg, var(--yellow), #f08228);
+    color: #1a1200;
+    font-weight: 800;
+    font-size: .8rem;
+    padding: 3px 12px;
+    border-radius: 99px;
+    margin-bottom: 8px;
+    animation: popIn .3s ease;
+    letter-spacing: .04em;
+  }
+
+  #combo-badge.visible { display: block; }
+
+  @keyframes popIn {
+    0% { transform: scale(.6); opacity: 0; }
+    60% { transform: scale(1.1); }
+    100% { transform: scale(1); opacity: 1; }
+  }
+
+  /* Grid wrapper */
+  #grid-wrapper {
+    width: 100%;
+    max-height: calc(100vh - 190px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4px 2px 8px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  #grid {
+    display: grid;
+    grid-template-columns: repeat(9, var(--cell-size));
+    gap: var(--gap);
+    justify-content: center;
+  }
+
+  /* Cells */
+  .cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-radius: var(--radius);
+    background: var(--surface2);
+    border: 1.5px solid var(--border);
     cursor: pointer;
     user-select: none;
-    min-width: 38px;
-    min-height: 38px;
-    padding: 3px;
-    transition: background 0.3s, transform 0.2s;
+    transition: background .15s, border-color .15s, transform .1s, opacity .3s;
+    position: relative;
   }
 
-  .cell.selected { background: #87cefa; transform: scale(1.05); }
-
-  /* Анімації клітинок */
-  @keyframes bounceHint {
-    0% { transform: translateY(0); }
-    30% { transform: translateY(-15px); }
-    50% { transform: translateY(0); }
-    70% { transform: translateY(-8px); }
-    100% { transform: translateY(0); }
-  }
-  @keyframes pulseRed {
-    0% { background: #ffcccc; transform: translateY(0); }
-    30% { background: #ff6666; transform: translateY(-10px); }
-    50% { background: #ff9999; transform: translateY(0); }
-    70% { background: #ff6666; transform: translateY(-5px); }
-    100% { background: #ffcccc; transform: translateY(0); }
+  .cell:not(.empty):hover {
+    background: #2c3158;
+    border-color: var(--accent);
+    transform: scale(1.06);
+    z-index: 2;
   }
 
-  .cell.hint { background: #90ee90; animation: bounceHint 0.8s ease-out; }
-  .cell.wrong { animation: pulseRed 0.8s ease-out; }
+  .cell.empty {
+    background: transparent;
+    border-color: transparent;
+    cursor: default;
+    pointer-events: none;
+  }
 
-  #level { margin-top: 20px; font-size: 18px; }
-  #message { margin-top: 10px; font-size: 16px; color: #d9534f; }
+  .cell.selected {
+    background: linear-gradient(135deg, #1e4fd8, #4f8ef7);
+    border-color: #7ab3ff;
+    color: #fff;
+    transform: scale(1.08);
+    box-shadow: 0 0 14px rgba(79,142,247,.6);
+    z-index: 3;
+  }
 
-  .icon-bar { display: flex; gap: 14px; margin-top: 10px; }
+  .cell.hint {
+    border-color: var(--yellow);
+    box-shadow: 0 0 12px rgba(245,200,66,.5);
+    animation: hintPulse 0.8s ease infinite alternate;
+  }
 
-  .icon-button {
-    background: none;
+  @keyframes hintPulse {
+    from { box-shadow: 0 0 6px rgba(245,200,66,.3); }
+    to   { box-shadow: 0 0 18px rgba(245,200,66,.8); }
+  }
+
+  .cell.removing {
+    animation: cellPop .35s ease forwards;
+    pointer-events: none;
+  }
+
+  @keyframes cellPop {
+    0%   { transform: scale(1); opacity: 1; }
+    40%  { transform: scale(1.2); opacity: .8; }
+    100% { transform: scale(0); opacity: 0; }
+  }
+
+  .cell.new-row {
+    animation: slideIn .4s ease both;
+  }
+
+  @keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to   { transform: translateY(0); opacity: 1; }
+  }
+
+  /* Number colors by digit */
+  .cell[data-n="1"]  { color: #4f8ef7; }
+  .cell[data-n="2"]  { color: #7c5aff; }
+  .cell[data-n="3"]  { color: #3dd68c; }
+  .cell[data-n="4"]  { color: #f5c842; }
+  .cell[data-n="5"]  { color: #f08228; }
+  .cell[data-n="6"]  { color: #f05a5a; }
+  .cell[data-n="7"]  { color: #c75af7; }
+  .cell[data-n="8"]  { color: #5af7e0; }
+  .cell[data-n="9"]  { color: #f7a25a; }
+  .cell.selected[data-n] { color: #fff; }
+
+  /* Bottom action bar */
+  .action-bar {
+    display: flex;
+    gap: 14px;
+    margin-top: 14px;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .fab {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
     border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
     cursor: pointer;
-    padding: 6px;
-    transition: transform 0.2s ease;
-  }
-  .icon-button svg { stroke: #333; width: 32px; height: 32px; transform: none; }
-
-  @media (hover: hover) and (pointer: fine) {
-    .icon-button:not(.rotate-animation):hover svg { transform: scale(1.15); }
+    position: relative;
+    transition: transform .15s, box-shadow .15s;
+    font-family: inherit;
+    font-weight: 700;
   }
 
-  @keyframes blink {
-    0%,100% { stroke: #FFD700; transform: scale(1); }
-    50% { stroke: #FFA500; transform: scale(1.2); }
-  }
-  .blinking svg { animation: blink 1s infinite; }
+  .fab:active { transform: scale(.93); }
 
-  @keyframes rotate360 {
-    0% { transform: rotate(0deg); }
-    50% { transform: rotate(360deg); }
-    100% { transform: rotate(0deg); }
+  .fab-add {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(79,142,247,.4);
   }
-  .rotate-animation svg { animation: rotate360 0.6s ease; }
 
-  #game-container { position: relative; display: inline-block; }
+  .fab-hint {
+    background: linear-gradient(135deg, var(--yellow), #f08228);
+    color: #1a1200;
+    box-shadow: 0 4px 18px rgba(245,200,66,.35);
+  }
+
+  .fab:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+
+  .fab .badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    color: var(--text);
+    font-size: .65rem;
+    font-weight: 700;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Modal */
+  #modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,.75);
+    backdrop-filter: blur(6px);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+
+  #modal-overlay.open { display: flex; }
+
+  #modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 32px 28px;
+    max-width: 320px;
+    width: 90%;
+    text-align: center;
+    animation: modalIn .35s ease;
+    box-shadow: 0 24px 60px rgba(0,0,0,.5);
+  }
+
+  @keyframes modalIn {
+    from { transform: scale(.85) translateY(20px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
+
+  #modal-icon { font-size: 3rem; margin-bottom: 10px; }
+  #modal-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 6px; }
+  #modal-sub { color: var(--muted); font-size: .95rem; margin-bottom: 22px; }
+
+  .modal-btns { display: flex; gap: 10px; justify-content: center; }
+
+  .modal-btn {
+    padding: 11px 24px;
+    border-radius: 12px;
+    border: none;
+    font-family: inherit;
+    font-weight: 700;
+    font-size: .95rem;
+    cursor: pointer;
+    transition: opacity .15s;
+  }
+
+  .modal-btn:hover { opacity: .85; }
+  .modal-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
+  .modal-btn.secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 90px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 9px 20px;
+    border-radius: 99px;
+    font-size: .85rem;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .25s, transform .25s;
+    z-index: 50;
+    white-space: nowrap;
+  }
+
+  #toast.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    font-size: .72rem;
+    padding: 8px 0 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  @media (max-width: 430px) {
+    :root { --cell-size: 38px; --gap: 4px; }
+    .logo { font-size: 1.2rem; }
+    .score-box { min-width: 60px; padding: 5px 10px; }
+    .score-val { font-size: 1rem; }
+    header { padding: 14px 12px 10px; }
+    main { padding: 0 6px 10px; }
+  }
+
+  @media (max-width: 360px) {
+    :root { --cell-size: 34px; --gap: 3px; }
+  }
 </style>
 </head>
 <body>
 
-<h1>Number Match</h1>
-<div id="level">Рівень: 1</div>
-<div id="game-container"><div id="game"></div></div>
-<div id="message"></div>
+<header>
+  <div class="logo">NumberMatch</div>
+  <div class="scores">
+    <div class="score-box">
+      <div class="score-label">Рахунок</div>
+      <div class="score-val" id="score-val">0</div>
+    </div>
+    <div class="score-box">
+      <div class="score-label">Рекорд</div>
+      <div class="score-val" id="best-val">0</div>
+    </div>
+  </div>
+  <button class="btn-restart" id="btn-restart" title="Заново">↺</button>
+</header>
 
-<div class="icon-bar">
-  <button id="restartBtn" class="icon-button" onclick="animateIcon(this,'rotate'); startGame();" title="Перезапустити гру">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="1 4 1 10 7 10"></polyline>
-      <path d="M3.51 15a9 9 0 1 0 3.13-9.36L1 10"></path>
-    </svg>
-  </button>
-  <button class="icon-button" onclick="animateIcon(this,'bounce'); addRow();" title="Додати рядок">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19"></line>
-      <line x1="5" y1="12" x2="19" y2="12"></line>
-    </svg>
-  </button>
-  <button id="hintBtn" class="icon-button" onclick="animateIcon(this,'blink'); showHint();" title="Підказка">
-    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="#333" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M9 18h6M10 22h4M12 2a7 7 0 0 1 7 7c0 2.485-1.5 4.5-3 6a4 4 0 0 0-1 3H11a4 4 0 0 0-1-3c-1.5-1.5-3-3.515-3-6a7 7 0 0 1 7-7z"/>
-    </svg>
-  </button>
+<main>
+  <div id="combo-badge">🔥 КОМБО x<span id="combo-count">2</span></div>
+  <div id="grid-wrapper">
+    <div id="grid"></div>
+  </div>
+  <div class="action-bar">
+    <button class="fab fab-hint" id="btn-hint" title="Підказка">
+      💡
+      <span class="badge" id="hint-badge">3</span>
+    </button>
+    <button class="fab fab-add" id="btn-add" title="Додати рядки">
+      ＋
+      <span class="badge" id="add-badge">∞</span>
+    </button>
+  </div>
+</main>
+
+<footer>Знайди пари однакових чисел або числа, що дають у сумі 10</footer>
+
+<div id="modal-overlay">
+  <div id="modal">
+    <div id="modal-icon">🎉</div>
+    <div id="modal-title">You Win!</div>
+    <div id="modal-sub">Final score: <strong id="modal-score">0</strong></div>
+    <div class="modal-btns">
+      <button class="modal-btn secondary" id="modal-no">Cancel</button>
+      <button class="modal-btn primary" id="modal-yes">Play Again</button>
+    </div>
+  </div>
 </div>
 
+<div id="toast"></div>
+
 <script>
-let level = 1, rows = 10, cols = 8;
-let numbers = [], selected = [], blocked = false;
-
-const game = document.getElementById('game');
-const levelDisplay = document.getElementById('level');
-const message = document.getElementById('message');
-const hintBtn = document.getElementById('hintBtn');
-
-/* --- Універсальна анімація --- */
-function animateIcon(button,type) {
-  const svg = button.querySelector("svg");
-  if(type==='rotate'){ button.classList.add('rotate-animation'); setTimeout(()=>button.classList.remove('rotate-animation'),600); }
-  else if(type==='bounce'){ svg.style.transform="scale(1.4)"; setTimeout(()=>svg.style.transform="",400); }
-  else if(type==='blink'){ svg.style.stroke="#FFD700"; svg.style.transform="scale(1.2)"; setTimeout(()=>{ svg.style.stroke="#333"; svg.style.transform=""; },400); }
-}
-
-function animateCell(cell,cls,duration=800,callback=null){ cell.classList.add(cls); setTimeout(()=>{ cell.classList.remove(cls); if(callback) callback(); },duration); }
-
-/* --- Гра --- */
-function startGame(){
-  numbers = []; selected=[]; blocked=false; message.textContent='';
-  for(let i=0;i<rows*cols;i++) numbers.push(i<5*cols?Math.floor(Math.random()*9)+1:null);
-  renderGrid();
-  updateHintBlink();
-}
-
-function renderGrid(){
-  game.innerHTML='';
-  numbers.forEach((num,idx)=>{
-    const cell=document.createElement('div'); cell.classList.add('cell'); if(num!==null) cell.textContent=num;
-    cell.addEventListener('click',()=>selectCell(idx));
-    game.appendChild(cell);
-  });
-  updateHintBlink();
-}
-
-function selectCell(idx){
-  if(numbers[idx]===null||blocked) return;
-  const cells=document.querySelectorAll('.cell');
-  if(selected.includes(idx)){ cells[idx].classList.remove('selected'); selected=selected.filter(i=>i!==idx); return; }
-  if(selected.length<2){ selected.push(idx); cells[idx].classList.add('selected'); }
-  if(selected.length===2){ blocked=true; setTimeout(checkMatch,300); }
-}
-
-function canConnect(i1,i2){
-  const r1=Math.floor(i1/cols), c1=i1%cols, r2=Math.floor(i2/cols), c2=i2%cols;
-  if(Math.abs(r1-r2)<=1&&Math.abs(c1-c2)<=1) return true;
-  if(r1===r2){ for(let c=Math.min(c1,c2)+1;c<Math.max(c1,c2);c++) if(numbers[r1*cols+c]!==null) return false; return true; }
-  if(c1===c2){ for(let r=Math.min(r1,r2)+1;r<Math.max(r1,r2);r++) if(numbers[r*cols+c1]!==null) return false; return true; }
-  if(Math.abs(r1-r2)===Math.abs(c1-c2)){
-    let r=r1<r2?1:-1, c=c1<c2?1:-1, rr=r1+r, cc=c1+c;
-    while(rr!==r2&&cc!==c2){ if(numbers[rr*cols+cc]!==null) return false; rr+=r; cc+=c; } return true;
+/* ─────────────────────────────────────────────
+   GameBoard
+   ───────────────────────────────────────────── */
+class GameBoard {
+  constructor(cols = 9) {
+    this.cols = cols;
+    this.cells = []; // flat 1-D array, length = rows*cols
   }
-  if((c1===cols-1&&c2===0&&r2===r1+1)||(c2===cols-1&&c1===0&&r1===r2+1)) return true;
-  for(let i=Math.min(i1,i2)+1;i<Math.max(i1,i2);i++) if(numbers[i]!==null) return false;
-  return true;
-}
 
-function checkMatch(){
-  const [i1,i2]=selected, n1=numbers[i1], n2=numbers[i2], cells=document.querySelectorAll('.cell');
-  if((n1===n2||n1+n2===10)&&canConnect(i1,i2)){
-    numbers[i1]=numbers[i2]=null; cells[i1].textContent=cells[i2].textContent='';
-    selected.forEach(i=>cells[i].classList.remove('selected')); selected=[];
-    compressRows(); checkLevelComplete(); blocked=false;
-  }else{
-    message.textContent='Не можна поєднати!';
-    selected.forEach(i=>animateCell(cells[i],'wrong',800,()=>{ cells[i].classList.remove('selected'); selected=[]; message.textContent=''; blocked=false; }));
+  get rows() { return this.cells.length / this.cols; }
+
+  generate() {
+    // sequence 1-9 repeated 3 times → shuffle → pad to full rows
+    const seq = [];
+    for (let rep = 0; rep < 3; rep++)
+      for (let n = 1; n <= 9; n++) seq.push(n);
+    // Fisher-Yates shuffle
+    for (let i = seq.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [seq[i], seq[j]] = [seq[j], seq[i]];
+    }
+    // pad to full rows
+    while (seq.length % this.cols !== 0) seq.push(seq[seq.length % seq.length] || 1);
+    this.cells = seq;
   }
-  updateHintBlink();
-}
 
-function compressRows(){
-  let matrix=[]; for(let r=0;r<rows;r++) matrix.push(numbers.slice(r*cols,(r+1)*cols));
-  matrix=matrix.filter(r=>r.some(n=>n!==null));
-  while(matrix.length<rows) matrix.push(new Array(cols).fill(null));
-  numbers=matrix.flat(); renderGrid();
-}
+  idx(r, c) { return r * this.cols + c; }
+  getCell(r, c) { return this.cells[this.idx(r, c)]; }
+  isEmpty(r, c) { return this.cells[this.idx(r, c)] === 0; }
+  removeCell(r, c) { this.cells[this.idx(r, c)] = 0; }
 
-function addRow(){
-  if(blocked) return;
-  let matrix=[]; for(let r=0;r<rows;r++) matrix.push(numbers.slice(r*cols,(r+1)*cols));
-  let lastFilled=matrix.map(r=>r.some(n=>n!==null)).lastIndexOf(true);
-  if(lastFilled<rows-1){
-    const newRow=Array.from({length:cols},()=>Math.floor(Math.random()*9)+1);
-    matrix.splice(lastFilled+1,0,newRow);
-    if(matrix.length>rows) matrix=matrix.slice(0,rows);
-    numbers=matrix.flat(); renderGrid();
+  addRows() {
+    const remaining = this.cells.filter(v => v !== 0);
+    if (remaining.length === 0) return false;
+    let toAdd = [...remaining];
+    while (toAdd.length % this.cols !== 0) toAdd.push(0);
+    this.cells = [...this.cells, ...toAdd];
+    return true;
   }
-}
 
-function showHint(){
-  if(blocked) return; blocked=true;
-  const cells=document.querySelectorAll('.cell');
-  for(let i=0;i<numbers.length;i++){
-    if(numbers[i]===null) continue;
-    for(let j=i+1;j<numbers.length;j++){
-      if(numbers[j]===null) continue;
-      if((numbers[i]===numbers[j]||numbers[i]+numbers[j]===10)&&canConnect(i,j)){
-        animateCell(cells[i],'hint',800); animateCell(cells[j],'hint',800,()=>{ blocked=false; }); return;
+  compact() {
+    // Remove fully-empty rows
+    let changed = false;
+    const newCells = [];
+    for (let r = 0; r < this.rows; r++) {
+      const row = this.cells.slice(r * this.cols, (r + 1) * this.cols);
+      if (row.some(v => v !== 0)) newCells.push(...row);
+      else changed = true;
+    }
+    this.cells = newCells;
+    return changed;
+  }
+
+  isCleared() { return this.cells.every(v => v === 0); }
+
+  hasAnyMoves() {
+    const h = this.hint();
+    return h !== null;
+  }
+
+  hint() {
+    const total = this.cells.length;
+    for (let i = 0; i < total; i++) {
+      if (this.cells[i] === 0) continue;
+      const r1 = Math.floor(i / this.cols), c1 = i % this.cols;
+      for (let j = i + 1; j < total; j++) {
+        if (this.cells[j] === 0) continue;
+        const r2 = Math.floor(j / this.cols), c2 = j % this.cols;
+        if (Validator.isMatch(this.cells[i], this.cells[j]) &&
+            Validator.areNeighbors(this, {r: r1, c: c1}, {r: r2, c: c2})) {
+          return [{r: r1, c: c1}, {r: r2, c: c2}];
+        }
       }
     }
+    return null;
   }
-  message.textContent='Підказок немає!';
-  setTimeout(()=>message.textContent='',1000); blocked=false;
 }
 
-function hasHint(){ for(let i=0;i<numbers.length;i++){ if(numbers[i]===null) continue; for(let j=i+1;j<numbers.length;j++){ if(numbers[j]===null) continue; if((numbers[i]===numbers[j]||numbers[i]+numbers[j]===10)&&canConnect(i,j)) return true; } } return false; }
-function updateHintBlink(){ if(hasHint()) hintBtn.classList.add('blinking'); else hintBtn.classList.remove('blinking'); }
-function checkLevelComplete(){ if(numbers.every(n=>n===null)){ level++; levelDisplay.textContent='Рівень: '+level; startGame(); } }
+/* ─────────────────────────────────────────────
+   Validator
+   ───────────────────────────────────────────── */
+class Validator {
+  static isMatch(a, b) { return a === b || a + b === 10; }
 
-startGame();
+  static areNeighbors(board, p1, p2) {
+    const {cols} = board;
+    const i1 = p1.r * cols + p1.c;
+    const i2 = p2.r * cols + p2.c;
+    if (i1 === i2) return false;
+
+    const minI = Math.min(i1, i2), maxI = Math.max(i1, i2);
+
+    // 1. Direct adjacent (horizontal or vertical)
+    if (Math.abs(p1.r - p2.r) + Math.abs(p1.c - p2.c) === 1) return true;
+
+    // 2. Same row, all between empty
+    if (p1.r === p2.r) {
+      const minC = Math.min(p1.c, p2.c), maxC = Math.max(p1.c, p2.c);
+      let allEmpty = true;
+      for (let c = minC + 1; c < maxC; c++) {
+        if (!board.isEmpty(p1.r, c)) { allEmpty = false; break; }
+      }
+      if (allEmpty) return true;
+    }
+
+    // 3. Same column, all between empty
+    if (p1.c === p2.c) {
+      const minR = Math.min(p1.r, p2.r), maxR = Math.max(p1.r, p2.r);
+      let allEmpty = true;
+      for (let r = minR + 1; r < maxR; r++) {
+        if (!board.isEmpty(r, p1.c)) { allEmpty = false; break; }
+      }
+      if (allEmpty) return true;
+    }
+
+    // 4. Wrap-around (all linear cells between them empty)
+    let allEmpty = true;
+    for (let k = minI + 1; k < maxI; k++) {
+      if (board.cells[k] !== 0) { allEmpty = false; break; }
+    }
+    if (allEmpty) return true;
+
+    return false;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   GameUI
+   ───────────────────────────────────────────── */
+class GameUI {
+  constructor() {
+    this.grid = document.getElementById('grid');
+    this.scoreEl = document.getElementById('score-val');
+    this.bestEl = document.getElementById('best-val');
+    this.hintBadge = document.getElementById('hint-badge');
+    this.comboBadge = document.getElementById('combo-badge');
+    this.comboCount = document.getElementById('combo-count');
+  }
+
+  render(board, onCellClick, newRowStartIdx = -1) {
+    this.grid.innerHTML = '';
+    const total = board.cells.length;
+    for (let i = 0; i < total; i++) {
+      const val = board.cells[i];
+      const r = Math.floor(i / board.cols), c = i % board.cols;
+      const div = document.createElement('div');
+      div.className = 'cell' + (val === 0 ? ' empty' : '');
+      if (val !== 0) {
+        div.textContent = val;
+        div.dataset.n = val;
+        div.dataset.r = r;
+        div.dataset.c = c;
+        div.addEventListener('click', () => onCellClick(r, c));
+        if (newRowStartIdx >= 0 && i >= newRowStartIdx) {
+          div.classList.add('new-row');
+          div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
+        }
+      }
+      this.grid.appendChild(div);
+    }
+  }
+
+  getCellEl(r, c) {
+    return this.grid.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+  }
+
+  clearStates() {
+    this.grid.querySelectorAll('.selected,.hint').forEach(el => {
+      el.classList.remove('selected', 'hint');
+    });
+  }
+
+  selectCell(r, c) {
+    const el = this.getCellEl(r, c);
+    if (el) el.classList.add('selected');
+  }
+
+  showHint(p1, p2) {
+    [p1, p2].forEach(p => {
+      const el = this.getCellEl(p.r, p.c);
+      if (el) el.classList.add('hint');
+    });
+    setTimeout(() => {
+      [p1, p2].forEach(p => {
+        const el = this.getCellEl(p.r, p.c);
+        if (el) el.classList.remove('hint');
+      });
+    }, 2000);
+  }
+
+  animateRemove(p1, p2, cb) {
+    [p1, p2].forEach(p => {
+      const el = this.getCellEl(p.r, p.c);
+      if (el) el.classList.add('removing');
+    });
+    setTimeout(cb, 360);
+  }
+
+  updateScore(score, best) {
+    this.scoreEl.textContent = score;
+    this.bestEl.textContent = best;
+  }
+
+  updateHintBadge(n) { this.hintBadge.textContent = n; }
+
+  showCombo(n) {
+    this.comboCount.textContent = n;
+    this.comboBadge.classList.add('visible');
+    clearTimeout(this._comboT);
+    this._comboT = setTimeout(() => this.comboBadge.classList.remove('visible'), 1500);
+  }
+
+  hideCombo() { this.comboBadge.classList.remove('visible'); }
+}
+
+/* ─────────────────────────────────────────────
+   Modal & Toast helpers
+   ───────────────────────────────────────────── */
+function showModal({icon='🎉', title, sub, yesText='Play Again', noText=null, onYes, onNo}) {
+  document.getElementById('modal-icon').textContent = icon;
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-sub').innerHTML = sub;
+  document.getElementById('modal-yes').textContent = yesText;
+  const noBtn = document.getElementById('modal-no');
+  if (noText) { noBtn.textContent = noText; noBtn.style.display = ''; }
+  else { noBtn.style.display = 'none'; }
+  document.getElementById('modal-yes').onclick = () => { hideModal(); onYes && onYes(); };
+  document.getElementById('modal-no').onclick = () => { hideModal(); onNo && onNo(); };
+  document.getElementById('modal-overlay').classList.add('open');
+}
+
+function hideModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+}
+
+let _toastT;
+function showToast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+/* ─────────────────────────────────────────────
+   GameController
+   ───────────────────────────────────────────── */
+class GameController {
+  constructor() {
+    this.board = new GameBoard(9);
+    this.ui = new GameUI();
+    this.score = 0;
+    this.best = parseInt(localStorage.getItem('nm_highscore') || '0');
+    this.hintsLeft = 3;
+    this.combo = 0;
+    this.selected = null;
+    this.busy = false;
+
+    document.getElementById('btn-hint').addEventListener('click', () => this.useHint());
+    document.getElementById('btn-add').addEventListener('click', () => this.addRows());
+    document.getElementById('btn-restart').addEventListener('click', () => this.confirmRestart());
+
+    this.checkResume();
+  }
+
+  checkResume() {
+    const saved = localStorage.getItem('nm_board');
+    if (saved) {
+      try {
+        const state = JSON.parse(saved);
+        showModal({
+          icon: '💾', title: 'Продовжити?',
+          sub: 'Продовжити попередню гру?',
+          yesText: 'Продовжити', noText: 'Нова гра',
+          onYes: () => { this.loadState(state); this.renderFull(); },
+          onNo: () => { this.start(); }
+        });
+        return;
+      } catch(e) {}
+    }
+    this.start();
+  }
+
+  loadState(s) {
+    this.board.cells = s.cells;
+    this.score = s.score || 0;
+    this.hintsLeft = s.hints !== undefined ? s.hints : 3;
+    this.combo = 0;
+    this.selected = null;
+    this.best = parseInt(localStorage.getItem('nm_highscore') || '0');
+  }
+
+  saveState() {
+    localStorage.setItem('nm_board', JSON.stringify({
+      cells: this.board.cells, score: this.score, hints: this.hintsLeft
+    }));
+    localStorage.setItem('nm_highscore', this.best);
+  }
+
+  start() {
+    this.board.generate();
+    this.score = 0;
+    this.hintsLeft = 3;
+    this.combo = 0;
+    this.selected = null;
+    this.busy = false;
+    localStorage.removeItem('nm_board');
+    this.renderFull();
+  }
+
+  renderFull(newRowStartIdx = -1) {
+    this.ui.render(this.board, (r, c) => this.handleCellClick(r, c), newRowStartIdx);
+    this.ui.updateScore(this.score, this.best);
+    this.ui.updateHintBadge(this.hintsLeft);
+    document.getElementById('btn-hint').disabled = this.hintsLeft <= 0;
+  }
+
+  handleCellClick(r, c) {
+    if (this.busy) return;
+    if (this.board.isEmpty(r, c)) return;
+
+    if (!this.selected) {
+      this.selected = {r, c};
+      this.ui.clearStates();
+      this.ui.selectCell(r, c);
+      return;
+    }
+
+    const s = this.selected;
+    this.selected = null;
+    this.ui.clearStates();
+
+    if (s.r === r && s.c === c) return; // same cell
+
+    const v1 = this.board.getCell(s.r, s.c);
+    const v2 = this.board.getCell(r, c);
+
+    if (!Validator.isMatch(v1, v2)) {
+      showToast('Числа не збігаються!');
+      this.combo = 0;
+      this.ui.hideCombo();
+      return;
+    }
+
+    if (!Validator.areNeighbors(this.board, s, {r, c})) {
+      showToast('Клітинки не сусідні!');
+      this.combo = 0;
+      this.ui.hideCombo();
+      return;
+    }
+
+    // Valid pair!
+    this.busy = true;
+    this.combo++;
+    let pts = 10;
+    if (this.combo > 1) { pts += 5 * (this.combo - 1); this.ui.showCombo(this.combo); }
+
+    this.score += pts;
+    if (this.score > this.best) { this.best = this.score; }
+    this.ui.updateScore(this.score, this.best);
+
+    this.ui.animateRemove(s, {r, c}, () => {
+      this.board.removeCell(s.r, s.c);
+      this.board.removeCell(r, c);
+      this.board.compact();
+      this.busy = false;
+      this.saveState();
+
+      if (this.board.isCleared()) {
+        localStorage.removeItem('nm_board');
+        showModal({
+          icon: '🏆', title: 'Перемога!',
+          sub: `Фінальний рахунок: <strong>${this.score}</strong>`,
+          yesText: 'Грати знову',
+          onYes: () => this.start()
+        });
+        return;
+      }
+
+      this.renderFull();
+
+      if (!this.board.hasAnyMoves()) {
+        this.promptAddRows();
+      }
+    });
+  }
+
+  useHint() {
+    if (this.hintsLeft <= 0 || this.busy) return;
+    const pair = this.board.hint();
+    if (!pair) { showToast('Немає доступних ходів!'); return; }
+    this.hintsLeft--;
+    this.ui.updateHintBadge(this.hintsLeft);
+    document.getElementById('btn-hint').disabled = this.hintsLeft <= 0;
+    this.ui.clearStates();
+    this.selected = null;
+    this.ui.showHint(pair[0], pair[1]);
+    this.saveState();
+  }
+
+  addRows() {
+    if (this.busy) return;
+    const prevLen = this.board.cells.length;
+    const added = this.board.addRows();
+    if (!added) { showToast('Нічого додавати!'); return; }
+    this.combo = 0;
+    this.ui.hideCombo();
+    this.saveState();
+    this.renderFull(prevLen);
+  }
+
+  promptAddRows() {
+    showModal({
+      icon: '🤔', title: 'Немає ходів!',
+      sub: 'Валідних пар не залишилось. Додати рядки?',
+      yesText: 'Додати рядки', noText: 'Нова гра',
+      onYes: () => this.addRows(),
+      onNo: () => this.start()
+    });
+  }
+
+  confirmRestart() {
+    showModal({
+      icon: '↺', title: 'Почати знову?',
+      sub: 'Поточний прогрес буде втрачено.',
+      yesText: 'Так', noText: 'Скасувати',
+      onYes: () => this.start(),
+      onNo: () => {}
+    });
+  }
+}
+
+/* ─────────────────────────────────────────────
+   Boot
+   ───────────────────────────────────────────── */
+const game = new GameController();
 </script>
 </body>
 </html>
