@@ -51,23 +51,32 @@
   header {
     width: 100%;
     max-width: 480px;
-    padding: 18px 20px 14px;
+    padding: 16px 20px 12px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: space-between;
-    gap: 12px;
+    gap: 10px;
     position: relative;
     z-index: 1;
   }
 
+  .header-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
   .logo {
-    font-size: 1.4rem;
+    font-size: 1.5rem;
     font-weight: 900;
     letter-spacing: -0.5px;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-align: center;
   }
 
   .scores {
@@ -107,7 +116,6 @@
     border: 1px solid var(--border);
     border-radius: 10px;
     color: var(--muted);
-    font-size: 1.2rem;
     width: 40px;
     height: 40px;
     display: flex;
@@ -118,7 +126,10 @@
     flex-shrink: 0;
   }
 
-  .btn-restart:hover { color: var(--text); border-color: var(--accent); }
+  .btn-restart svg { display: block; }
+  @media (hover: hover) {
+    .btn-restart:hover { color: var(--text); border-color: var(--accent); }
+  }
 
   main {
     flex: 1;
@@ -132,37 +143,136 @@
     align-items: center;
   }
 
+  /* Progress bar */
+  .progress-wrapper {
+    width: 100%;
+    max-width: 480px;
+    padding: 0 20px 10px;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .progress-fill {
+    height: 100%;
+    width: 0%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    box-shadow: 0 0 8px rgba(61, 214, 140, .4);
+    transition: width .5s cubic-bezier(.4, 0, .2, 1);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px rgba(61, 214, 140, .7), 0 0 20px rgba(61, 214, 140, .3);
+    opacity: 0;
+    transition: opacity .3s;
+  }
+
+  .progress-fill.active::after {
+    opacity: 1;
+  }
+
+  .progress-label {
+    font-size: .68rem;
+    font-weight: 600;
+    color: var(--muted);
+    white-space: nowrap;
+    min-width: 50px;
+    text-align: right;
+    letter-spacing: .02em;
+  }
+
   /* Combo badge */
+  /* Combo badge — overlay on grid */
   #combo-badge {
     display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(.6);
     background: linear-gradient(135deg, var(--yellow), #f08228);
     color: #1a1200;
     font-weight: 800;
-    font-size: .8rem;
-    padding: 3px 12px;
+    font-size: 1rem;
+    padding: 6px 18px;
     border-radius: 99px;
-    margin-bottom: 8px;
-    animation: popIn .3s ease;
     letter-spacing: .04em;
+    align-items: center;
+    gap: 4px;
+    z-index: 10;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(240, 130, 40, .4);
   }
 
-  #combo-badge.visible { display: block; }
-
-  @keyframes popIn {
-    0% { transform: scale(.6); opacity: 0; }
-    60% { transform: scale(1.1); }
-    100% { transform: scale(1); opacity: 1; }
+  #combo-badge.visible {
+    display: inline-flex;
+    animation: comboIn .4s cubic-bezier(.2, .8, .3, 1.2) forwards;
   }
 
-  /* Grid wrapper */
+  @keyframes comboIn {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
+    50%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  }
+
+  #combo-badge.fade-out {
+    animation: comboOut .3s ease forwards;
+  }
+
+  @keyframes comboOut {
+    to { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
+  }
+
+  .combo-flame {
+    flex-shrink: 0;
+    filter: drop-shadow(0 0 2px rgba(200, 80, 0, .4));
+  }
+
+  /* Grid wrapper — "table" container */
   #grid-wrapper {
     width: 100%;
-    max-height: calc(100vh - 190px);
+    max-height: calc(100vh - 260px);
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 4px 2px 8px;
+    padding: 16px 10px 18px;
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+    background:
+      radial-gradient(ellipse at 50% 0%, rgba(79,142,247,.06) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, rgba(124,90,255,.04) 0%, transparent 60%),
+      linear-gradient(180deg, #1c2035 0%, #181b2c 100%);
+    border: 1px solid rgba(60, 66, 100, .45);
+    border-top-color: rgba(100, 120, 180, .25);
+    border-radius: 18px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.04),
+      inset 0 -1px 0 rgba(0,0,0,.2),
+      inset 0 0 30px rgba(79, 142, 247, .05),
+      inset 0 0 60px rgba(124, 90, 255, .03),
+      0 2px 12px rgba(0, 0, 0, .3),
+      0 0 40px rgba(79, 142, 247, .04);
+    position: relative;
   }
 
   #grid {
@@ -182,35 +292,59 @@
     font-size: 1.45rem;
     font-weight: 700;
     border-radius: var(--radius);
-    background: var(--surface2);
-    border: 1.5px solid var(--border);
+    background: linear-gradient(180deg, #272b42 0%, #1f2338 100%);
+    border: 1px solid rgba(90, 100, 145, .5);
+    border-top-color: rgba(110, 120, 165, .45);
     cursor: pointer;
     user-select: none;
-    transition: background .15s, border-color .15s, transform .1s, opacity .3s;
+    transition: background .2s, border-color .2s, transform .15s, opacity .3s, box-shadow .2s;
     position: relative;
+    box-shadow: 0 1px 3px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04);
   }
 
-  .cell:not(.empty):hover {
-    background: #2c3158;
-    border-color: var(--accent);
-    transform: scale(1.06);
-    z-index: 2;
+  @media (hover: hover) {
+    .cell:not(.empty):hover {
+      background: linear-gradient(180deg, #2e3358 0%, #262a44 100%);
+      border-color: rgba(79, 142, 247, .35);
+      transform: scale(1.05);
+      box-shadow: 0 2px 10px rgba(79, 142, 247, .12), inset 0 1px 0 rgba(255,255,255,.05);
+      z-index: 2;
+    }
   }
 
   .cell.empty {
-    background: transparent;
-    border-color: transparent;
+    background: rgba(20, 23, 36, .3);
+    border-color: rgba(70, 76, 110, .2);
+    box-shadow: inset 0 1px 3px rgba(0,0,0,.15);
     cursor: default;
     pointer-events: none;
   }
 
   .cell.selected {
     background: linear-gradient(135deg, #1e4fd8, #4f8ef7);
-    border-color: #7ab3ff;
+    border-color: rgba(122, 179, 255, .4);
     color: #fff;
-    transform: scale(1.08);
-    box-shadow: 0 0 14px rgba(79,142,247,.6);
+    transform: scale(1.07) translateY(-1px);
+    box-shadow: 0 4px 16px rgba(79,142,247,.3), 0 0 20px rgba(79,142,247,.12), inset 0 1px 0 rgba(255,255,255,.1);
     z-index: 3;
+  }
+
+  .cell.error {
+    background: linear-gradient(135deg, #b83030, #f05a5a) !important;
+    border-color: rgba(240, 90, 90, .5) !important;
+    color: #fff !important;
+    transform: scale(1.05);
+    box-shadow: 0 0 12px rgba(240, 90, 90, .3);
+    z-index: 3;
+    animation: errorShake .35s ease;
+  }
+
+  @keyframes errorShake {
+    0%, 100% { translate: 0; }
+    20% { translate: -3px 0; }
+    40% { translate: 3px 0; }
+    60% { translate: -2px 0; }
+    80% { translate: 2px 0; }
   }
 
   .cell.hint {
@@ -233,6 +367,15 @@
     0%   { transform: scale(1); opacity: 1; }
     40%  { transform: scale(1.2); opacity: .8; }
     100% { transform: scale(0); opacity: 0; }
+  }
+
+  /* Particles */
+  .particle {
+    position: fixed;
+    pointer-events: none;
+    border-radius: 50%;
+    z-index: 90;
+    will-change: transform, opacity;
   }
 
   .cell.new-row {
@@ -273,12 +416,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
     cursor: pointer;
     position: relative;
     transition: transform .15s, box-shadow .15s;
     font-family: inherit;
     font-weight: 700;
+  }
+
+  .fab svg {
+    display: block;
+    flex-shrink: 0;
   }
 
   .fab:active { transform: scale(.93); }
@@ -296,10 +443,9 @@
   }
 
   .fab-undo {
-    background: linear-gradient(135deg, #5a6080, #3a3f5e);
-    color: var(--text);
-    box-shadow: 0 4px 18px rgba(90,96,128,.3);
-    font-size: 1.3rem;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(79,142,247,.4);
   }
 
   .fab:disabled {
@@ -356,7 +502,7 @@
     to   { transform: scale(1) translateY(0); opacity: 1; }
   }
 
-  #modal-icon { font-size: 3rem; margin-bottom: 10px; }
+  #modal-icon { margin-bottom: 10px; display: flex; justify-content: center; }
   #modal-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 6px; }
   #modal-sub { color: var(--muted); font-size: .95rem; margin-bottom: 22px; }
 
@@ -373,7 +519,9 @@
     transition: opacity .15s;
   }
 
-  .modal-btn:hover { opacity: .85; }
+  @media (hover: hover) {
+    .modal-btn:hover { opacity: .85; }
+  }
   .modal-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
   .modal-btn.secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
 
@@ -413,15 +561,18 @@
 
   @media (max-width: 430px) {
     :root { --cell-size: 38px; --gap: 4px; }
-    .logo { font-size: 1.2rem; }
+    .logo { font-size: 1.25rem; }
     .score-box { min-width: 60px; padding: 5px 10px; }
     .score-val { font-size: 1rem; }
-    header { padding: 14px 12px 10px; }
+    header { padding: 12px 12px 8px; gap: 8px; }
     main { padding: 0 6px 10px; }
+    .progress-wrapper { padding: 0 12px 8px; }
   }
 
   @media (max-width: 360px) {
     :root { --cell-size: 34px; --gap: 3px; }
+    .progress-wrapper { padding: 0 8px 6px; }
+    .logo { font-size: 1.1rem; }
   }
 </style>
 </head>
@@ -429,34 +580,43 @@
 
 <header>
   <div class="logo">Number Match</div>
-  <div class="scores">
-    <div class="score-box">
-      <div class="score-label">Рахунок</div>
-      <div class="score-val" id="score-val">0</div>
+  <div class="header-row">
+    <div class="scores">
+      <div class="score-box">
+        <div class="score-label">Рахунок</div>
+        <div class="score-val" id="score-val">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">Рекорд</div>
+        <div class="score-val" id="best-val">0</div>
+      </div>
     </div>
-    <div class="score-box">
-      <div class="score-label">Рекорд</div>
-      <div class="score-val" id="best-val">0</div>
-    </div>
+    <button class="btn-restart" id="btn-restart" title="Заново"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
   </div>
-  <button class="btn-restart" id="btn-restart" title="Заново">↺</button>
 </header>
 
+<div class="progress-wrapper">
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+  <div class="progress-label" id="progress-label">0 / 0</div>
+</div>
+
 <main>
-  <div id="combo-badge">🔥 КОМБО x<span id="combo-count">2</span></div>
   <div id="grid-wrapper">
+    <div id="combo-badge"><svg class="combo-flame" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 23c-4.4 0-8-3.2-8-7.2 0-2.8 2-5.9 3.5-7.2 0 3.2 1.9 4.8 3.1 4.4 1.4-.5 1.3-3.1 3.1-6.3 1.3 2.7 2.6 4.5 2.6 7.6S16.4 23 12 23z"/></svg> КОМБО x<span id="combo-count">2</span></div>
     <div id="grid"></div>
   </div>
   <div class="action-bar">
     <button class="fab fab-undo" id="btn-undo" title="Скасувати хід" disabled>
-      ↩
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H13"/></svg>
     </button>
     <button class="fab fab-hint" id="btn-hint" title="Підказка">
-      💡
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
       <span class="badge" id="hint-badge">3</span>
     </button>
     <button class="fab fab-add" id="btn-add" title="Додати рядки">
-      ＋
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
       <span class="badge" id="add-badge">5</span>
     </button>
   </div>
@@ -466,7 +626,7 @@
 
 <div id="modal-overlay">
   <div id="modal">
-    <div id="modal-icon">🎉</div>
+    <div id="modal-icon"></div>
     <div id="modal-title">You Win!</div>
     <div id="modal-sub">Final score: <strong id="modal-score">0</strong></div>
     <div class="modal-btns">
@@ -501,17 +661,18 @@ class GameBoard {
   get rows() { return this.cells.length / this.cols; }
 
   generate() {
-    // sequence 1-9 repeated 3 times → shuffle → pad to full rows
+    // sequence 1-9 repeated 4 times → 36 cells = 4 rows
+    // Even count of every digit guarantees full clearability:
+    // each complement pair (1↔9, 2↔8, 3↔7, 4↔6) has 4+4=8 (even)
+    // 5↔5 has 4 (even), total 36 (even)
     const seq = [];
-    for (let rep = 0; rep < 3; rep++)
+    for (let rep = 0; rep < 4; rep++)
       for (let n = 1; n <= 9; n++) seq.push(n);
     // Fisher-Yates shuffle
     for (let i = seq.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [seq[i], seq[j]] = [seq[j], seq[i]];
     }
-    // pad to full rows
-    while (seq.length % this.cols !== 0) seq.push(Math.floor(Math.random() * 9) + 1);
     this.cells = seq;
   }
 
@@ -543,6 +704,8 @@ class GameBoard {
   }
 
   isCleared() { return this.cells.every(v => v === 0); }
+
+  countNonEmpty() { return this.cells.filter(v => v !== 0).length; }
 
   hasAnyMoves() {
     const h = this.hint();
@@ -633,6 +796,52 @@ class Validator {
 }
 
 /* ─────────────────────────────────────────────
+   Particle System
+   ───────────────────────────────────────────── */
+const DIGIT_COLORS = {
+  1: '#4f8ef7', 2: '#7c5aff', 3: '#3dd68c', 4: '#f5c842', 5: '#f08228',
+  6: '#f05a5a', 7: '#c75af7', 8: '#5af7e0', 9: '#f7a25a'
+};
+
+function spawnParticles(el) {
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  const digit = el.dataset.n;
+  const color = DIGIT_COLORS[digit] || '#e8eaf6';
+  const count = 10;
+
+  for (let i = 0; i < count; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    const size = 3 + Math.random() * 4;
+    const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.8;
+    const dist = 28 + Math.random() * 36;
+    const dx = Math.cos(angle) * dist;
+    const dy = Math.sin(angle) * dist;
+    const dur = 400 + Math.random() * 250;
+
+    p.style.cssText = `
+      width: ${size}px; height: ${size}px;
+      left: ${cx - size / 2}px; top: ${cy - size / 2}px;
+      background: ${color};
+      box-shadow: 0 0 ${size + 3}px ${color}88, 0 0 ${size + 8}px ${color}44;
+      opacity: 1;
+      transition: transform ${dur}ms cubic-bezier(.2,.8,.3,1), opacity ${dur}ms ease-out;
+    `;
+    document.body.appendChild(p);
+
+    // force reflow then animate
+    p.offsetWidth;
+    p.style.transform = `translate(${dx}px, ${dy}px) scale(0.3)`;
+    p.style.opacity = '0';
+
+    setTimeout(() => p.remove(), dur + 20);
+  }
+}
+
+/* ─────────────────────────────────────────────
    GameUI
    ───────────────────────────────────────────── */
 class GameUI {
@@ -683,6 +892,22 @@ class GameUI {
     if (el) el.classList.add('selected');
   }
 
+  showError(p1, p2) {
+    [p1, p2].forEach(p => {
+      const el = this.getCellEl(p.r, p.c);
+      if (el) {
+        el.classList.remove('selected');
+        el.classList.add('error');
+      }
+    });
+    setTimeout(() => {
+      [p1, p2].forEach(p => {
+        const el = this.getCellEl(p.r, p.c);
+        if (el) el.classList.remove('error');
+      });
+    }, 400);
+  }
+
   showHint(p1, p2) {
     [p1, p2].forEach(p => {
       const el = this.getCellEl(p.r, p.c);
@@ -699,7 +924,11 @@ class GameUI {
   animateRemove(p1, p2, cb) {
     [p1, p2].forEach(p => {
       const el = this.getCellEl(p.r, p.c);
-      if (el) el.classList.add('removing');
+      if (el) {
+        el.classList.add('removing');
+        // spawn particles at peak of scale-up (140ms)
+        setTimeout(() => spawnParticles(el), 140);
+      }
     });
     setTimeout(cb, 360);
   }
@@ -714,21 +943,50 @@ class GameUI {
     document.getElementById('btn-hint').disabled = n <= 0;
   }
 
-  showCombo(n) {
-    this.comboCount.textContent = n;
-    this.comboBadge.classList.add('visible');
-    clearTimeout(this._comboT);
-    this._comboT = setTimeout(() => this.comboBadge.classList.remove('visible'), 1500);
+  updateProgress(cleared, total) {
+    const pct = total > 0 ? (cleared / total) * 100 : 0;
+    const fill = document.getElementById('progress-fill');
+    const label = document.getElementById('progress-label');
+    fill.style.width = pct + '%';
+    fill.classList.toggle('active', pct > 0 && pct < 100);
+    label.textContent = `${cleared} / ${total}`;
   }
 
-  hideCombo() { this.comboBadge.classList.remove('visible'); }
+  showCombo(n) {
+    this.comboCount.textContent = n;
+    this.comboBadge.classList.remove('fade-out');
+    this.comboBadge.classList.add('visible');
+    clearTimeout(this._comboT);
+    clearTimeout(this._comboFade);
+    this._comboT = setTimeout(() => {
+      this.comboBadge.classList.add('fade-out');
+      this._comboFade = setTimeout(() => {
+        this.comboBadge.classList.remove('visible', 'fade-out');
+      }, 300);
+    }, 1200);
+  }
+
+  hideCombo() {
+    clearTimeout(this._comboT);
+    clearTimeout(this._comboFade);
+    this.comboBadge.classList.remove('visible', 'fade-out');
+  }
 }
 
 /* ─────────────────────────────────────────────
    Modal & Toast helpers
    ───────────────────────────────────────────── */
-function showModal({icon='🎉', title, sub, yesText='Play Again', noText=null, onYes, onNo}) {
-  document.getElementById('modal-icon').textContent = icon;
+const MODAL_ICONS = {
+  save: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
+  trophy: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 22V8a6 6 0 0 0 4 0v14"/><path d="M6 3h12v6a6 6 0 0 1-12 0V3z"/></svg>',
+  noMoves: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
+  gameOver: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+  restart: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>'
+};
+
+function showModal({icon='trophy', title, sub, yesText='Play Again', noText=null, onYes, onNo}) {
+  const iconEl = document.getElementById('modal-icon');
+  iconEl.innerHTML = MODAL_ICONS[icon] || MODAL_ICONS.trophy;
   document.getElementById('modal-title').textContent = title;
   document.getElementById('modal-sub').innerHTML = sub;
   document.getElementById('modal-yes').textContent = yesText;
@@ -769,6 +1027,7 @@ class GameController {
     this.busy = false;
     this.history = []; // undo stack
     this.maxHistory = 20;
+    this.initialCount = 0; // total cells to clear (for progress)
 
     document.getElementById('btn-hint').addEventListener('click', () => this.useHint());
     document.getElementById('btn-add').addEventListener('click', () => this.addRows());
@@ -784,7 +1043,7 @@ class GameController {
       try {
         const state = JSON.parse(saved);
         showModal({
-          icon: '💾', title: 'Продовжити?',
+          icon: 'save', title: 'Продовжити?',
           sub: 'Продовжити попередню гру?',
           yesText: 'Продовжити', noText: 'Нова гра',
           onYes: () => { this.loadState(state); this.renderFull(); },
@@ -801,6 +1060,7 @@ class GameController {
     this.score = s.score || 0;
     this.hintsLeft = s.hints !== undefined ? s.hints : 3;
     this.addsLeft = s.adds !== undefined ? s.adds : 5;
+    this.initialCount = s.initCount || this.board.countNonEmpty();
     this.combo = 0;
     this.selected = null;
     this.history = [];
@@ -809,7 +1069,7 @@ class GameController {
 
   saveState() {
     Storage.set('nm_board', JSON.stringify({
-      cells: this.board.cells, score: this.score, hints: this.hintsLeft, adds: this.addsLeft
+      cells: this.board.cells, score: this.score, hints: this.hintsLeft, adds: this.addsLeft, initCount: this.initialCount
     }));
     Storage.set('nm_highscore', this.best);
   }
@@ -820,7 +1080,8 @@ class GameController {
       score: this.score,
       hintsLeft: this.hintsLeft,
       addsLeft: this.addsLeft,
-      combo: this.combo
+      combo: this.combo,
+      initialCount: this.initialCount
     });
     if (this.history.length > this.maxHistory) this.history.shift();
     this.updateUndoBtn();
@@ -834,6 +1095,7 @@ class GameController {
     this.hintsLeft = snap.hintsLeft;
     this.addsLeft = snap.addsLeft;
     this.combo = snap.combo;
+    this.initialCount = snap.initialCount;
     this.selected = null;
     this.saveState();
     this.renderFull();
@@ -858,6 +1120,7 @@ class GameController {
     this.selected = null;
     this.busy = false;
     this.history = [];
+    this.initialCount = this.board.countNonEmpty();
     Storage.remove('nm_board');
     this.renderFull();
   }
@@ -868,12 +1131,16 @@ class GameController {
     this.ui.updateHintBadge(this.hintsLeft);
     this.updateAddBadge();
     this.updateUndoBtn();
+    const remaining = this.board.countNonEmpty();
+    const cleared = this.initialCount - remaining;
+    this.ui.updateProgress(cleared, this.initialCount);
   }
 
   handleCellClick(r, c) {
     if (this.busy) return;
     if (this.board.isEmpty(r, c)) return;
 
+    // First selection
     if (!this.selected) {
       this.selected = {r, c};
       this.ui.clearStates();
@@ -882,29 +1149,42 @@ class GameController {
     }
 
     const s = this.selected;
-    this.selected = null;
-    this.ui.clearStates();
 
-    if (s.r === r && s.c === c) return; // same cell
+    // Same cell — deselect
+    if (s.r === r && s.c === c) {
+      this.selected = null;
+      this.ui.clearStates();
+      return;
+    }
 
     const v1 = this.board.getCell(s.r, s.c);
     const v2 = this.board.getCell(r, c);
 
-    if (!Validator.isMatch(v1, v2)) {
-      showToast('Числа не збігаються!');
-      this.combo = 0;
-      this.ui.hideCombo();
-      return;
-    }
+    // Show both cells selected briefly
+    this.ui.selectCell(r, c);
 
-    if (!Validator.areNeighbors(this.board, s, {r, c})) {
-      showToast('Клітинки не сусідні!');
-      this.combo = 0;
-      this.ui.hideCombo();
+    // Invalid match — show error, clear both
+    if (!Validator.isMatch(v1, v2) || !Validator.areNeighbors(this.board, s, {r, c})) {
+      this.busy = true;
+      const msg = !Validator.isMatch(v1, v2) ? 'Числа не збігаються!' : 'Клітинки не сусідні!';
+
+      setTimeout(() => {
+        this.ui.clearStates();
+        this.ui.showError(s, {r, c});
+        showToast(msg);
+        this.combo = 0;
+        this.ui.hideCombo();
+
+        setTimeout(() => {
+          this.selected = null;
+          this.busy = false;
+        }, 400);
+      }, 150);
       return;
     }
 
     // Valid pair — save state before modifying
+    this.selected = null;
     this.pushHistory();
     this.busy = true;
     this.combo++;
@@ -921,39 +1201,42 @@ class GameController {
     if (this.score > this.best) { this.best = this.score; }
     this.ui.updateScore(this.score, this.best);
 
-    this.ui.animateRemove(s, {r, c}, () => {
-      this.board.removeCell(s.r, s.c);
-      this.board.removeCell(r, c);
-      this.board.compact();
-      this.busy = false;
-      this.saveState();
+    setTimeout(() => {
+      this.ui.clearStates();
+      this.ui.animateRemove(s, {r, c}, () => {
+        this.board.removeCell(s.r, s.c);
+        this.board.removeCell(r, c);
+        this.board.compact();
+        this.busy = false;
+        this.saveState();
 
-      if (this.board.isCleared()) {
-        Storage.remove('nm_board');
-        showModal({
-          icon: '🏆', title: 'Перемога!',
-          sub: `Фінальний рахунок: <strong>${this.score}</strong>`,
-          yesText: 'Грати знову',
-          onYes: () => this.start()
-        });
-        return;
-      }
-
-      this.renderFull();
-
-      if (!this.board.hasAnyMoves()) {
-        if (this.addsLeft > 0) {
-          this.promptAddRows();
-        } else {
+        if (this.board.isCleared()) {
+          Storage.remove('nm_board');
           showModal({
-            icon: '😔', title: 'Гра завершена!',
-            sub: `Немає ходів і додавань. Рахунок: <strong>${this.score}</strong>`,
+            icon: 'trophy', title: 'Перемога!',
+            sub: `Фінальний рахунок: <strong>${this.score}</strong>`,
             yesText: 'Грати знову',
             onYes: () => this.start()
           });
+          return;
         }
-      }
-    });
+
+        this.renderFull();
+
+        if (!this.board.hasAnyMoves()) {
+          if (this.addsLeft > 0) {
+            this.promptAddRows();
+          } else {
+            showModal({
+              icon: 'gameOver', title: 'Гра завершена!',
+              sub: `Немає ходів і додавань. Рахунок: <strong>${this.score}</strong>`,
+              yesText: 'Грати знову',
+              onYes: () => this.start()
+            });
+          }
+        }
+      });
+    }, 200);
   }
 
   useHint() {
@@ -972,8 +1255,11 @@ class GameController {
     if (this.busy || this.addsLeft <= 0) return;
     this.pushHistory();
     const prevLen = this.board.cells.length;
+    const prevNonEmpty = this.board.countNonEmpty();
     const added = this.board.addRows();
     if (!added) { this.history.pop(); showToast('Нічого додавати!'); this.updateUndoBtn(); return; }
+    const newNonEmpty = this.board.countNonEmpty() - prevNonEmpty;
+    this.initialCount += newNonEmpty;
     this.addsLeft--;
     this.combo = 0;
     this.ui.hideCombo();
@@ -983,7 +1269,7 @@ class GameController {
 
   promptAddRows() {
     showModal({
-      icon: '🤔', title: 'Немає ходів!',
+      icon: 'noMoves', title: 'Немає ходів!',
       sub: `Валідних пар не залишилось. Додати рядки? (залишилось: ${this.addsLeft})`,
       yesText: 'Додати рядки', noText: 'Нова гра',
       onYes: () => this.addRows(),
@@ -993,7 +1279,7 @@ class GameController {
 
   confirmRestart() {
     showModal({
-      icon: '↺', title: 'Почати знову?',
+      icon: 'restart', title: 'Почати знову?',
       sub: 'Поточний прогрес буде втрачено.',
       yesText: 'Так', noText: 'Скасувати',
       onYes: () => this.start(),
