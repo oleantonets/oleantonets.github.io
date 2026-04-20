@@ -491,6 +491,32 @@
     will-change: transform, opacity;
   }
 
+  /* Floating points */
+  .float-pts {
+    position: fixed;
+    pointer-events: none;
+    z-index: 91;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(79,142,247,.35);
+    white-space: nowrap;
+  }
+
+  .float-pts.combo {
+    font-size: 1.35rem;
+    color: var(--yellow);
+    text-shadow: 0 0 10px rgba(245,200,66,.45);
+  }
+
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translate(-50%, 6px); }
+    10%  { opacity: 1; }
+    75%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50px); }
+  }
+
   .cell.new-row {
     animation: slideIn .4s ease both;
   }
@@ -984,6 +1010,22 @@ function spawnParticles(el) {
   }
 }
 
+function spawnFloatPts(el, pts, isCombo) {
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const color = getComputedStyle(el).color;
+  const span = document.createElement('div');
+  span.className = 'float-pts' + (isCombo ? ' combo' : '');
+  span.textContent = '+' + pts;
+  span.style.left = (rect.left + rect.width / 2) + 'px';
+  span.style.top = rect.top + 'px';
+  span.style.color = color;
+  span.style.textShadow = `0 0 10px ${color}`;
+  span.style.animation = 'floatUp 1.2s linear forwards';
+  document.body.appendChild(span);
+  setTimeout(() => span.remove(), 1250);
+}
+
 /* ─────────────────────────────────────────────
    GameUI
    ───────────────────────────────────────────── */
@@ -1346,6 +1388,8 @@ class GameController {
 
     setTimeout(() => {
       this.ui.clearStates();
+      const el1 = this.ui.getCellEl(s.r, s.c);
+      spawnFloatPts(el1, pts, this.combo > 1);
       this.ui.animateRemove(s, {r, c}, () => {
         this.board.removeCell(s.r, s.c);
         this.board.removeCell(r, c);
