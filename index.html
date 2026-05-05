@@ -3,79 +3,32 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Числовий Збіг</title>
+<title>Number Match</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    /* Light theme (default) */
-    --bg: #eef0f7;
-    --surface: #ffffff;
-    --surface2: #f0f2fa;
-    --border: #cdd2e0;
-    --accent: #4f8ef7;
-    --accent2: #7c5aff;
-    --yellow: #d9960a;
-    --green: #28a868;
-    --red: #d83e3e;
-    --text: #1c1f30;
-    --muted: #6e7698;
-    --cell-size: 44px;
-    --gap: 5px;
-    --radius: 10px;
-
-    /* Body background gradients */
-    --body-g1: rgba(79,142,247,.04);
-    --body-g2: rgba(124,90,255,.04);
-
-    /* Grid */
-    --grid-from: #e8eaf4;
-    --grid-to: #e2e4ee;
-    --grid-g1: rgba(79,142,247,.03);
-    --grid-g2: rgba(124,90,255,.02);
-    --grid-brd: rgba(180,188,215,.5);
-    --grid-brd-t: rgba(200,210,240,.4);
-    --grid-sh-top: rgba(255,255,255,.6);
-    --grid-sh-bot: rgba(0,0,0,.03);
-    --grid-glow1: rgba(79,142,247,.03);
-    --grid-glow2: rgba(124,90,255,.02);
-    --grid-outer: rgba(0,0,0,.06);
-    --grid-outer-glow: rgba(79,142,247,.03);
-
-    /* Cells */
-    --cell-from: #ffffff;
-    --cell-to: #f2f3fc;
-    --cell-brd: rgba(175,182,210,.55);
-    --cell-brd-t: rgba(195,205,235,.5);
-    --cell-sh-outer: 0 1px 3px rgba(0,0,0,.06);
-    --cell-sh-inset: rgba(255,255,255,.6);
-    --cell-hover-from: #e8eaff;
-    --cell-hover-to: #dfe2f8;
-    --cell-hover-sh: rgba(79,142,247,.1);
-    --cell-hover-inset: rgba(255,255,255,.5);
-    --empty-bg: rgba(200,205,225,.15);
-    --empty-brd: rgba(175,182,210,.2);
-    --empty-sh: rgba(0,0,0,.03);
-
-    /* Digit colors — high contrast for light bg */
-    --d1: #2568d8; --d2: #5c38d8; --d3: #1a9860; --d4: #b57c08;
-    --d5: #c06010; --d6: #c83030; --d7: #9028d8; --d8: #0e908a; --d9: #c07018;
-  }
-
-  [data-theme="dark"] {
+    /* Dark theme */
     --bg: #0f1117;
     --surface: #1a1d2e;
     --surface2: #22263a;
     --border: #2e3250;
+    --accent: #4f8ef7;
+    --accent2: #7c5aff;
     --yellow: #f5c842;
     --green: #3dd68c;
     --red: #f05a5a;
     --text: #e8eaf6;
     --muted: #5a6080;
+    --cell-size: 44px;
+    --gap: 5px;
+    --radius: 10px;
 
+    /* Body background gradients */
     --body-g1: rgba(79,142,247,.07);
     --body-g2: rgba(124,90,255,.07);
 
+    /* Grid */
     --grid-from: #1c2035;
     --grid-to: #181b2c;
     --grid-g1: rgba(79,142,247,.06);
@@ -89,6 +42,7 @@
     --grid-outer: rgba(0,0,0,.3);
     --grid-outer-glow: rgba(79,142,247,.04);
 
+    /* Cells */
     --cell-from: #272b42;
     --cell-to: #1f2338;
     --cell-brd: rgba(90,100,145,.5);
@@ -103,6 +57,7 @@
     --empty-brd: rgba(70,76,110,.2);
     --empty-sh: rgba(0,0,0,.15);
 
+    /* Digit colors */
     --d1: #4f8ef7; --d2: #7c5aff; --d3: #3dd68c; --d4: #f5c842;
     --d5: #f08228; --d6: #f05a5a; --d7: #c75af7; --d8: #5af7e0; --d9: #f7a25a;
   }
@@ -138,7 +93,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 28px;
     position: relative;
     z-index: 1;
   }
@@ -149,61 +104,42 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    position: relative;
   }
 
   .logo-row {
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 10px;
     position: relative;
   }
 
   .logo {
+    font-family: 'Roboto Mono', monospace;
     font-size: 1.5rem;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
+    font-weight: 500;
+    letter-spacing: 0px;
+    color: var(--text);
+    flex: 1;
   }
 
-  .btn-theme {
-    position: absolute;
-    right: 0;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--muted);
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: color .2s, border-color .2s;
-    flex-shrink: 0;
-  }
-
-  .btn-theme svg { display: block; }
-  @media (hover: hover) {
-    .btn-theme:hover { color: var(--text); border-color: var(--accent); }
-  }
 
   .scores {
     display: flex;
     gap: 10px;
+    flex: 1;
   }
 
   .score-box {
+    flex: 1;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 6px 14px;
-    text-align: center;
-    min-width: 70px;
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: left;
+    min-width: 0;
   }
 
   .score-label {
@@ -212,36 +148,24 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    margin-bottom: 4px;
   }
 
   .score-val {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 500;
     color: var(--text);
-    line-height: 1.2;
+    line-height: 1.1;
   }
 
-  #score-val { color: var(--accent); }
-  #best-val  { color: var(--yellow); }
+  #score-val { color: var(--text); }
+  #best-val  { color: var(--muted); }
 
-  .btn-restart {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--muted);
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all .2s;
-    flex-shrink: 0;
-  }
-
-  .btn-restart svg { display: block; }
-  @media (hover: hover) {
-    .btn-restart:hover { color: var(--text); border-color: var(--accent); }
+  .fab-restart {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(79,142,247,.4);
   }
 
   main {
@@ -402,6 +326,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    font-family: 'Roboto Mono', monospace;
     font-size: 1.65rem;
     font-weight: 700;
     border-radius: var(--radius);
@@ -426,9 +351,6 @@
   }
 
   .cell.empty {
-    background: var(--empty-bg);
-    border-color: var(--empty-brd);
-    box-shadow: inset 0 1px 3px var(--empty-sh);
     cursor: default;
     pointer-events: none;
   }
@@ -615,15 +537,11 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,.45);
+    background: rgba(0,0,0,.75);
     backdrop-filter: blur(6px);
     z-index: 100;
     align-items: center;
     justify-content: center;
-  }
-
-  [data-theme="dark"] #modal-overlay {
-    background: rgba(0,0,0,.75);
   }
 
   #modal-overlay.open { display: flex; }
@@ -637,10 +555,6 @@
     width: 90%;
     text-align: center;
     animation: modalIn .35s ease;
-    box-shadow: 0 24px 60px rgba(0,0,0,.15);
-  }
-
-  [data-theme="dark"] #modal {
     box-shadow: 0 24px 60px rgba(0,0,0,.5);
   }
 
@@ -674,27 +588,26 @@
 
   /* Toast */
   #toast {
-    position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    padding: 9px 20px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
+    background: transparent;
+    border: 1.5px solid var(--yellow);
+    color: var(--yellow);
+    padding: 6px 16px;
     border-radius: 99px;
-    font-size: .85rem;
+    font-size: .75rem;
     font-weight: 600;
     opacity: 0;
     pointer-events: none;
-    transition: opacity .25s, transform .25s;
+    transition: opacity .25s;
     z-index: 50;
     white-space: nowrap;
   }
 
   #toast.show {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
   }
 
   footer {
@@ -708,10 +621,10 @@
 
   @media (max-width: 430px) {
     :root { --cell-size: 38px; --gap: 4px; }
-    .logo { font-size: 1.25rem; }
+    .logo { font-size: 1.35rem; }
     .score-box { min-width: 60px; padding: 5px 10px; }
-    .score-val { font-size: 1rem; }
-    header { padding: 12px 12px 8px; gap: 8px; }
+    .score-val { font-size: 1.8rem; }
+    header { padding: 12px 12px 8px; gap: 28px; }
     main { padding: 0 6px 10px; }
     .progress-wrapper { padding: 0 12px 8px; }
   }
@@ -719,7 +632,7 @@
   @media (max-width: 360px) {
     :root { --cell-size: 34px; --gap: 3px; }
     .progress-wrapper { padding: 0 8px 6px; }
-    .logo { font-size: 1.1rem; }
+    .logo { font-size: 1.35rem; }
   }
 </style>
 </head>
@@ -728,7 +641,7 @@
 <header>
   <div class="logo-row">
     <div class="logo">Number Match</div>
-    <button class="btn-theme" id="btn-theme" title="Змінити тему"><svg id="theme-icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg><svg id="theme-icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg></button>
+    <div id="toast"></div>
   </div>
   <div class="header-row">
     <div class="scores">
@@ -741,7 +654,6 @@
         <div class="score-val" id="best-val">0</div>
       </div>
     </div>
-    <button class="btn-restart" id="btn-restart" title="Заново"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
   </div>
 </header>
 
@@ -758,8 +670,8 @@
     <div id="grid"></div>
   </div>
   <div class="action-bar">
-    <button class="fab fab-undo" id="btn-undo" title="Скасувати хід" disabled>
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H13"/></svg>
+    <button class="fab fab-restart" id="btn-restart" title="Заново">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
     <button class="fab fab-hint" id="btn-hint" title="Підказка">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
@@ -771,8 +683,6 @@
     </button>
   </div>
 </main>
-
-<footer>Знайди пари однакових чисел або тих, що дають 10 · Сусіди — поруч або через порожні клітинки</footer>
 
 <div id="modal-overlay">
   <div id="modal">
@@ -786,8 +696,6 @@
   </div>
 </div>
 
-<div id="toast"></div>
-
 <script>
 /* ─────────────────────────────────────────────
    Safe localStorage wrapper
@@ -798,33 +706,6 @@ const Storage = {
   set(k, v) { try { if (this._ok) localStorage.setItem(k, v); } catch(e) {} },
   remove(k) { try { if (this._ok) localStorage.removeItem(k); } catch(e) {} }
 };
-
-/* ─────────────────────────────────────────────
-   Theme Toggle
-   ───────────────────────────────────────────── */
-function applyTheme(theme) {
-  if (theme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    document.getElementById('theme-icon-sun').style.display = 'none';
-    document.getElementById('theme-icon-moon').style.display = 'block';
-  } else {
-    document.documentElement.removeAttribute('data-theme');
-    document.getElementById('theme-icon-sun').style.display = 'block';
-    document.getElementById('theme-icon-moon').style.display = 'none';
-  }
-}
-
-(function initTheme() {
-  const saved = Storage.get('nm_theme');
-  if (saved) applyTheme(saved);
-})();
-
-document.getElementById('btn-theme').addEventListener('click', () => {
-  const isDark = document.documentElement.hasAttribute('data-theme');
-  const next = isDark ? 'light' : 'dark';
-  applyTheme(next);
-  Storage.set('nm_theme', next);
-});
 
 /* ─────────────────────────────────────────────
    GameBoard
@@ -1046,7 +927,7 @@ class GameUI {
       const val = board.cells[i];
       const r = Math.floor(i / board.cols), c = i % board.cols;
       const div = document.createElement('div');
-      div.className = 'cell' + (val === 0 ? ' empty' : '');
+      div.className = 'cell';
       if (val !== 0) {
         div.textContent = val;
         div.dataset.n = val;
@@ -1057,6 +938,8 @@ class GameUI {
           div.classList.add('new-row');
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
         }
+      } else {
+        div.style.pointerEvents = 'none';
       }
       this.grid.appendChild(div);
     }
@@ -1210,14 +1093,11 @@ class GameController {
     this.combo = 0;
     this.selected = null;
     this.busy = false;
-    this.history = []; // undo stack
-    this.maxHistory = 20;
     this.initialCount = 0; // total cells to clear (for progress)
 
     document.getElementById('btn-hint').addEventListener('click', () => this.useHint());
     document.getElementById('btn-add').addEventListener('click', () => this.addRows());
     document.getElementById('btn-restart').addEventListener('click', () => this.confirmRestart());
-    document.getElementById('btn-undo').addEventListener('click', () => this.undo());
 
     this.checkResume();
   }
@@ -1248,7 +1128,6 @@ class GameController {
     this.initialCount = s.initCount || this.board.countNonEmpty();
     this.combo = 0;
     this.selected = null;
-    this.history = [];
     this.best = parseInt(Storage.get('nm_highscore') || '0');
   }
 
@@ -1259,37 +1138,7 @@ class GameController {
     Storage.set('nm_highscore', this.best);
   }
 
-  pushHistory() {
-    this.history.push({
-      cells: [...this.board.cells],
-      score: this.score,
-      hintsLeft: this.hintsLeft,
-      addsLeft: this.addsLeft,
-      combo: this.combo,
-      initialCount: this.initialCount
-    });
-    if (this.history.length > this.maxHistory) this.history.shift();
-    this.updateUndoBtn();
-  }
 
-  undo() {
-    if (this.busy || this.history.length === 0) return;
-    const snap = this.history.pop();
-    this.board.cells = snap.cells;
-    this.score = snap.score;
-    this.hintsLeft = snap.hintsLeft;
-    this.addsLeft = snap.addsLeft;
-    this.combo = snap.combo;
-    this.initialCount = snap.initialCount;
-    this.selected = null;
-    this.saveState();
-    this.renderFull();
-    showToast('Хід скасовано');
-  }
-
-  updateUndoBtn() {
-    document.getElementById('btn-undo').disabled = this.history.length === 0;
-  }
 
   updateAddBadge() {
     document.getElementById('add-badge').textContent = this.addsLeft;
@@ -1304,7 +1153,6 @@ class GameController {
     this.combo = 0;
     this.selected = null;
     this.busy = false;
-    this.history = [];
     this.initialCount = this.board.countNonEmpty();
     Storage.remove('nm_board');
     this.renderFull();
@@ -1315,7 +1163,6 @@ class GameController {
     this.ui.updateScore(this.score, this.best);
     this.ui.updateHintBadge(this.hintsLeft);
     this.updateAddBadge();
-    this.updateUndoBtn();
     const remaining = this.board.countNonEmpty();
     const cleared = this.initialCount - remaining;
     this.ui.updateProgress(cleared, this.initialCount);
@@ -1370,7 +1217,6 @@ class GameController {
 
     // Valid pair — save state before modifying
     this.selected = null;
-    this.pushHistory();
     this.busy = true;
     this.combo++;
     let pts = 10;
@@ -1379,6 +1225,7 @@ class GameController {
     // Earn a hint every 5 consecutive combos
     if (this.combo > 0 && this.combo % 5 === 0) {
       this.hintsLeft++;
+      this.ui.updateHintBadge(this.hintsLeft);
       showToast('+1 підказка за комбо!');
     }
 
@@ -1390,12 +1237,15 @@ class GameController {
       this.ui.clearStates();
       const el1 = this.ui.getCellEl(s.r, s.c);
       spawnFloatPts(el1, pts, this.combo > 1);
+      this.board.removeCell(s.r, s.c);
+      this.board.removeCell(r, c);
+      this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
       this.ui.animateRemove(s, {r, c}, () => {
-        this.board.removeCell(s.r, s.c);
-        this.board.removeCell(r, c);
-        this.board.compact();
         this.busy = false;
         this.saveState();
+        const remaining = this.board.countNonEmpty();
+        const cleared = this.initialCount - remaining;
+        this.ui.updateProgress(cleared, this.initialCount);
 
         if (this.board.isCleared()) {
           Storage.remove('nm_board');
@@ -1407,8 +1257,6 @@ class GameController {
           });
           return;
         }
-
-        this.renderFull();
 
         if (!this.board.hasAnyMoves()) {
           if (this.addsLeft > 0) {
@@ -1440,11 +1288,10 @@ class GameController {
 
   addRows() {
     if (this.busy || this.addsLeft <= 0) return;
-    this.pushHistory();
     const prevLen = this.board.cells.length;
     const prevNonEmpty = this.board.countNonEmpty();
     const added = this.board.addRows();
-    if (!added) { this.history.pop(); showToast('Нічого додавати!'); this.updateUndoBtn(); return; }
+    if (!added) { showToast('Нічого додавати!'); return; }
     const newNonEmpty = this.board.countNonEmpty() - prevNonEmpty;
     this.initialCount += newNonEmpty;
     this.addsLeft--;
