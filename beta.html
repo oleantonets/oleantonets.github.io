@@ -104,6 +104,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
+    position: relative;
   }
 
   .logo-row {
@@ -586,9 +587,9 @@
 
   /* Toast */
   #toast {
-    position: fixed;
-    top: 8px;
-    right: 16px;
+    position: absolute;
+    top: -45px;
+    right: 0;
     background: var(--surface2);
     border: 1px solid var(--border);
     color: var(--text);
@@ -650,6 +651,7 @@
         <div class="score-val" id="best-val">0</div>
       </div>
     </div>
+    <div id="toast"></div>
   </div>
 </header>
 
