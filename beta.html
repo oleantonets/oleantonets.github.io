@@ -1243,6 +1243,9 @@ class GameController {
       this.ui.animateRemove(s, {r, c}, () => {
         this.busy = false;
         this.saveState();
+        const remaining = this.board.countNonEmpty();
+        const cleared = this.initialCount - remaining;
+        this.ui.updateProgress(cleared, this.initialCount);
 
         if (this.board.isCleared()) {
           Storage.remove('nm_board');
