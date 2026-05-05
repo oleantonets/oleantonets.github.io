@@ -349,9 +349,6 @@
   }
 
   .cell.empty {
-    background: var(--empty-bg);
-    border-color: var(--empty-brd);
-    box-shadow: inset 0 1px 3px var(--empty-sh);
     cursor: default;
     pointer-events: none;
   }
@@ -932,7 +929,7 @@ class GameUI {
       const val = board.cells[i];
       const r = Math.floor(i / board.cols), c = i % board.cols;
       const div = document.createElement('div');
-      div.className = 'cell' + (val === 0 ? ' empty' : '');
+      div.className = 'cell';
       if (val !== 0) {
         div.textContent = val;
         div.dataset.n = val;
@@ -943,6 +940,8 @@ class GameUI {
           div.classList.add('new-row');
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
         }
+      } else {
+        div.style.pointerEvents = 'none';
       }
       this.grid.appendChild(div);
     }
@@ -1239,10 +1238,10 @@ class GameController {
       this.ui.clearStates();
       const el1 = this.ui.getCellEl(s.r, s.c);
       spawnFloatPts(el1, pts, this.combo > 1);
+      this.board.removeCell(s.r, s.c);
+      this.board.removeCell(r, c);
+      this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
       this.ui.animateRemove(s, {r, c}, () => {
-        this.board.removeCell(s.r, s.c);
-        this.board.removeCell(r, c);
-        this.board.compact();
         this.busy = false;
         this.saveState();
 
@@ -1256,8 +1255,6 @@ class GameController {
           });
           return;
         }
-
-        this.renderFull();
 
         if (!this.board.hasAnyMoves()) {
           if (this.addsLeft > 0) {
