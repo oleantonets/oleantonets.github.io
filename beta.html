@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Числовий Збіг</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
     /* Dark theme */
@@ -149,14 +149,15 @@
   }
 
   .score-val {
+    font-family: 'Roboto Mono', monospace;
     font-size: 2.2rem;
     font-weight: 500;
     color: var(--text);
     line-height: 1.1;
   }
 
-  #score-val { color: var(--accent); }
-  #best-val  { color: var(--yellow); }
+  #score-val { color: var(--text); }
+  #best-val  { color: var(--muted); }
 
   .fab-restart {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
