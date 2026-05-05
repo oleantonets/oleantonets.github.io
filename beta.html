@@ -113,6 +113,7 @@
     align-items: center;
     justify-content: space-between;
     gap: 10px;
+    position: relative;
   }
 
   .logo {
@@ -588,7 +589,8 @@
   /* Toast */
   #toast {
     position: absolute;
-    top: -45px;
+    top: 50%;
+    transform: translateY(-50%);
     right: 0;
     background: transparent;
     border: 1.5px solid var(--yellow);
@@ -639,6 +641,7 @@
 <header>
   <div class="logo-row">
     <div class="logo">Number Match</div>
+    <div id="toast"></div>
   </div>
   <div class="header-row">
     <div class="scores">
@@ -651,7 +654,6 @@
         <div class="score-val" id="best-val">0</div>
       </div>
     </div>
-    <div id="toast"></div>
   </div>
 </header>
 
@@ -693,8 +695,6 @@
     </div>
   </div>
 </div>
-
-<div id="toast"></div>
 
 <script>
 /* ─────────────────────────────────────────────
