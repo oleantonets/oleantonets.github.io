@@ -8,6 +8,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   :root {
+    /* Dark theme */
     --bg: #0f1117;
     --surface: #1a1d2e;
     --surface2: #22263a;
@@ -22,6 +23,43 @@
     --cell-size: 44px;
     --gap: 5px;
     --radius: 10px;
+
+    /* Body background gradients */
+    --body-g1: rgba(79,142,247,.07);
+    --body-g2: rgba(124,90,255,.07);
+
+    /* Grid */
+    --grid-from: #1c2035;
+    --grid-to: #181b2c;
+    --grid-g1: rgba(79,142,247,.06);
+    --grid-g2: rgba(124,90,255,.04);
+    --grid-brd: rgba(60,66,100,.45);
+    --grid-brd-t: rgba(100,120,180,.25);
+    --grid-sh-top: rgba(255,255,255,.04);
+    --grid-sh-bot: rgba(0,0,0,.2);
+    --grid-glow1: rgba(79,142,247,.05);
+    --grid-glow2: rgba(124,90,255,.03);
+    --grid-outer: rgba(0,0,0,.3);
+    --grid-outer-glow: rgba(79,142,247,.04);
+
+    /* Cells */
+    --cell-from: #272b42;
+    --cell-to: #1f2338;
+    --cell-brd: rgba(90,100,145,.5);
+    --cell-brd-t: rgba(110,120,165,.45);
+    --cell-sh-outer: 0 1px 3px rgba(0,0,0,.2);
+    --cell-sh-inset: rgba(255,255,255,.04);
+    --cell-hover-from: #2e3358;
+    --cell-hover-to: #262a44;
+    --cell-hover-sh: rgba(79,142,247,.12);
+    --cell-hover-inset: rgba(255,255,255,.05);
+    --empty-bg: rgba(20,23,36,.3);
+    --empty-brd: rgba(70,76,110,.2);
+    --empty-sh: rgba(0,0,0,.15);
+
+    /* Digit colors */
+    --d1: #4f8ef7; --d2: #7c5aff; --d3: #3dd68c; --d4: #f5c842;
+    --d5: #f08228; --d6: #f05a5a; --d7: #c75af7; --d8: #5af7e0; --d9: #f7a25a;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -42,8 +80,8 @@
     content: '';
     position: fixed;
     inset: 0;
-    background-image: radial-gradient(circle at 20% 20%, rgba(79,142,247,.07) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 80%, rgba(124,90,255,.07) 0%, transparent 50%);
+    background-image: radial-gradient(circle at 20% 20%, var(--body-g1) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 80%, var(--body-g2) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
   }
@@ -68,29 +106,37 @@
     gap: 10px;
   }
 
-  .logo {
-    font-size: 1.5rem;
-    font-weight: 900;
-    letter-spacing: -0.5px;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
+  .logo-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
   }
+
+  .logo {
+    font-size: 1.9rem;
+    font-weight: 500;
+    letter-spacing: 0px;
+    color: var(--text);
+    flex: 1;
+  }
+
 
   .scores {
     display: flex;
     gap: 10px;
+    flex: 1;
   }
 
   .score-box {
+    flex: 1;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 6px 14px;
-    text-align: center;
-    min-width: 70px;
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: left;
+    min-width: 0;
   }
 
   .score-label {
@@ -99,36 +145,42 @@
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    margin-bottom: 4px;
   }
 
   .score-val {
-    font-size: 1.1rem;
-    font-weight: 700;
+    font-size: 2.2rem;
+    font-weight: 500;
     color: var(--text);
-    line-height: 1.2;
+    line-height: 1.1;
   }
 
   #score-val { color: var(--accent); }
   #best-val  { color: var(--yellow); }
 
   .btn-restart {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 10px;
+    background: rgba(79, 142, 247, .08);
+    border: 1.5px solid var(--muted);
+    border-radius: 50%;
     color: var(--muted);
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    transition: all .2s;
+    transition: all .3s cubic-bezier(.2, .8, .3, 1);
     flex-shrink: 0;
   }
 
   .btn-restart svg { display: block; }
   @media (hover: hover) {
-    .btn-restart:hover { color: var(--text); border-color: var(--accent); }
+    .btn-restart:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      background: rgba(79, 142, 247, .15);
+      box-shadow: 0 0 20px rgba(79, 142, 247, .2);
+    }
   }
 
   main {
@@ -259,19 +311,19 @@
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
     background:
-      radial-gradient(ellipse at 50% 0%, rgba(79,142,247,.06) 0%, transparent 60%),
-      radial-gradient(ellipse at 50% 100%, rgba(124,90,255,.04) 0%, transparent 60%),
-      linear-gradient(180deg, #1c2035 0%, #181b2c 100%);
-    border: 1px solid rgba(60, 66, 100, .45);
-    border-top-color: rgba(100, 120, 180, .25);
+      radial-gradient(ellipse at 50% 0%, var(--grid-g1) 0%, transparent 60%),
+      radial-gradient(ellipse at 50% 100%, var(--grid-g2) 0%, transparent 60%),
+      linear-gradient(180deg, var(--grid-from) 0%, var(--grid-to) 100%);
+    border: 1px solid var(--grid-brd);
+    border-top-color: var(--grid-brd-t);
     border-radius: 18px;
     box-shadow:
-      inset 0 1px 0 rgba(255,255,255,.04),
-      inset 0 -1px 0 rgba(0,0,0,.2),
-      inset 0 0 30px rgba(79, 142, 247, .05),
-      inset 0 0 60px rgba(124, 90, 255, .03),
-      0 2px 12px rgba(0, 0, 0, .3),
-      0 0 40px rgba(79, 142, 247, .04);
+      inset 0 1px 0 var(--grid-sh-top),
+      inset 0 -1px 0 var(--grid-sh-bot),
+      inset 0 0 30px var(--grid-glow1),
+      inset 0 0 60px var(--grid-glow2),
+      0 2px 12px var(--grid-outer),
+      0 0 40px var(--grid-outer-glow);
     position: relative;
   }
 
@@ -289,33 +341,33 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.45rem;
+    font-size: 1.65rem;
     font-weight: 700;
     border-radius: var(--radius);
-    background: linear-gradient(180deg, #272b42 0%, #1f2338 100%);
-    border: 1px solid rgba(90, 100, 145, .5);
-    border-top-color: rgba(110, 120, 165, .45);
+    background: linear-gradient(180deg, var(--cell-from) 0%, var(--cell-to) 100%);
+    border: 1px solid var(--cell-brd);
+    border-top-color: var(--cell-brd-t);
     cursor: pointer;
     user-select: none;
     transition: background .2s, border-color .2s, transform .15s, opacity .3s, box-shadow .2s;
     position: relative;
-    box-shadow: 0 1px 3px rgba(0,0,0,.2), inset 0 1px 0 rgba(255,255,255,.04);
+    box-shadow: var(--cell-sh-outer), inset 0 1px 0 var(--cell-sh-inset);
   }
 
   @media (hover: hover) {
     .cell:not(.empty):hover {
-      background: linear-gradient(180deg, #2e3358 0%, #262a44 100%);
+      background: linear-gradient(180deg, var(--cell-hover-from) 0%, var(--cell-hover-to) 100%);
       border-color: rgba(79, 142, 247, .35);
       transform: scale(1.05);
-      box-shadow: 0 2px 10px rgba(79, 142, 247, .12), inset 0 1px 0 rgba(255,255,255,.05);
+      box-shadow: 0 2px 10px var(--cell-hover-sh), inset 0 1px 0 var(--cell-hover-inset);
       z-index: 2;
     }
   }
 
   .cell.empty {
-    background: rgba(20, 23, 36, .3);
-    border-color: rgba(70, 76, 110, .2);
-    box-shadow: inset 0 1px 3px rgba(0,0,0,.15);
+    background: var(--empty-bg);
+    border-color: var(--empty-brd);
+    box-shadow: inset 0 1px 3px var(--empty-sh);
     cursor: default;
     pointer-events: none;
   }
@@ -378,6 +430,32 @@
     will-change: transform, opacity;
   }
 
+  /* Floating points */
+  .float-pts {
+    position: fixed;
+    pointer-events: none;
+    z-index: 91;
+    font-family: 'Outfit', sans-serif;
+    font-weight: 800;
+    font-size: 1.15rem;
+    color: var(--accent);
+    text-shadow: 0 0 8px rgba(79,142,247,.35);
+    white-space: nowrap;
+  }
+
+  .float-pts.combo {
+    font-size: 1.35rem;
+    color: var(--yellow);
+    text-shadow: 0 0 10px rgba(245,200,66,.45);
+  }
+
+  @keyframes floatUp {
+    0%   { opacity: 0; transform: translate(-50%, 6px); }
+    10%  { opacity: 1; }
+    75%  { opacity: 1; }
+    100% { opacity: 0; transform: translate(-50%, -50px); }
+  }
+
   .cell.new-row {
     animation: slideIn .4s ease both;
   }
@@ -388,15 +466,15 @@
   }
 
   /* Number colors by digit */
-  .cell[data-n="1"]  { color: #4f8ef7; }
-  .cell[data-n="2"]  { color: #7c5aff; }
-  .cell[data-n="3"]  { color: #3dd68c; }
-  .cell[data-n="4"]  { color: #f5c842; }
-  .cell[data-n="5"]  { color: #f08228; }
-  .cell[data-n="6"]  { color: #f05a5a; }
-  .cell[data-n="7"]  { color: #c75af7; }
-  .cell[data-n="8"]  { color: #5af7e0; }
-  .cell[data-n="9"]  { color: #f7a25a; }
+  .cell[data-n="1"]  { color: var(--d1); }
+  .cell[data-n="2"]  { color: var(--d2); }
+  .cell[data-n="3"]  { color: var(--d3); }
+  .cell[data-n="4"]  { color: var(--d4); }
+  .cell[data-n="5"]  { color: var(--d5); }
+  .cell[data-n="6"]  { color: var(--d6); }
+  .cell[data-n="7"]  { color: var(--d7); }
+  .cell[data-n="8"]  { color: var(--d8); }
+  .cell[data-n="9"]  { color: var(--d9); }
   .cell.selected[data-n] { color: #fff; }
 
   /* Bottom action bar */
@@ -456,15 +534,15 @@
 
   .fab .badge {
     position: absolute;
-    top: -4px;
-    right: -4px;
+    top: -5px;
+    right: -5px;
     background: var(--surface);
     border: 1.5px solid var(--border);
     color: var(--text);
-    font-size: .65rem;
+    font-size: .85rem;
     font-weight: 700;
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -561,7 +639,7 @@
 
   @media (max-width: 430px) {
     :root { --cell-size: 38px; --gap: 4px; }
-    .logo { font-size: 1.25rem; }
+    .logo { font-size: 1.6rem; }
     .score-box { min-width: 60px; padding: 5px 10px; }
     .score-val { font-size: 1rem; }
     header { padding: 12px 12px 8px; gap: 8px; }
@@ -572,14 +650,17 @@
   @media (max-width: 360px) {
     :root { --cell-size: 34px; --gap: 3px; }
     .progress-wrapper { padding: 0 8px 6px; }
-    .logo { font-size: 1.1rem; }
+    .logo { font-size: 1.4rem; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="logo">Number Match</div>
+  <div class="logo-row">
+    <div class="logo">Number Match</div>
+    <button class="btn-restart" id="btn-restart" title="Заново"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
+  </div>
   <div class="header-row">
     <div class="scores">
       <div class="score-box">
@@ -591,7 +672,6 @@
         <div class="score-val" id="best-val">0</div>
       </div>
     </div>
-    <button class="btn-restart" id="btn-restart" title="Заново"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg></button>
   </div>
 </header>
 
@@ -661,12 +741,10 @@ class GameBoard {
   get rows() { return this.cells.length / this.cols; }
 
   generate() {
-    // sequence 1-9 repeated 4 times → 36 cells = 4 rows
-    // Even count of every digit guarantees full clearability:
-    // each complement pair (1↔9, 2↔8, 3↔7, 4↔6) has 4+4=8 (even)
-    // 5↔5 has 4 (even), total 36 (even)
+    // sequence 1-9 repeated 8 times → 72 cells = 8 rows
+    // Even count of every digit guarantees full clearability
     const seq = [];
-    for (let rep = 0; rep < 4; rep++)
+    for (let rep = 0; rep < 8; rep++)
       for (let n = 1; n <= 9; n++) seq.push(n);
     // Fisher-Yates shuffle
     for (let i = seq.length - 1; i > 0; i--) {
@@ -798,18 +876,12 @@ class Validator {
 /* ─────────────────────────────────────────────
    Particle System
    ───────────────────────────────────────────── */
-const DIGIT_COLORS = {
-  1: '#4f8ef7', 2: '#7c5aff', 3: '#3dd68c', 4: '#f5c842', 5: '#f08228',
-  6: '#f05a5a', 7: '#c75af7', 8: '#5af7e0', 9: '#f7a25a'
-};
-
 function spawnParticles(el) {
   if (!el) return;
   const rect = el.getBoundingClientRect();
   const cx = rect.left + rect.width / 2;
   const cy = rect.top + rect.height / 2;
-  const digit = el.dataset.n;
-  const color = DIGIT_COLORS[digit] || '#e8eaf6';
+  const color = getComputedStyle(el).color || '#888';
   const count = 10;
 
   for (let i = 0; i < count; i++) {
@@ -839,6 +911,22 @@ function spawnParticles(el) {
 
     setTimeout(() => p.remove(), dur + 20);
   }
+}
+
+function spawnFloatPts(el, pts, isCombo) {
+  if (!el) return;
+  const rect = el.getBoundingClientRect();
+  const color = getComputedStyle(el).color;
+  const span = document.createElement('div');
+  span.className = 'float-pts' + (isCombo ? ' combo' : '');
+  span.textContent = '+' + pts;
+  span.style.left = (rect.left + rect.width / 2) + 'px';
+  span.style.top = rect.top + 'px';
+  span.style.color = color;
+  span.style.textShadow = `0 0 10px ${color}`;
+  span.style.animation = 'floatUp 1.2s linear forwards';
+  document.body.appendChild(span);
+  setTimeout(() => span.remove(), 1250);
 }
 
 /* ─────────────────────────────────────────────
@@ -1203,6 +1291,8 @@ class GameController {
 
     setTimeout(() => {
       this.ui.clearStates();
+      const el1 = this.ui.getCellEl(s.r, s.c);
+      spawnFloatPts(el1, pts, this.combo > 1);
       this.ui.animateRemove(s, {r, c}, () => {
         this.board.removeCell(s.r, s.c);
         this.board.removeCell(r, c);
