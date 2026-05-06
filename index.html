@@ -1253,6 +1253,7 @@ class GameController {
       spawnFloatPts(el1, pts, this.combo > 1);
       this.board.removeCell(s.r, s.c);
       this.board.removeCell(r, c);
+      this.board.compact();
       this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
       this.ui.animateRemove(s, {r, c}, () => {
         this.busy = false;
