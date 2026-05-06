@@ -163,15 +163,6 @@
   #score-val { color: var(--text); }
   #best-val  { color: var(--muted); }
 
-  #score-val.pop {
-    animation: scorePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
-  }
-
-  @keyframes scorePop {
-    0%   { transform: rotateX(0deg); color: var(--text); }
-    50%  { transform: rotateX(180deg); color: var(--green); }
-    100% { transform: rotateX(0deg); color: var(--text); }
-  }
 
   .fab-restart {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -410,9 +401,7 @@
   }
 
   @keyframes cellPop {
-    0%   { transform: scale(1); opacity: 1; }
-    40%  { transform: scale(1.2); opacity: .8; }
-    100% { transform: scale(0); opacity: 0; }
+    100% { color: transparent; }
   }
 
   /* Particles */
@@ -1015,9 +1004,6 @@ class GameUI {
   updateScore(score, best) {
     this.scoreEl.textContent = score;
     this.bestEl.textContent = best;
-    this.scoreEl.classList.remove('pop');
-    void this.scoreEl.offsetWidth;
-    this.scoreEl.classList.add('pop');
   }
 
   updateHintBadge(n) {
@@ -1253,9 +1239,9 @@ class GameController {
       spawnFloatPts(el1, pts, this.combo > 1);
       this.board.removeCell(s.r, s.c);
       this.board.removeCell(r, c);
-      this.board.compact();
-      this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
       this.ui.animateRemove(s, {r, c}, () => {
+        this.board.compact();
+        this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
         this.busy = false;
         this.saveState();
         const remaining = this.board.countNonEmpty();
