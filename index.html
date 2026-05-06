@@ -932,16 +932,17 @@ class GameUI {
       seen.add(key);
 
       let div = this.cellEls.get(key);
+      if (!div) {
+        div = document.createElement('div');
+        div.className = 'cell';
+        div.dataset.r = r;
+        div.dataset.c = c;
+        div.addEventListener('click', () => onCellClick(r, c));
+        this.grid.appendChild(div);
+        this.cellEls.set(key, div);
+      }
+
       if (val !== 0) {
-        if (!div) {
-          div = document.createElement('div');
-          div.className = 'cell';
-          div.dataset.r = r;
-          div.dataset.c = c;
-          div.addEventListener('click', () => onCellClick(r, c));
-          this.grid.appendChild(div);
-          this.cellEls.set(key, div);
-        }
         div.textContent = val;
         div.dataset.n = val;
         div.style.pointerEvents = '';
@@ -951,11 +952,9 @@ class GameUI {
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
         }
       } else {
-        if (div) {
-          div.style.pointerEvents = 'none';
-          div.textContent = '';
-          delete div.dataset.n;
-        }
+        div.style.pointerEvents = 'none';
+        div.textContent = '';
+        delete div.dataset.n;
       }
     }
 
@@ -1175,6 +1174,8 @@ class GameController {
     this.busy = false;
     this.initialCount = this.board.countNonEmpty();
     Storage.remove('nm_board');
+    this.ui.cellEls.clear();
+    this.ui.grid.innerHTML = '';
     this.renderFull();
   }
 
