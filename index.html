@@ -400,15 +400,7 @@
   }
 
   .cell.removing {
-    animation: dissolve .6s ease forwards;
     pointer-events: none;
-  }
-
-  @keyframes dissolve {
-    0% { opacity: 1; filter: blur(0) brightness(1); text-shadow: 0 0 8px currentColor; }
-    40% { opacity: 0.8; filter: blur(1px) brightness(1.2); text-shadow: 0 0 16px currentColor; }
-    70% { opacity: 0.4; filter: blur(4px) brightness(1); text-shadow: 0 0 24px currentColor; }
-    100% { opacity: 0; filter: blur(10px) brightness(0.5); text-shadow: 0 0 40px currentColor; }
   }
 
   /* Particles */
@@ -1019,15 +1011,13 @@ class GameUI {
       const el = this.getCellEl(p.r, p.c);
       if (el) {
         el.classList.remove('new-row');
-        el.style.animationDelay = '';  // Clear animation delay from slideIn
-        el.offsetHeight;  // Force reflow
+        el.style.animationDelay = '';
+        el.offsetHeight;
+        spawnParticles(el);
         el.classList.add('removing');
-        // spawn particles early in dissolve animation (100ms)
-        setTimeout(() => spawnParticles(el), 100);
       }
     });
-    // Wait for dissolve animation to complete (600ms) + buffer (20ms)
-    setTimeout(cb, 620);
+    setTimeout(cb, 200);
   }
 
   updateScore(score, best) {
