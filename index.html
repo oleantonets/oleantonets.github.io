@@ -1022,11 +1022,12 @@ class GameUI {
         el.style.animationDelay = '';  // Clear animation delay from slideIn
         el.offsetHeight;  // Force reflow
         el.classList.add('removing');
-        // spawn particles at peak of scale-up (140ms)
-        setTimeout(() => spawnParticles(el), 140);
+        // spawn particles early in dissolve animation (100ms)
+        setTimeout(() => spawnParticles(el), 100);
       }
     });
-    setTimeout(cb, 360);
+    // Wait for dissolve animation to complete (600ms) + buffer (20ms)
+    setTimeout(cb, 620);
   }
 
   updateScore(score, best) {
