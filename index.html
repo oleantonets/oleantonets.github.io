@@ -942,11 +942,12 @@ class GameUI {
       if (!div) {
         div = document.createElement('div');
         div.className = 'cell';
-        div.dataset.r = r;
-        div.dataset.c = c;
         this.grid.appendChild(div);
         this.cellEls.set(key, div);
       }
+
+      div.dataset.r = r;
+      div.dataset.c = c;
 
       if (val !== 0) {
         div.textContent = val;
