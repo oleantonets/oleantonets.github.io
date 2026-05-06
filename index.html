@@ -929,25 +929,22 @@ class GameUI {
   }
 
   render(board, newRowStartIdx = -1) {
+    this.grid.innerHTML = '';
+    this.cellEls.clear();
+
     const total = board.cells.length;
-    const seen = new Set();
 
     for (let i = 0; i < total; i++) {
       const val = board.cells[i];
       const r = Math.floor(i / board.cols), c = i % board.cols;
       const key = `${r},${c}`;
-      seen.add(key);
 
-      let div = this.cellEls.get(key);
-      if (!div) {
-        div = document.createElement('div');
-        div.className = 'cell';
-        this.grid.appendChild(div);
-        this.cellEls.set(key, div);
-      }
-
+      const div = document.createElement('div');
+      div.className = 'cell';
       div.dataset.r = r;
       div.dataset.c = c;
+      this.grid.appendChild(div);
+      this.cellEls.set(key, div);
 
       if (val !== 0) {
         div.textContent = val;
@@ -965,15 +962,6 @@ class GameUI {
         div.classList.remove('error', 'hint', 'new-row');
       }
     }
-
-    const keysToDelete = [];
-    for (const [key, div] of this.cellEls) {
-      if (!seen.has(key)) {
-        div.remove();
-        keysToDelete.push(key);
-      }
-    }
-    keysToDelete.forEach(key => this.cellEls.delete(key));
   }
 
   getCellEl(r, c) {
