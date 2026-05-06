@@ -1022,7 +1022,8 @@ class GameUI {
       const el = this.getCellEl(p.r, p.c);
       if (el) {
         el.classList.remove('new-row');
-        el.offsetHeight;  // Force reflow to ensure animation stops before starting new one
+        el.style.animationDelay = '';  // Clear animation delay from slideIn
+        el.offsetHeight;  // Force reflow
         el.classList.add('removing');
         // spawn particles at peak of scale-up (140ms)
         setTimeout(() => spawnParticles(el), 140);
