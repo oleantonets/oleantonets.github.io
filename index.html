@@ -952,7 +952,7 @@ class GameUI {
         div.textContent = val;
         div.dataset.n = val;
         div.style.pointerEvents = '';
-        div.classList.remove('new-row');
+        div.classList.remove('removing', 'error', 'hint', 'new-row');
         if (newRowStartIdx >= 0 && i >= newRowStartIdx) {
           div.classList.add('new-row');
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
@@ -961,6 +961,7 @@ class GameUI {
         div.style.pointerEvents = 'none';
         div.textContent = '';
         delete div.dataset.n;
+        div.classList.remove('removing', 'error', 'hint', 'new-row');
       }
     }
 
