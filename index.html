@@ -1021,6 +1021,7 @@ class GameUI {
     [p1, p2].forEach(p => {
       const el = this.getCellEl(p.r, p.c);
       if (el) {
+        el.classList.remove('new-row');
         el.classList.add('removing');
         // spawn particles at peak of scale-up (140ms)
         setTimeout(() => spawnParticles(el), 140);
