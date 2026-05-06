@@ -911,7 +911,7 @@ function spawnFloatPts(el, pts, isCombo) {
    GameUI
    ───────────────────────────────────────────── */
 class GameUI {
-  constructor() {
+  constructor(onCellClick) {
     this.grid = document.getElementById('grid');
     this.scoreEl = document.getElementById('score-val');
     this.bestEl = document.getElementById('best-val');
@@ -919,9 +919,16 @@ class GameUI {
     this.comboBadge = document.getElementById('combo-badge');
     this.comboCount = document.getElementById('combo-count');
     this.cellEls = new Map();
+    this.grid.addEventListener('click', (e) => {
+      const div = e.target.closest('.cell');
+      if (!div || div.style.pointerEvents === 'none') return;
+      const r = parseInt(div.dataset.r);
+      const c = parseInt(div.dataset.c);
+      onCellClick(r, c);
+    });
   }
 
-  render(board, onCellClick, newRowStartIdx = -1) {
+  render(board, newRowStartIdx = -1) {
     const total = board.cells.length;
     const seen = new Set();
 
@@ -937,7 +944,6 @@ class GameUI {
         div.className = 'cell';
         div.dataset.r = r;
         div.dataset.c = c;
-        div.addEventListener('click', () => onCellClick(r, c));
         this.grid.appendChild(div);
         this.cellEls.set(key, div);
       }
@@ -1106,7 +1112,7 @@ function showToast(msg) {
 class GameController {
   constructor() {
     this.board = new GameBoard(9);
-    this.ui = new GameUI();
+    this.ui = new GameUI((r, c) => this.handleCellClick(r, c));
     this.score = 0;
     this.best = parseInt(Storage.get('nm_highscore') || '0');
     this.hintsLeft = 3;
@@ -1180,7 +1186,7 @@ class GameController {
   }
 
   renderFull(newRowStartIdx = -1) {
-    this.ui.render(this.board, (r, c) => this.handleCellClick(r, c), newRowStartIdx);
+    this.ui.render(this.board, newRowStartIdx);
     this.ui.updateScore(this.score, this.best);
     this.ui.updateHintBadge(this.hintsLeft);
     this.updateAddBadge();
@@ -1262,7 +1268,7 @@ class GameController {
       this.board.removeCell(r, c);
       this.ui.animateRemove(s, {r, c}, () => {
         this.board.compact();
-        this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
+        this.ui.render(this.board);
         this.busy = false;
         this.saveState();
         const remaining = this.board.countNonEmpty();
