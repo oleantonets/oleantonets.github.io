@@ -918,35 +918,57 @@ class GameUI {
     this.hintBadge = document.getElementById('hint-badge');
     this.comboBadge = document.getElementById('combo-badge');
     this.comboCount = document.getElementById('combo-count');
+    this.cellEls = new Map();
   }
 
   render(board, onCellClick, newRowStartIdx = -1) {
-    this.grid.innerHTML = '';
     const total = board.cells.length;
+    const seen = new Set();
+
     for (let i = 0; i < total; i++) {
       const val = board.cells[i];
       const r = Math.floor(i / board.cols), c = i % board.cols;
-      const div = document.createElement('div');
-      div.className = 'cell';
+      const key = `${r},${c}`;
+      seen.add(key);
+
+      let div = this.cellEls.get(key);
       if (val !== 0) {
+        if (!div) {
+          div = document.createElement('div');
+          div.className = 'cell';
+          div.dataset.r = r;
+          div.dataset.c = c;
+          div.addEventListener('click', () => onCellClick(r, c));
+          this.grid.appendChild(div);
+          this.cellEls.set(key, div);
+        }
         div.textContent = val;
         div.dataset.n = val;
-        div.dataset.r = r;
-        div.dataset.c = c;
-        div.addEventListener('click', () => onCellClick(r, c));
+        div.style.pointerEvents = '';
+        div.classList.remove('new-row');
         if (newRowStartIdx >= 0 && i >= newRowStartIdx) {
           div.classList.add('new-row');
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
         }
       } else {
-        div.style.pointerEvents = 'none';
+        if (div) {
+          div.style.pointerEvents = 'none';
+          div.textContent = '';
+          delete div.dataset.n;
+        }
       }
-      this.grid.appendChild(div);
+    }
+
+    for (const [key, div] of this.cellEls) {
+      if (!seen.has(key)) {
+        div.remove();
+        this.cellEls.delete(key);
+      }
     }
   }
 
   getCellEl(r, c) {
-    return this.grid.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
+    return this.cellEls.get(`${r},${c}`) || null;
   }
 
   clearStates() {
@@ -1137,8 +1159,6 @@ class GameController {
     }));
     Storage.set('nm_highscore', this.best);
   }
-
-
 
   updateAddBadge() {
     document.getElementById('add-badge').textContent = this.addsLeft;
