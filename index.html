@@ -966,12 +966,14 @@ class GameUI {
       }
     }
 
+    const keysToDelete = [];
     for (const [key, div] of this.cellEls) {
       if (!seen.has(key)) {
         div.remove();
-        this.cellEls.delete(key);
+        keysToDelete.push(key);
       }
     }
+    keysToDelete.forEach(key => this.cellEls.delete(key));
   }
 
   getCellEl(r, c) {
