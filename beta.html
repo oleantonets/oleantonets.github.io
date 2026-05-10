@@ -276,40 +276,48 @@
 
 <script>
     let selected = null;
+    let busy = false;
 
     function isMatch(a, b) {
         return a === b || a + b === 10;
     }
 
     function handleClick(cell) {
+        if (busy) return;
+
+        // Перший вибір
         if (!selected) {
             selected = cell;
             cell.classList.add('selected');
             return;
         }
 
+        // Клік на ту саму клітинку — зняти виділення
         if (selected === cell) {
             cell.classList.remove('selected');
             selected = null;
             return;
         }
 
+        // Перевірка пари
         const n1 = parseInt(selected.textContent);
         const n2 = parseInt(cell.textContent);
+        const prev = selected;
+        selected = null;
 
         if (isMatch(n1, n2)) {
-            selected.classList.remove('selected');
-            selected.classList.add('removed');
+            prev.classList.remove('selected');
+            prev.classList.add('removed');
             cell.classList.add('removed');
-            selected = null;
         } else {
-            const prev = selected;
-            selected = null;
+            busy = true;
+            prev.classList.remove('selected');
             prev.classList.add('error');
             cell.classList.add('error');
             setTimeout(() => {
-                prev.classList.remove('selected', 'error');
+                prev.classList.remove('error');
                 cell.classList.remove('error');
+                busy = false;
             }, 400);
         }
     }
