@@ -267,7 +267,10 @@
 
             if (cell.classList.contains('selected')) {
                 cell.classList.remove('selected');
-                selectedCells = selectedCells.filter(c => c !== cell);
+                const index = selectedCells.indexOf(cell);
+                if (index > -1) {
+                    selectedCells.splice(index, 1);
+                }
                 return;
             }
 
