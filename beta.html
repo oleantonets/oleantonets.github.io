@@ -147,17 +147,17 @@
             <div class="progress-card">
                 <div class="progress-header">
                     <span class="progress-level-label">Level</span>
-                    <span class="progress-level-value">10</span>
+                    <span class="progress-level-value">0</span>
                 </div>
                 <div class="progress-bar-wrapper">
                     <div class="progress-bar-fill"></div>
                 </div>
                 <div class="progress-footer">
                     <div class="progress-points">
-                        Points: <span class="progress-points-value">300</span>
+                        Points: <span class="progress-points-value">0</span>
                     </div>
                     <div class="progress-required">
-                        Required: <span class="progress-required-value">350</span>
+                        Required: <span class="progress-required-value">250</span>
                     </div>
                 </div>
             </div>
@@ -216,7 +216,6 @@
                 gameState.matchedPairs = 0;
 
                 updateProgress();
-                console.log(`🎉 Рівень ${gameState.level}!`);
             }
 
             function generateGameCells() {
@@ -315,8 +314,6 @@
                     cell2.removeAttribute('data-number');
                     cell1.textContent = '';
                     cell2.textContent = '';
-                    const matchType = isSameNumber ? `${num1}+${num1}` : `${num1}+${num2}`;
-                    console.log(`✓ Пара: ${matchType} = ${num1 + num2}`);
                     addPoints(POINTS_PER_PAIR);
                     selectedCells = [];
                 } else {
@@ -346,8 +343,6 @@
                 if (selectedCells.length === 2) {
                     setTimeout(checkMatch, 150);
                 }
-
-                console.log(`Вибрана клітинка: ${cell.getAttribute('data-number')}`);
             }
 
             function handleCellClick(event) {
