@@ -265,6 +265,8 @@
             }
 
             if (cell.classList.contains('selected')) {
+                cell.classList.remove('selected');
+                selectedCells = selectedCells.filter(c => c !== cell);
                 return;
             }
 
