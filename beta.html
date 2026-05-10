@@ -159,31 +159,10 @@
 
         .game-cell.selected {
             transform: scale(1.15);
-            filter: brightness(1.4);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+            filter: brightness(1.3);
         }
 
-        .game-cell.error {
-            animation: errorShake .35s ease;
-            filter: brightness(0.6) sepia(1) hue-rotate(-30deg);
-        }
-
-        @keyframes errorShake {
-            0%, 100% { transform: translateX(0); }
-            20%       { transform: translateX(-4px); }
-            40%       { transform: translateX(4px); }
-            60%       { transform: translateX(-3px); }
-            80%       { transform: translateX(3px); }
-        }
-
-        .game-cell.removed {
-            background: #4b5563;
-            color: transparent;
-            pointer-events: none;
-            filter: none;
-            transform: none;
-            outline: none;
-        }
     </style>
 </head>
 <body>
@@ -274,57 +253,47 @@
         </div>
     </div>
 
-<script>
-    let selected = null;
-    let busy = false;
+    <script>
+        let selectedCells = [];
+        const gameGrid = document.querySelector('.game-grid');
 
-    function isMatch(a, b) {
-        return a === b || a + b === 10;
-    }
+        gameGrid.addEventListener('click', (e) => {
+            const cell = e.target.closest('.game-cell');
 
-    function handleClick(cell) {
-        if (busy) return;
+            if (!cell || cell.classList.contains('empty-glass') || cell.classList.contains('matched')) {
+                return;
+            }
 
-        // Перший вибір
-        if (!selected) {
-            selected = cell;
+            if (cell.classList.contains('selected')) {
+                return;
+            }
+
+            if (selectedCells.length >= 2) {
+                return;
+            }
+
             cell.classList.add('selected');
-            return;
-        }
+            selectedCells.push(cell);
 
-        // Клік на ту саму клітинку — зняти виділення
-        if (selected === cell) {
-            cell.classList.remove('selected');
-            selected = null;
-            return;
-        }
+            if (selectedCells.length === 2) {
+                setTimeout(() => {
+                    const [cell1, cell2] = selectedCells;
+                    const num1 = cell1.textContent;
+                    const num2 = cell2.textContent;
 
-        // Перевірка пари
-        const n1 = parseInt(selected.textContent);
-        const n2 = parseInt(cell.textContent);
-        const prev = selected;
-        selected = null;
+                    if (num1 === num2) {
+                        cell1.classList.add('empty-glass');
+                        cell2.classList.add('empty-glass');
+                        cell1.textContent = '';
+                        cell2.textContent = '';
+                    }
 
-        if (isMatch(n1, n2)) {
-            prev.classList.remove('selected');
-            prev.classList.add('removed');
-            cell.classList.add('removed');
-        } else {
-            busy = true;
-            prev.classList.remove('selected');
-            prev.classList.add('error');
-            cell.classList.add('error');
-            setTimeout(() => {
-                prev.classList.remove('error');
-                cell.classList.remove('error');
-                busy = false;
-            }, 400);
-        }
-    }
-
-    document.querySelectorAll('.game-cell:not(.empty-glass)').forEach(cell => {
-        cell.addEventListener('click', () => handleClick(cell));
-    });
-</script>
+                    cell1.classList.remove('selected');
+                    cell2.classList.remove('selected');
+                    selectedCells = [];
+                }, 600);
+            }
+        });
+    </script>
 </body>
 </html>
