@@ -170,8 +170,54 @@
         const GRID_ROWS = 8;
         const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
         const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        const POINTS_PER_PAIR = 10;
+
         let selectedCells = [];
         let gameGrid = null;
+        let gameState = {
+            level: 0,
+            points: 0,
+            requiredPoints: 350,
+            matchedPairs: 0
+        };
+
+        function updateProgress() {
+            const levelEl = document.querySelector('.progress-level-value');
+            const pointsEl = document.querySelector('.progress-points-value');
+            const requiredEl = document.querySelector('.progress-required-value');
+            const progressBar = document.querySelector('.progress-bar-fill');
+
+            levelEl.textContent = gameState.level;
+            pointsEl.textContent = gameState.points;
+            requiredEl.textContent = gameState.requiredPoints;
+
+            const progressPercent = Math.min(
+                (gameState.points / gameState.requiredPoints) * 100,
+                100
+            );
+            progressBar.style.width = progressPercent + '%';
+        }
+
+        function addPoints(points) {
+            gameState.points += points;
+            gameState.matchedPairs++;
+
+            // Перевіряємо, чи досягнули потрібну кількість очок
+            if (gameState.points >= gameState.requiredPoints) {
+                levelUp();
+            } else {
+                updateProgress();
+            }
+        }
+
+        function levelUp() {
+            gameState.level++;
+            gameState.points = 0;
+            gameState.matchedPairs = 0;
+
+            updateProgress();
+            console.log(`🎉 Рівень ${gameState.level}!`);
+        }
 
         function generateGameCells() {
             const cells = [];
@@ -233,6 +279,7 @@
                 cell1.textContent = '';
                 cell2.textContent = '';
                 console.log(`✓ Знайдено пару: ${num1}`);
+                addPoints(POINTS_PER_PAIR);
                 selectedCells = [];
             } else {
                 // Не збіг - деселектуємо
@@ -292,8 +339,11 @@
             });
         }
 
-        // Генеруємо сітку при завантаженні сторінки
-        document.addEventListener('DOMContentLoaded', renderGameGrid);
+        // Генеруємо сітку та ініціалізуємо прогрес при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', () => {
+            updateProgress();
+            renderGameGrid();
+        });
     </script>
     </div>
 </body>
