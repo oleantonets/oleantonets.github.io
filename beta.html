@@ -261,9 +261,17 @@
                 this.classList.toggle('active');
             });
 
-            cell.addEventListener('touchstart', function(e) {
+            cell.addEventListener('touchend', function(e) {
                 e.preventDefault();
                 this.classList.toggle('active');
+            });
+
+            cell.addEventListener('touchstart', function() {
+                this.style.opacity = '0.8';
+            });
+
+            cell.addEventListener('touchend', function() {
+                this.style.opacity = '1';
             });
         });
     </script>
