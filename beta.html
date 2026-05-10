@@ -89,19 +89,84 @@
   header {
     width: 100%;
     max-width: 480px;
-    padding: 12px 20px;
+    padding: 16px 20px 12px;
     display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-end;
+    gap: 28px;
     position: relative;
     z-index: 1;
   }
 
-  #toast {
-    margin-left: auto;
+  .header-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    position: relative;
+  }
+
+  .logo-row {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    position: relative;
+  }
+
+  .logo {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    letter-spacing: 0px;
+    color: var(--text);
+    flex: 1;
   }
 
 
+  .scores {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+  }
+
+  .score-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: left;
+    min-width: 0;
+  }
+
+  .score-label {
+    font-size: 0.62rem;
+    color: var(--muted);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+  }
+
+  .score-val {
+    font-family: 'Roboto Mono', monospace;
+    font-size: 2.2rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1.1;
+  }
+
+  #score-val { color: var(--text); }
+  #best-val  { color: var(--muted); }
+
+  .fab-restart {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 18px rgba(79,142,247,.4);
+  }
 
   main {
     flex: 1;
@@ -115,95 +180,63 @@
     align-items: center;
   }
 
-  /* Progress card */
-  .progress-card {
-    background: rgba(255, 255, 255, 0.2);
-    border: 1.5px solid rgba(255, 255, 255, 0.4);
-    border-radius: 28px;
-    padding: 16px;
-    margin-bottom: 24px;
-    margin-left: auto;
-    margin-right: auto;
-    backdrop-filter: blur(60px);
-    -webkit-backdrop-filter: blur(60px);
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    position: relative;
-    overflow: hidden;
+  /* Progress bar */
+  .progress-wrapper {
     width: 100%;
-    max-width: 520px;
-  }
-
-  .progress-header {
+    max-width: 480px;
+    padding: 0 20px 10px;
+    position: relative;
+    z-index: 1;
     display: flex;
-    justify-content: flex-end;
     align-items: center;
-    gap: 4px;
-    margin-bottom: 12px;
+    gap: 10px;
   }
 
-  .progress-level-label {
-    font-size: 17px;
-    color: #f8fafc;
-    letter-spacing: 1px;
-    font-weight: 700;
-  }
-
-  .progress-level-value {
-    font-size: 17px;
-    font-weight: 700;
-    color: #f8fafc;
-  }
-
-  .progress-bar-wrapper {
-    height: 16px;
-    background: rgba(167, 139, 250, 0.15);
-    border: 1px solid rgba(167, 139, 250, 0.15);
-    border-radius: 8px;
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    background: var(--surface2);
+    border-radius: 4px;
     overflow: hidden;
-    margin-bottom: 12px;
+    position: relative;
   }
 
-  .progress-bar-fill {
+  .progress-fill {
     height: 100%;
-    width: 86%;
-    background: linear-gradient(90deg, #a78bfa, #ec4899);
-    border-radius: 8px;
-    box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
+    width: 0%;
+    border-radius: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    box-shadow: 0 0 8px rgba(61, 214, 140, .4);
     transition: width .5s cubic-bezier(.4, 0, .2, 1);
+    position: relative;
   }
 
-  .progress-footer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    font-size: 12px;
-    color: #cbd5e1;
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 10px rgba(61, 214, 140, .7), 0 0 20px rgba(61, 214, 140, .3);
+    opacity: 0;
+    transition: opacity .3s;
   }
 
-  .progress-points {
-    flex: 1;
-    white-space: nowrap;
-    color: #cbd5e1;
+  .progress-fill.active::after {
+    opacity: 1;
   }
 
-  .progress-points-value {
-    color: #f8fafc;
+  .progress-label {
+    font-size: .68rem;
     font-weight: 600;
-    margin-left: 2px;
-  }
-
-  .progress-required {
-    flex: 1;
+    color: var(--muted);
+    white-space: nowrap;
+    min-width: 50px;
     text-align: right;
-    white-space: nowrap;
-    color: #cbd5e1;
-  }
-
-  .progress-required-value {
-    color: #f8fafc;
-    font-weight: 600;
-    margin-left: 2px;
+    letter-spacing: .02em;
   }
 
   /* Combo badge */
@@ -256,7 +289,7 @@
   /* Grid wrapper — "table" container */
   #grid-wrapper {
     width: 100%;
-    max-height: calc(var(--cell-size) * 8 + var(--gap) * 7 + 34px);
+    max-height: calc(100vh - 260px);
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px 10px 18px;
@@ -366,7 +399,9 @@
   }
 
   @keyframes cellPop {
-    100% { color: transparent; }
+    0%   { transform: scale(1); opacity: 1; }
+    40%  { transform: scale(1.2); opacity: .8; }
+    100% { transform: scale(0); opacity: 0; }
   }
 
   /* Particles */
@@ -553,6 +588,10 @@
 
   /* Toast */
   #toast {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
     background: transparent;
     border: 1.5px solid var(--yellow);
     color: var(--yellow);
@@ -582,33 +621,47 @@
 
   @media (max-width: 430px) {
     :root { --cell-size: 38px; --gap: 4px; }
-    header { padding: 8px 12px; }
+    .logo { font-size: 1.35rem; }
+    .score-box { min-width: 60px; padding: 5px 10px; }
+    .score-val { font-size: 1.8rem; }
+    header { padding: 12px 12px 8px; gap: 28px; }
     main { padding: 0 6px 10px; }
+    .progress-wrapper { padding: 0 12px 8px; }
   }
 
   @media (max-width: 360px) {
     :root { --cell-size: 34px; --gap: 3px; }
+    .progress-wrapper { padding: 0 8px 6px; }
+    .logo { font-size: 1.35rem; }
   }
 </style>
 </head>
 <body>
 
 <header>
-  <div id="toast"></div>
+  <div class="logo-row">
+    <div class="logo">Number Match</div>
+    <div id="toast"></div>
+  </div>
+  <div class="header-row">
+    <div class="scores">
+      <div class="score-box">
+        <div class="score-label">Рахунок</div>
+        <div class="score-val" id="score-val">0</div>
+      </div>
+      <div class="score-box">
+        <div class="score-label">Рекорд</div>
+        <div class="score-val" id="best-val">0</div>
+      </div>
+    </div>
+  </div>
 </header>
 
-<div class="progress-card">
-  <div class="progress-header">
-    <span class="progress-level-label">Level</span>
-    <span class="progress-level-value" id="progress-level">0</span>
+<div class="progress-wrapper">
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill"></div>
   </div>
-  <div class="progress-bar-wrapper">
-    <div class="progress-bar-fill" id="progress-bar-fill"></div>
-  </div>
-  <div class="progress-footer">
-    <span class="progress-points">Points: <span class="progress-points-value" id="progress-points">0</span></span>
-    <span class="progress-required">Required: <span class="progress-required-value" id="progress-required">0</span></span>
-  </div>
+  <div class="progress-label" id="progress-label">0 / 0</div>
 </div>
 
 <main>
@@ -618,7 +671,7 @@
   </div>
   <div class="action-bar">
     <button class="fab fab-restart" id="btn-restart" title="Заново">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
     <button class="fab fab-hint" id="btn-hint" title="Підказка">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
@@ -858,59 +911,42 @@ function spawnFloatPts(el, pts, isCombo) {
    GameUI
    ───────────────────────────────────────────── */
 class GameUI {
-  constructor(onCellClick) {
+  constructor() {
     this.grid = document.getElementById('grid');
+    this.scoreEl = document.getElementById('score-val');
+    this.bestEl = document.getElementById('best-val');
     this.hintBadge = document.getElementById('hint-badge');
     this.comboBadge = document.getElementById('combo-badge');
     this.comboCount = document.getElementById('combo-count');
-    this.cellEls = new Map();
-    this.grid.addEventListener('click', (e) => {
-      const div = e.target.closest('.cell');
-      if (!div || div.style.pointerEvents === 'none') return;
-      const r = parseInt(div.dataset.r);
-      const c = parseInt(div.dataset.c);
-      onCellClick(r, c);
-    });
   }
 
-  render(board, newRowStartIdx = -1) {
+  render(board, onCellClick, newRowStartIdx = -1) {
     this.grid.innerHTML = '';
-    this.cellEls.clear();
-
     const total = board.cells.length;
-
     for (let i = 0; i < total; i++) {
       const val = board.cells[i];
       const r = Math.floor(i / board.cols), c = i % board.cols;
-      const key = `${r},${c}`;
-
       const div = document.createElement('div');
       div.className = 'cell';
-      div.dataset.r = r;
-      div.dataset.c = c;
-      this.grid.appendChild(div);
-      this.cellEls.set(key, div);
-
       if (val !== 0) {
         div.textContent = val;
         div.dataset.n = val;
-        div.style.pointerEvents = '';
-        div.classList.remove('error', 'hint', 'new-row');
+        div.dataset.r = r;
+        div.dataset.c = c;
+        div.addEventListener('click', () => onCellClick(r, c));
         if (newRowStartIdx >= 0 && i >= newRowStartIdx) {
           div.classList.add('new-row');
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
         }
       } else {
         div.style.pointerEvents = 'none';
-        div.textContent = '';
-        delete div.dataset.n;
-        div.classList.remove('error', 'hint', 'new-row');
       }
+      this.grid.appendChild(div);
     }
   }
 
   getCellEl(r, c) {
-    return this.cellEls.get(`${r},${c}`) || null;
+    return this.grid.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
   }
 
   clearStates() {
@@ -957,9 +993,6 @@ class GameUI {
     [p1, p2].forEach(p => {
       const el = this.getCellEl(p.r, p.c);
       if (el) {
-        el.classList.remove('new-row');
-        el.style.animationDelay = '';  // Clear animation delay from slideIn
-        el.offsetHeight;  // Force reflow
         el.classList.add('removing');
         // spawn particles at peak of scale-up (140ms)
         setTimeout(() => spawnParticles(el), 140);
@@ -968,7 +1001,9 @@ class GameUI {
     setTimeout(cb, 360);
   }
 
-  updateScore(score) {
+  updateScore(score, best) {
+    this.scoreEl.textContent = score;
+    this.bestEl.textContent = best;
   }
 
   updateHintBadge(n) {
@@ -976,18 +1011,13 @@ class GameUI {
     document.getElementById('btn-hint').disabled = n <= 0;
   }
 
-  updateProgress(cleared, total, score) {
+  updateProgress(cleared, total) {
     const pct = total > 0 ? (cleared / total) * 100 : 0;
-    const barFill = document.getElementById('progress-bar-fill');
-    const scoreVal = score || 0;
-    const level = Math.floor(scoreVal / 350);
-    const nextLevelThreshold = (level + 1) * 350;
-    const pointsForNextLevel = Math.max(0, nextLevelThreshold - scoreVal);
-
-    document.getElementById('progress-level').textContent = level;
-    document.getElementById('progress-points').textContent = scoreVal;
-    document.getElementById('progress-required').textContent = pointsForNextLevel;
-    barFill.style.width = pct + '%';
+    const fill = document.getElementById('progress-fill');
+    const label = document.getElementById('progress-label');
+    fill.style.width = pct + '%';
+    fill.classList.toggle('active', pct > 0 && pct < 100);
+    label.textContent = `${cleared} / ${total}`;
   }
 
   showCombo(n) {
@@ -1055,8 +1085,9 @@ function showToast(msg) {
 class GameController {
   constructor() {
     this.board = new GameBoard(9);
-    this.ui = new GameUI((r, c) => this.handleCellClick(r, c));
+    this.ui = new GameUI();
     this.score = 0;
+    this.best = parseInt(Storage.get('nm_highscore') || '0');
     this.hintsLeft = 3;
     this.addsLeft = 5;
     this.combo = 0;
@@ -1097,13 +1128,17 @@ class GameController {
     this.initialCount = s.initCount || this.board.countNonEmpty();
     this.combo = 0;
     this.selected = null;
+    this.best = parseInt(Storage.get('nm_highscore') || '0');
   }
 
   saveState() {
     Storage.set('nm_board', JSON.stringify({
       cells: this.board.cells, score: this.score, hints: this.hintsLeft, adds: this.addsLeft, initCount: this.initialCount
     }));
+    Storage.set('nm_highscore', this.best);
   }
+
+
 
   updateAddBadge() {
     document.getElementById('add-badge').textContent = this.addsLeft;
@@ -1120,19 +1155,17 @@ class GameController {
     this.busy = false;
     this.initialCount = this.board.countNonEmpty();
     Storage.remove('nm_board');
-    this.ui.cellEls.clear();
-    this.ui.grid.innerHTML = '';
     this.renderFull();
   }
 
   renderFull(newRowStartIdx = -1) {
-    this.ui.render(this.board, newRowStartIdx);
-    this.ui.updateScore(this.score);
+    this.ui.render(this.board, (r, c) => this.handleCellClick(r, c), newRowStartIdx);
+    this.ui.updateScore(this.score, this.best);
     this.ui.updateHintBadge(this.hintsLeft);
     this.updateAddBadge();
     const remaining = this.board.countNonEmpty();
     const cleared = this.initialCount - remaining;
-    this.ui.updateProgress(cleared, this.initialCount, this.score);
+    this.ui.updateProgress(cleared, this.initialCount);
   }
 
   handleCellClick(r, c) {
@@ -1197,7 +1230,8 @@ class GameController {
     }
 
     this.score += pts;
-    this.ui.updateScore(this.score);
+    if (this.score > this.best) { this.best = this.score; }
+    this.ui.updateScore(this.score, this.best);
 
     setTimeout(() => {
       this.ui.clearStates();
@@ -1205,14 +1239,13 @@ class GameController {
       spawnFloatPts(el1, pts, this.combo > 1);
       this.board.removeCell(s.r, s.c);
       this.board.removeCell(r, c);
+      this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
       this.ui.animateRemove(s, {r, c}, () => {
-        this.board.compact();
-        this.ui.render(this.board);
         this.busy = false;
         this.saveState();
         const remaining = this.board.countNonEmpty();
         const cleared = this.initialCount - remaining;
-        this.ui.updateProgress(cleared, this.initialCount, this.score);
+        this.ui.updateProgress(cleared, this.initialCount);
 
         if (this.board.isCleared()) {
           Storage.remove('nm_board');
