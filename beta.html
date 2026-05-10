@@ -156,6 +156,11 @@
             box-shadow: none;
             filter: none;
         }
+
+        .game-cell.selected {
+            transform: scale(1.30);
+            filter: brightness(1.2);
+        }
     </style>
 </head>
 <body>
@@ -245,5 +250,13 @@
         <div class="game-cell num-1">1</div>
         </div>
     </div>
+
+    <script>
+        document.querySelectorAll('.game-cell:not(.empty-glass)').forEach(cell => {
+            cell.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+    </script>
 </body>
 </html>
