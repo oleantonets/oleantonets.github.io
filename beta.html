@@ -34,8 +34,6 @@
             backdrop-filter: blur(60px);
             -webkit-backdrop-filter: blur(60px);
             box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            position: relative;
-            overflow: hidden;
         }
 
         .progress-header {
@@ -46,17 +44,15 @@
             margin-bottom: 12px;
         }
 
-        .progress-level-label {
-            font-size: 17px;
-            color: #f8fafc;
-            letter-spacing: 1px;
-            font-weight: 700;
-        }
-
+        .progress-level-label,
         .progress-level-value {
             font-size: 17px;
             font-weight: 700;
             color: #f8fafc;
+        }
+
+        .progress-level-label {
+            letter-spacing: 1px;
         }
 
         .progress-bar-wrapper {
@@ -70,11 +66,10 @@
 
         .progress-bar-fill {
             height: 100%;
-            width: 0%;
+            width: 86%;
             background: linear-gradient(90deg, #a78bfa, #ec4899);
             border-radius: 8px;
             box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
-            transition: width 0.3s ease;
         }
 
         .progress-footer {
@@ -83,21 +78,13 @@
             align-items: center;
         }
 
-        .progress-points {
-            font-size: 12px;
-            color: #cbd5e1;
-        }
-
-        .progress-points-value {
-            color: #f8fafc;
-            font-weight: 600;
-        }
-
+        .progress-points,
         .progress-required {
             font-size: 12px;
             color: #cbd5e1;
         }
 
+        .progress-points-value,
         .progress-required-value {
             color: #f8fafc;
             font-weight: 600;
@@ -122,22 +109,10 @@
             transition: all 0.2s ease;
         }
 
-        .game-cell:hover:not(.matched) {
+        .game-cell:not(.empty-glass):hover {
             transform: scale(1.30);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             filter: brightness(1.2);
-        }
-
-        .game-cell.selected {
-            transform: scale(1.10);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
-        }
-
-        .game-cell.matched {
-            opacity: 0;
-            cursor: default;
-            pointer-events: none;
-            transition: opacity 0.6s ease;
         }
 
         .num-1 { background: #f472b6; color: white; }
@@ -148,66 +123,17 @@
         .num-6 { background: #fb7185; color: white; }
         .num-7 { background: #06b6d4; color: white; }
         .num-8 { background: #c084fc; color: white; }
+        .num-9 { background: #f97316; color: white; }
 
         .empty-glass {
             background: #4b5563;
-            border: none;
             cursor: default;
         }
 
-        .empty-glass:hover {
-            transform: none;
-            box-shadow: none;
-            filter: none;
-        }
-
-        .level-up-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .level-up-modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: rgba(255, 255, 255, 0.15);
-            border: 1.5px solid rgba(255, 255, 255, 0.4);
-            border-radius: 28px;
-            padding: 32px;
-            text-align: center;
-            backdrop-filter: blur(60px);
-            -webkit-backdrop-filter: blur(60px);
-        }
-
-        .modal-content h2 {
-            font-size: 32px;
-            margin-bottom: 16px;
-        }
-
-        .modal-content button {
-            background: linear-gradient(90deg, #a78bfa, #ec4899);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            margin-top: 16px;
-            transition: transform 0.2s ease;
-        }
-
-        .modal-content button:hover {
-            transform: scale(1.05);
+        .game-cell.selected {
+            transform: scale(1.30);
+            box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
+            filter: brightness(1.3);
         }
     </style>
 </head>
@@ -216,17 +142,17 @@
         <div class="progress-card">
             <div class="progress-header">
                 <span class="progress-level-label">Level</span>
-                <span class="progress-level-value" id="levelValue">1</span>
+                <span class="progress-level-value">10</span>
             </div>
             <div class="progress-bar-wrapper">
-                <div class="progress-bar-fill" id="progressBar"></div>
+                <div class="progress-bar-fill"></div>
             </div>
             <div class="progress-footer">
                 <div class="progress-points">
-                    Points: <span class="progress-points-value" id="pointsValue">0</span>
+                    Points: <span class="progress-points-value">300</span>
                 </div>
                 <div class="progress-required">
-                    Required: <span class="progress-required-value" id="requiredValue">32</span>
+                    Required: <span class="progress-required-value">350</span>
                 </div>
             </div>
         </div>
@@ -234,147 +160,73 @@
         <div class="game-grid" id="gameGrid"></div>
     </div>
 
-    <div class="level-up-modal" id="levelUpModal">
-        <div class="modal-content">
-            <h2>🎉 Level Up!</h2>
-            <p id="levelUpText">You've reached Level 2!</p>
-            <button onclick="continuGame()">Continue</button>
-        </div>
-    </div>
-
     <script>
-        const GRID_SIZE = 8;
-        const TOTAL_CELLS = GRID_SIZE * GRID_SIZE;
-        const NUM_PAIRS = TOTAL_CELLS / 2;
-        const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8];
+        const GRID_COLS = 8;
+        const GRID_ROWS = 8;
+        const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
+        const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+        let selectedCells = [];
 
-        let gameState = {
-            level: 1,
-            points: 0,
-            requiredPoints: NUM_PAIRS,
-            selectedCells: [],
-            matchedPairs: 0,
-            totalPairs: NUM_PAIRS,
-            locked: false,
-            cells: []
-        };
+        function generateGameCells() {
+            const cells = [];
 
-        function initGame() {
-            gameState.cells = createGameBoard();
-            renderBoard();
-            updateProgress();
-        }
+            // Додаємо першу пусту клітинку
+            cells.push(null);
 
-        function createGameBoard() {
-            const board = [];
-            for (let num of NUMBERS) {
-                for (let i = 0; i < 8; i++) {
-                    board.push(num);
-                }
+            // Заповнюємо решту сітки числами
+            let numberIndex = 0;
+            for (let i = 1; i < TOTAL_CELLS; i++) {
+                cells.push(NUMBERS[numberIndex % NUMBERS.length]);
+                numberIndex++;
             }
-            return shuffleArray(board);
+
+            return cells;
         }
 
-        function shuffleArray(arr) {
-            const newArr = [...arr];
-            for (let i = newArr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
+        function handleCellClick(event) {
+            const cell = event.target;
+
+            // Не вибираємо пусту клітинку
+            if (cell.classList.contains('empty-glass')) return;
+
+            // Не вибираємо одну й ту ж клітинку двічі
+            if (cell.classList.contains('selected')) {
+                cell.classList.remove('selected');
+                selectedCells = selectedCells.filter(c => c !== cell);
+                return;
             }
-            return newArr;
+
+            // Вибираємо клітинку
+            cell.classList.add('selected');
+            selectedCells.push(cell);
+
+            console.log(`Вибрана клітинка: ${cell.getAttribute('data-number')}`);
         }
 
-        function renderBoard() {
-            const grid = document.getElementById('gameGrid');
-            grid.innerHTML = '';
+        function renderGameGrid() {
+            const gameGrid = document.getElementById('gameGrid');
+            const cells = generateGameCells();
 
-            gameState.cells.forEach((num, index) => {
-                const cell = document.createElement('div');
-                cell.className = `game-cell num-${num}`;
-                cell.textContent = num;
-                cell.dataset.index = index;
-                cell.dataset.number = num;
+            cells.forEach((number) => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = 'game-cell';
 
-                if (gameState.matchedPairs > 0) {
-                    const matchedIndices = JSON.parse(localStorage.getItem('matchedIndices') || '[]');
-                    if (matchedIndices.includes(index)) {
-                        cell.classList.add('matched');
-                    }
+                if (number === null) {
+                    cellDiv.classList.add('empty-glass');
+                } else {
+                    cellDiv.classList.add(`num-${number}`);
+                    cellDiv.textContent = number;
+                    cellDiv.setAttribute('data-number', number);
+                    cellDiv.addEventListener('click', handleCellClick);
                 }
 
-                cell.addEventListener('click', () => handleCellClick(index, cell));
-                grid.appendChild(cell);
+                gameGrid.appendChild(cellDiv);
             });
         }
 
-        function handleCellClick(index, cellElement) {
-            if (gameState.locked) return;
-            if (cellElement.classList.contains('matched')) return;
-            if (gameState.selectedCells.some(cell => cell.index === index)) return;
-
-            gameState.selectedCells.push({ index, element: cellElement });
-            cellElement.classList.add('selected');
-
-            if (gameState.selectedCells.length === 2) {
-                checkForMatch();
-            }
-        }
-
-        function checkForMatch() {
-            gameState.locked = true;
-            const [first, second] = gameState.selectedCells;
-
-            setTimeout(() => {
-                if (first.element.dataset.number === second.element.dataset.number) {
-                    first.element.classList.add('matched');
-                    second.element.classList.add('matched');
-                    gameState.matchedPairs++;
-                    gameState.points += 10;
-
-                    const matchedIndices = JSON.parse(localStorage.getItem('matchedIndices') || '[]');
-                    matchedIndices.push(first.index, second.index);
-                    localStorage.setItem('matchedIndices', JSON.stringify(matchedIndices));
-
-                    if (gameState.matchedPairs === gameState.totalPairs) {
-                        nextLevel();
-                    }
-                } else {
-                    first.element.classList.remove('selected');
-                    second.element.classList.remove('selected');
-                }
-
-                gameState.selectedCells = [];
-                gameState.locked = false;
-                updateProgress();
-            }, 600);
-        }
-
-        function nextLevel() {
-            gameState.level++;
-            gameState.points = 0;
-            gameState.matchedPairs = 0;
-            gameState.requiredPoints = gameState.totalPairs;
-            localStorage.setItem('matchedIndices', '[]');
-
-            const modal = document.getElementById('levelUpModal');
-            document.getElementById('levelUpText').textContent = `You've reached Level ${gameState.level}!`;
-            modal.classList.add('show');
-        }
-
-        function continuGame() {
-            document.getElementById('levelUpModal').classList.remove('show');
-            initGame();
-        }
-
-        function updateProgress() {
-            const percentage = (gameState.points / gameState.requiredPoints) * 100;
-            document.getElementById('progressBar').style.width = Math.min(percentage, 100) + '%';
-            document.getElementById('pointsValue').textContent = gameState.points;
-            document.getElementById('requiredValue').textContent = gameState.requiredPoints;
-            document.getElementById('levelValue').textContent = gameState.level;
-        }
-
-        initGame();
+        // Генеруємо сітку при завантаженні сторінки
+        document.addEventListener('DOMContentLoaded', renderGameGrid);
     </script>
+    </div>
 </body>
 </html>
