@@ -297,11 +297,15 @@
 
             const cell1 = selectedCells[0];
             const cell2 = selectedCells[1];
-            const num1 = cell1.getAttribute('data-number');
-            const num2 = cell2.getAttribute('data-number');
+            const num1 = parseInt(cell1.getAttribute('data-number'));
+            const num2 = parseInt(cell2.getAttribute('data-number'));
 
-            // Перевіряємо, чи числа однакові та клітинки сусідні
-            if (num1 === num2 && areAdjacent(cell1, cell2)) {
+            const isAdjacent = areAdjacent(cell1, cell2);
+            const isSameNumber = num1 === num2;
+            const sumToTen = num1 + num2 === 10;
+
+            // Перевіряємо, чи числа однакові або в сумі дають 10, та клітинки сусідні
+            if (isAdjacent && (isSameNumber || sumToTen)) {
                 // Пара знайдена - робимо клітинки пустими
                 cell1.classList.remove('selected');
                 cell2.classList.remove('selected');
@@ -311,7 +315,8 @@
                 cell2.removeAttribute('data-number');
                 cell1.textContent = '';
                 cell2.textContent = '';
-                console.log(`✓ Знайдено пару: ${num1}`);
+                const matchType = isSameNumber ? `${num1}+${num1}` : `${num1}+${num2}`;
+                console.log(`✓ Пара: ${matchType} = ${num1 + num2}`);
                 addPoints(POINTS_PER_PAIR);
                 selectedCells = [];
             } else {
