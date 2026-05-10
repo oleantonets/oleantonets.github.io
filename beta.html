@@ -156,6 +156,13 @@
             box-shadow: none;
             filter: none;
         }
+
+        .game-cell.active {
+            transform: scale(1.15);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.2);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+        }
     </style>
 </head>
 <body>
@@ -245,5 +252,20 @@
         <div class="game-cell num-1">1</div>
         </div>
     </div>
+
+    <script>
+        const gameCells = document.querySelectorAll('.game-cell:not(.empty-glass)');
+
+        gameCells.forEach(cell => {
+            cell.addEventListener('click', function() {
+                this.classList.toggle('active');
+            });
+
+            cell.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                this.classList.toggle('active');
+            });
+        });
+    </script>
 </body>
 </html>
