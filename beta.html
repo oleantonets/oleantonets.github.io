@@ -140,12 +140,6 @@
             box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
             filter: brightness(1.3);
         }
-
-        .game-cell.matched {
-            opacity: 0.3;
-            pointer-events: none;
-            cursor: default;
-        }
     </style>
 </head>
 <body>
@@ -182,12 +176,9 @@
         function generateGameCells() {
             const cells = [];
 
-            // Додаємо першу пусту клітинку
-            cells.push(null);
-
-            // Заповнюємо решту сітки числами
+            // Заповнюємо всю сітку числами (64 клітинки)
             let numberIndex = 0;
-            for (let i = 1; i < TOTAL_CELLS; i++) {
+            for (let i = 0; i < TOTAL_CELLS; i++) {
                 cells.push(NUMBERS[numberIndex % NUMBERS.length]);
                 numberIndex++;
             }
@@ -235,10 +226,6 @@
                 cell2.removeAttribute('data-number');
                 cell1.textContent = '';
                 cell2.textContent = '';
-                cell1.removeEventListener('click', handleCellClick);
-                cell1.removeEventListener('touchend', handleCellTouch);
-                cell2.removeEventListener('click', handleCellClick);
-                cell2.removeEventListener('touchend', handleCellTouch);
                 console.log(`✓ Знайдено пару: ${num1}`);
                 selectedCells = [];
             } else {
@@ -250,8 +237,8 @@
         }
 
         function toggleCellSelection(cell) {
-            // Не вибираємо пусту клітинку або вже знайдену пару
-            if (cell.classList.contains('empty-glass') || cell.classList.contains('matched')) return;
+            // Не вибираємо пусту клітинку
+            if (cell.classList.contains('empty-glass')) return;
 
             // Не вибираємо одну й ту ж клітинку двічі
             if (cell.classList.contains('selected')) {
@@ -289,15 +276,11 @@
                 const cellDiv = document.createElement('div');
                 cellDiv.className = 'game-cell';
 
-                if (number === null) {
-                    cellDiv.classList.add('empty-glass');
-                } else {
-                    cellDiv.classList.add(`num-${number}`);
-                    cellDiv.textContent = number;
-                    cellDiv.setAttribute('data-number', number);
-                    cellDiv.addEventListener('click', handleCellClick);
-                    cellDiv.addEventListener('touchend', handleCellTouch);
-                }
+                cellDiv.classList.add(`num-${number}`);
+                cellDiv.textContent = number;
+                cellDiv.setAttribute('data-number', number);
+                cellDiv.addEventListener('click', handleCellClick);
+                cellDiv.addEventListener('touchend', handleCellTouch);
 
                 gameGrid.appendChild(cellDiv);
             });
