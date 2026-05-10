@@ -107,12 +107,17 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        .game-cell:not(.empty-glass):hover {
-            transform: scale(1.30);
-            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-            filter: brightness(1.2);
+        @media (hover: hover) {
+            .game-cell:not(.empty-glass):hover {
+                transform: scale(1.30);
+                box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                filter: brightness(1.2);
+            }
         }
 
         .num-1 { background: #f472b6; color: white; }
@@ -183,9 +188,7 @@
             return cells;
         }
 
-        function handleCellClick(event) {
-            const cell = event.target;
-
+        function toggleCellSelection(cell) {
             // Не вибираємо пусту клітинку
             if (cell.classList.contains('empty-glass')) return;
 
@@ -203,6 +206,15 @@
             console.log(`Вибрана клітинка: ${cell.getAttribute('data-number')}`);
         }
 
+        function handleCellClick(event) {
+            toggleCellSelection(event.target);
+        }
+
+        function handleCellTouch(event) {
+            event.preventDefault();
+            toggleCellSelection(event.target);
+        }
+
         function renderGameGrid() {
             const gameGrid = document.getElementById('gameGrid');
             const cells = generateGameCells();
@@ -218,6 +230,7 @@
                     cellDiv.textContent = number;
                     cellDiv.setAttribute('data-number', number);
                     cellDiv.addEventListener('click', handleCellClick);
+                    cellDiv.addEventListener('touchend', handleCellTouch);
                 }
 
                 gameGrid.appendChild(cellDiv);
