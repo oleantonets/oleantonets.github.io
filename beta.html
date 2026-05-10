@@ -255,12 +255,13 @@
 
     <script>
         let selectedCells = [];
+        let isProcessing = false;
         const gameGrid = document.querySelector('.game-grid');
 
         gameGrid.addEventListener('click', (e) => {
             const cell = e.target.closest('.game-cell');
 
-            if (!cell || cell.classList.contains('empty-glass') || cell.classList.contains('matched')) {
+            if (!cell || cell.classList.contains('empty-glass')) {
                 return;
             }
 
@@ -270,7 +271,7 @@
                 return;
             }
 
-            if (selectedCells.length >= 2) {
+            if (isProcessing || selectedCells.length >= 2) {
                 return;
             }
 
@@ -278,6 +279,7 @@
             selectedCells.push(cell);
 
             if (selectedCells.length === 2) {
+                isProcessing = true;
                 setTimeout(() => {
                     const [cell1, cell2] = selectedCells;
                     const num1 = cell1.textContent;
@@ -293,6 +295,7 @@
                     cell1.classList.remove('selected');
                     cell2.classList.remove('selected');
                     selectedCells = [];
+                    isProcessing = false;
                 }, 100);
             }
         });
