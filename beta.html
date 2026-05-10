@@ -127,12 +127,16 @@
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
+            transform-origin: center;
+            position: relative;
+            z-index: 1;
         }
 
         .game-cell:hover {
             transform: scale(1.15);
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             filter: brightness(1.2);
+            z-index: 10;
         }
 
         .num-1 { background: #f472b6; color: white; }
@@ -162,6 +166,7 @@
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
             filter: brightness(1.2);
             border: 2px solid rgba(255, 255, 255, 0.5);
+            z-index: 10;
         }
     </style>
 </head>
