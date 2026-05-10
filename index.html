@@ -89,7 +89,7 @@
   header {
     width: 100%;
     max-width: 480px;
-    padding: 32px 20px 12px;
+    padding: 16px 20px 12px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -111,22 +111,18 @@
     width: 100%;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: space-between;
     gap: 10px;
     position: relative;
   }
 
-  #toast {
-    margin-left: auto;
-  }
-
   .logo {
     font-family: 'Roboto Mono', monospace;
-    font-size: 1.8rem;
+    font-size: 1.5rem;
     font-weight: 500;
     letter-spacing: 0px;
     color: var(--text);
-    flex: 0 0 50%;
+    flex: 1;
   }
 
 
@@ -161,12 +157,10 @@
     font-weight: 500;
     color: var(--text);
     line-height: 1.1;
-    perspective: 1000px;
   }
 
   #score-val { color: var(--text); }
   #best-val  { color: var(--muted); }
-
 
   .fab-restart {
     background: linear-gradient(135deg, var(--accent), var(--accent2));
@@ -295,7 +289,7 @@
   /* Grid wrapper — "table" container */
   #grid-wrapper {
     width: 100%;
-    max-height: calc(var(--cell-size) * 8 + var(--gap) * 7 + 34px);
+    max-height: calc(100vh - 260px);
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px 10px 18px;
@@ -405,7 +399,9 @@
   }
 
   @keyframes cellPop {
-    100% { color: transparent; }
+    0%   { transform: scale(1); opacity: 1; }
+    40%  { transform: scale(1.2); opacity: .8; }
+    100% { transform: scale(0); opacity: 0; }
   }
 
   /* Particles */
@@ -592,6 +588,10 @@
 
   /* Toast */
   #toast {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: 0;
     background: transparent;
     border: 1.5px solid var(--yellow);
     color: var(--yellow);
@@ -621,10 +621,10 @@
 
   @media (max-width: 430px) {
     :root { --cell-size: 38px; --gap: 4px; }
-    .logo { font-size: 1.8rem; }
+    .logo { font-size: 1.35rem; }
     .score-box { min-width: 60px; padding: 5px 10px; }
     .score-val { font-size: 1.8rem; }
-    header { padding: 24px 12px 8px; gap: 28px; }
+    header { padding: 12px 12px 8px; gap: 28px; }
     main { padding: 0 6px 10px; }
     .progress-wrapper { padding: 0 12px 8px; }
   }
@@ -671,7 +671,7 @@
   </div>
   <div class="action-bar">
     <button class="fab fab-restart" id="btn-restart" title="Заново">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
     </button>
     <button class="fab fab-hint" id="btn-hint" title="Підказка">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
@@ -911,61 +911,42 @@ function spawnFloatPts(el, pts, isCombo) {
    GameUI
    ───────────────────────────────────────────── */
 class GameUI {
-  constructor(onCellClick) {
+  constructor() {
     this.grid = document.getElementById('grid');
     this.scoreEl = document.getElementById('score-val');
     this.bestEl = document.getElementById('best-val');
     this.hintBadge = document.getElementById('hint-badge');
     this.comboBadge = document.getElementById('combo-badge');
     this.comboCount = document.getElementById('combo-count');
-    this.cellEls = new Map();
-    this.grid.addEventListener('click', (e) => {
-      const div = e.target.closest('.cell');
-      if (!div || div.style.pointerEvents === 'none') return;
-      const r = parseInt(div.dataset.r);
-      const c = parseInt(div.dataset.c);
-      onCellClick(r, c);
-    });
   }
 
-  render(board, newRowStartIdx = -1) {
+  render(board, onCellClick, newRowStartIdx = -1) {
     this.grid.innerHTML = '';
-    this.cellEls.clear();
-
     const total = board.cells.length;
-
     for (let i = 0; i < total; i++) {
       const val = board.cells[i];
       const r = Math.floor(i / board.cols), c = i % board.cols;
-      const key = `${r},${c}`;
-
       const div = document.createElement('div');
       div.className = 'cell';
-      div.dataset.r = r;
-      div.dataset.c = c;
-      this.grid.appendChild(div);
-      this.cellEls.set(key, div);
-
       if (val !== 0) {
         div.textContent = val;
         div.dataset.n = val;
-        div.style.pointerEvents = '';
-        div.classList.remove('error', 'hint', 'new-row');
+        div.dataset.r = r;
+        div.dataset.c = c;
+        div.addEventListener('click', () => onCellClick(r, c));
         if (newRowStartIdx >= 0 && i >= newRowStartIdx) {
           div.classList.add('new-row');
           div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
         }
       } else {
         div.style.pointerEvents = 'none';
-        div.textContent = '';
-        delete div.dataset.n;
-        div.classList.remove('error', 'hint', 'new-row');
       }
+      this.grid.appendChild(div);
     }
   }
 
   getCellEl(r, c) {
-    return this.cellEls.get(`${r},${c}`) || null;
+    return this.grid.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
   }
 
   clearStates() {
@@ -1012,9 +993,6 @@ class GameUI {
     [p1, p2].forEach(p => {
       const el = this.getCellEl(p.r, p.c);
       if (el) {
-        el.classList.remove('new-row');
-        el.style.animationDelay = '';  // Clear animation delay from slideIn
-        el.offsetHeight;  // Force reflow
         el.classList.add('removing');
         // spawn particles at peak of scale-up (140ms)
         setTimeout(() => spawnParticles(el), 140);
@@ -1107,7 +1085,7 @@ function showToast(msg) {
 class GameController {
   constructor() {
     this.board = new GameBoard(9);
-    this.ui = new GameUI((r, c) => this.handleCellClick(r, c));
+    this.ui = new GameUI();
     this.score = 0;
     this.best = parseInt(Storage.get('nm_highscore') || '0');
     this.hintsLeft = 3;
@@ -1160,6 +1138,8 @@ class GameController {
     Storage.set('nm_highscore', this.best);
   }
 
+
+
   updateAddBadge() {
     document.getElementById('add-badge').textContent = this.addsLeft;
     document.getElementById('btn-add').disabled = this.addsLeft <= 0;
@@ -1175,13 +1155,11 @@ class GameController {
     this.busy = false;
     this.initialCount = this.board.countNonEmpty();
     Storage.remove('nm_board');
-    this.ui.cellEls.clear();
-    this.ui.grid.innerHTML = '';
     this.renderFull();
   }
 
   renderFull(newRowStartIdx = -1) {
-    this.ui.render(this.board, newRowStartIdx);
+    this.ui.render(this.board, (r, c) => this.handleCellClick(r, c), newRowStartIdx);
     this.ui.updateScore(this.score, this.best);
     this.ui.updateHintBadge(this.hintsLeft);
     this.updateAddBadge();
@@ -1261,9 +1239,8 @@ class GameController {
       spawnFloatPts(el1, pts, this.combo > 1);
       this.board.removeCell(s.r, s.c);
       this.board.removeCell(r, c);
+      this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
       this.ui.animateRemove(s, {r, c}, () => {
-        this.board.compact();
-        this.ui.render(this.board);
         this.busy = false;
         this.saveState();
         const remaining = this.board.countNonEmpty();
