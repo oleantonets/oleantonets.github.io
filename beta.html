@@ -251,12 +251,45 @@
             const row2 = Math.floor(idx2 / GRID_COLS);
             const col2 = idx2 % GRID_COLS;
 
-            // Перевіряємо, чи клітинки сусідні по вертикалі, горизонталі або діагоналі
-            const horizontallyAdjacent = row1 === row2 && Math.abs(col1 - col2) === 1;
-            const verticallyAdjacent = col1 === col2 && Math.abs(row1 - row2) === 1;
-            const diagonallyAdjacent = Math.abs(row1 - row2) === 1 && Math.abs(col1 - col2) === 1;
+            // 8 напрямків: вверх, вниз, ліво, право, 4 діагоналі
+            const directions = [
+                { dr: -1, dc: 0 }, // вверх
+                { dr: 1, dc: 0 },  // вниз
+                { dr: 0, dc: -1 }, // ліво
+                { dr: 0, dc: 1 },  // право
+                { dr: -1, dc: -1 }, // діагональ вверх-ліво
+                { dr: -1, dc: 1 },  // діагональ вверх-право
+                { dr: 1, dc: -1 },  // діагональ вниз-ліво
+                { dr: 1, dc: 1 }    // діагональ вниз-право
+            ];
 
-            return horizontallyAdjacent || verticallyAdjacent || diagonallyAdjacent;
+            // Перевіряємо кожен напрямок
+            for (let dir of directions) {
+                let r = row1 + dir.dr;
+                let c = col1 + dir.dc;
+
+                // Йдемо в напрямку доки не знайдемо не-пусту клітинку
+                while (r >= 0 && r < GRID_ROWS && c >= 0 && c < GRID_COLS) {
+                    const currentIdx = r * GRID_COLS + c;
+                    const currentCell = gameGrid.children[currentIdx];
+
+                    // Якщо натнулись на cell2 - вони можуть бути матчені
+                    if (currentCell === cell2) {
+                        return true;
+                    }
+
+                    // Якщо натнулись на не-пусту клітинку (не empty-glass) - стоп
+                    if (!currentCell.classList.contains('empty-glass')) {
+                        break;
+                    }
+
+                    // Рухаємось далі в напрямку
+                    r += dir.dr;
+                    c += dir.dc;
+                }
+            }
+
+            return false;
         }
 
         function checkMatch() {
