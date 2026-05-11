@@ -255,15 +255,14 @@
 
             function generateGameCells() {
                 const cells = [];
+                const pairsNeeded = TOTAL_CELLS / 2;
 
-                // Заповнюємо всю сітку числами (64 клітинки)
-                let numberIndex = 0;
-                for (let i = 0; i < TOTAL_CELLS; i++) {
-                    cells.push(NUMBERS[numberIndex % NUMBERS.length]);
-                    numberIndex++;
+                for (let i = 0; i < pairsNeeded; i++) {
+                    const number = NUMBERS[i % NUMBERS.length];
+                    cells.push(number);
+                    cells.push(number);
                 }
 
-                // Перемішуємо числа (Fisher-Yates shuffle)
                 for (let i = cells.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
                     [cells[i], cells[j]] = [cells[j], cells[i]];
