@@ -182,8 +182,7 @@
 
         <script>
             const GRID_COLS = 8;
-            const GRID_ROWS = 8;
-            const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
+            const TOTAL_CELLS = 64;
             const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             const POINTS_PER_PAIR = 10;
 
@@ -233,6 +232,27 @@
                 updateProgress();
             }
 
+            function checkForClearedRows() {
+                const currentRows = Math.floor(gameGrid.children.length / GRID_COLS);
+
+                for (let row = currentRows - 1; row >= 0; row--) {
+                    const rowCells = [];
+                    let isRowEmpty = true;
+
+                    for (let col = 0; col < GRID_COLS; col++) {
+                        const cell = gameGrid.children[row * GRID_COLS + col];
+                        rowCells.push(cell);
+                        if (!cell.classList.contains('empty-glass')) {
+                            isRowEmpty = false;
+                        }
+                    }
+
+                    if (isRowEmpty) {
+                        rowCells.forEach(cell => cell.remove());
+                    }
+                }
+            }
+
             function generateGameCells() {
                 const cells = [];
 
@@ -257,6 +277,7 @@
             }
 
             function areAdjacent(cell1, cell2) {
+                const currentRows = Math.floor(gameGrid.children.length / GRID_COLS);
                 const idx1 = getCellIndex(cell1);
                 const idx2 = getCellIndex(cell2);
 
@@ -283,7 +304,7 @@
                     let c = col1 + dir.dc;
 
                     // Йдемо в напрямку доки не знайдемо не-пусту клітинку
-                    while (r >= 0 && r < GRID_ROWS && c >= 0 && c < GRID_COLS) {
+                    while (r >= 0 && r < currentRows && c >= 0 && c < GRID_COLS) {
                         const currentIdx = r * GRID_COLS + c;
                         const currentCell = gameGrid.children[currentIdx];
 
@@ -331,6 +352,7 @@
                     cell2.textContent = '';
                     addPoints(POINTS_PER_PAIR);
                     selectedCells = [];
+                    checkForClearedRows();
                 } else {
                     // Не збіг - деселектуємо
                     cell1.classList.remove('selected');
