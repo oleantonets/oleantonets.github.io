@@ -33,35 +33,51 @@
                 margin-bottom: 24px;
                 backdrop-filter: blur(60px);
                 -webkit-backdrop-filter: blur(60px);
-                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            }
-
-            .progress-header {
                 display: flex;
-                justify-content: flex-end;
                 align-items: center;
-                gap: 4px;
-                margin-bottom: 12px;
+                gap: 16px;
             }
 
-            .progress-level-label,
-            .progress-level-value {
-                font-size: 17px;
+            .level-box {
+                background: rgba(167, 139, 250, 0.2);
+                border-radius: 12px;
+                padding: 12px 16px;
+                text-align: center;
+                min-width: 70px;
+                flex-shrink: 0;
+            }
+
+            .level-value {
+                font-size: 28px;
                 font-weight: 700;
-                color: #f8fafc;
+                color: #a78bfa;
+                line-height: 1;
             }
 
-            .progress-level-label {
-                letter-spacing: 1px;
+            .level-label {
+                font-size: 9px;
+                color: #cbd5e1;
+                text-transform: uppercase;
+                margin-top: 4px;
+                letter-spacing: 0.5px;
+            }
+
+            .progress-section {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                gap: 8px;
             }
 
             .progress-bar-wrapper {
                 height: 16px;
                 background: rgba(167, 139, 250, 0.15);
-                border: 1px solid rgba(167, 139, 250, 0.15);
+                border: 1px solid rgba(167, 139, 250, 0.3);
                 border-radius: 8px;
                 overflow: hidden;
-                margin-bottom: 12px;
+                position: relative;
+                display: flex;
+                align-items: center;
             }
 
             .progress-bar-fill {
@@ -69,25 +85,20 @@
                 width: 0%;
                 background: linear-gradient(90deg, #a78bfa, #ec4899);
                 border-radius: 8px;
-                box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
             }
 
-            .progress-footer {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
-
-            .progress-points,
-            .progress-required {
-                font-size: 12px;
+            .progress-info {
+                font-size: 11px;
                 color: #cbd5e1;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                text-align: center;
             }
 
-            .progress-points-value,
-            .progress-required-value {
+            .progress-info-value {
                 color: #f8fafc;
                 font-weight: 600;
+                font-size: 16px;
             }
 
             .game-grid {
@@ -145,19 +156,23 @@
     <body>
         <div class="container">
             <div class="progress-card">
-                <div class="progress-header">
-                    <span class="progress-level-label">Level</span>
-                    <span class="progress-level-value">0</span>
+                <div class="level-box">
+                    <div class="level-label">Level</div>
+                    <div class="level-value">1</div>
                 </div>
-                <div class="progress-bar-wrapper">
-                    <div class="progress-bar-fill"></div>
-                </div>
-                <div class="progress-footer">
-                    <div class="progress-points">
-                        Points: <span class="progress-points-value">0</span>
+                <div class="progress-section">
+                    <div class="progress-bar-wrapper">
+                        <div class="progress-bar-fill"></div>
                     </div>
-                    <div class="progress-required">
-                        Required: <span class="progress-required-value">250</span>
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                        <div>
+                            <div class="progress-info">Points</div>
+                            <div class="progress-info-value" id="pointsValue">0</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="progress-info">Required</div>
+                            <div class="progress-info-value" id="requiredValue">250</div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -175,16 +190,16 @@
             let selectedCells = [];
             let gameGrid = null;
             let gameState = {
-                level: 0,
+                level: 1,
                 points: 0,
                 requiredPoints: 250,
                 matchedPairs: 0
             };
 
             function updateProgress() {
-                const levelEl = document.querySelector('.progress-level-value');
-                const pointsEl = document.querySelector('.progress-points-value');
-                const requiredEl = document.querySelector('.progress-required-value');
+                const levelEl = document.querySelector('.level-value');
+                const pointsEl = document.querySelector('#pointsValue');
+                const requiredEl = document.querySelector('#requiredValue');
                 const progressBar = document.querySelector('.progress-bar-fill');
 
                 levelEl.textContent = gameState.level;
