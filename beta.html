@@ -323,6 +323,29 @@
                     }
                 }
 
+                // Лінійне обвивання: кінець рядка → початок наступного
+                const totalCells = gameGrid.children.length;
+                for (let i = idx1 + 1; i < totalCells; i++) {
+                    const cell = gameGrid.children[i];
+                    if (cell === cell2) {
+                        return true;
+                    }
+                    if (!cell.classList.contains('empty-glass')) {
+                        break;
+                    }
+                }
+
+                // Лінійне обвивання: початок рядка → кінець попереднього
+                for (let i = idx1 - 1; i >= 0; i--) {
+                    const cell = gameGrid.children[i];
+                    if (cell === cell2) {
+                        return true;
+                    }
+                    if (!cell.classList.contains('empty-glass')) {
+                        break;
+                    }
+                }
+
                 return false;
             }
 
