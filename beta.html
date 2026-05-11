@@ -1,383 +1,430 @@
-    <!DOCTYPE html>
-    <html lang="uk">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Number Match</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
+                    <!DOCTYPE html>
+                    <html lang="uk">
+                    <head>
+                        <meta charset="UTF-8">
+                        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                        <title>Number Match</title>
+                        <style>
+                            * {
+                                margin: 0;
+                                padding: 0;
+                                box-sizing: border-box;
+                            }
 
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: #0a0e1a;
-                color: #f1f5f9;
-                min-height: 100vh;
-                padding: 0 24px;
-            }
+                            body {
+                                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+                                background: #0a0e1a;
+                                color: #f1f5f9;
+                                min-height: 100vh;
+                                padding: 0 24px;
+                            }
 
-            .container {
-                max-width: 520px;
-                margin: 0 auto;
-                padding-top: 0;
-            }
+                            .container {
+                                max-width: 520px;
+                                margin: 0 auto;
+                                padding-top: 0;
+                            }
 
-            .progress-card {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1.5px solid rgba(255, 255, 255, 0.4);
-                border-radius: 28px;
-                padding: 16px;
-                margin-bottom: 24px;
-                backdrop-filter: blur(60px);
-                -webkit-backdrop-filter: blur(60px);
-                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            }
+                            .progress-card {
+                                background: rgba(255, 255, 255, 0.2);
+                                border: 1.5px solid rgba(255, 255, 255, 0.4);
+                                border-radius: 28px;
+                                padding: 16px;
+                                margin-bottom: 24px;
+                                backdrop-filter: blur(60px);
+                                -webkit-backdrop-filter: blur(60px);
+                                display: flex;
+                                align-items: center;
+                                gap: 16px;
+                            }
 
-            .progress-header {
-                display: flex;
-                justify-content: flex-end;
-                align-items: center;
-                gap: 4px;
-                margin-bottom: 12px;
-            }
+                            .level-box {
+                                background: rgba(167, 139, 250, 0.2);
+                                border-radius: 12px;
+                                padding: 12px 16px;
+                                text-align: center;
+                                min-width: 70px;
+                                flex-shrink: 0;
+                            }
 
-            .progress-level-label,
-            .progress-level-value {
-                font-size: 17px;
-                font-weight: 700;
-                color: #f8fafc;
-            }
+                            .level-value {
+                                font-size: 28px;
+                                font-weight: 700;
+                                color: #a78bfa;
+                                line-height: 1;
+                            }
 
-            .progress-level-label {
-                letter-spacing: 1px;
-            }
+                            .level-label {
+                                font-size: 9px;
+                                color: #cbd5e1;
+                                text-transform: uppercase;
+                                margin-top: 4px;
+                                letter-spacing: 0.5px;
+                            }
 
-            .progress-bar-wrapper {
-                height: 16px;
-                background: rgba(167, 139, 250, 0.15);
-                border: 1px solid rgba(167, 139, 250, 0.15);
-                border-radius: 8px;
-                overflow: hidden;
-                margin-bottom: 12px;
-            }
+                            .progress-section {
+                                flex: 1;
+                                display: flex;
+                                flex-direction: column;
+                                gap: 8px;
+                            }
 
-            .progress-bar-fill {
-                height: 100%;
-                width: 0%;
-                background: linear-gradient(90deg, #a78bfa, #ec4899);
-                border-radius: 8px;
-                box-shadow: 0 0 12px rgba(167, 139, 250, 0.4);
-            }
+                            .progress-bar-wrapper {
+                                height: 16px;
+                                background: rgba(167, 139, 250, 0.15);
+                                border: 1px solid rgba(167, 139, 250, 0.3);
+                                border-radius: 8px;
+                                overflow: hidden;
+                                position: relative;
+                                display: flex;
+                                align-items: center;
+                            }
 
-            .progress-footer {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-            }
+                            .progress-bar-fill {
+                                height: 100%;
+                                width: 0%;
+                                background: linear-gradient(90deg, #a78bfa, #ec4899);
+                                border-radius: 8px;
+                            }
 
-            .progress-points,
-            .progress-required {
-                font-size: 12px;
-                color: #cbd5e1;
-            }
+                            .progress-info {
+                                font-size: 11px;
+                                color: #cbd5e1;
+                                text-transform: uppercase;
+                                letter-spacing: 0.5px;
+                                text-align: center;
+                            }
 
-            .progress-points-value,
-            .progress-required-value {
-                color: #f8fafc;
-                font-weight: 600;
-            }
+                            .progress-info-value {
+                                color: #f8fafc;
+                                font-weight: 600;
+                                font-size: 12px;
+                            }
 
-            .game-grid {
-                display: grid;
-                grid-template-columns: repeat(8, 1fr);
-                gap: 8px;
-                margin-top: 24px;
-            }
+                            .game-grid {
+                                display: grid;
+                                grid-template-columns: repeat(8, 1fr);
+                                gap: 8px;
+                                margin-top: 24px;
+                            }
 
-            .game-cell {
-                aspect-ratio: 1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 8px;
-                font-size: 28px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                user-select: none;
-            }
+                            .game-cell {
+                                aspect-ratio: 1;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                border-radius: 8px;
+                                font-size: 28px;
+                                font-weight: 500;
+                                cursor: pointer;
+                                transition: all 0.2s ease;
+                                -webkit-touch-callout: none;
+                                -webkit-user-select: none;
+                                user-select: none;
+                            }
 
-            @media (hover: hover) {
-                .game-cell:not(.empty-glass):hover {
-                    transform: scale(1.30);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-                    filter: brightness(1.2);
-                }
-            }
+                            @media (hover: hover) {
+                                .game-cell:not(.empty-glass):hover {
+                                    transform: scale(1.30);
+                                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                                    filter: brightness(1.2);
+                                }
+                            }
 
-            .num-1 { background: #f472b6; color: white; }
-            .num-2 { background: #60a5fa; color: white; }
-            .num-3 { background: #34d399; color: white; }
-            .num-4 { background: #fbbf24; color: white; }
-            .num-5 { background: #a78bfa; color: white; }
-            .num-6 { background: #fb7185; color: white; }
-            .num-7 { background: #06b6d4; color: white; }
-            .num-8 { background: #c084fc; color: white; }
-            .num-9 { background: #f97316; color: white; }
+                            .num-1 { background: #f472b6; color: white; }
+                            .num-2 { background: #60a5fa; color: white; }
+                            .num-3 { background: #34d399; color: white; }
+                            .num-4 { background: #fbbf24; color: white; }
+                            .num-5 { background: #a78bfa; color: white; }
+                            .num-6 { background: #fb7185; color: white; }
+                            .num-7 { background: #06b6d4; color: white; }
+                            .num-8 { background: #c084fc; color: white; }
+                            .num-9 { background: #f97316; color: white; }
 
-            .empty-glass {
-                background: #4b5563;
-                cursor: default;
-            }
+                            .empty-glass {
+                                background: #4b5563;
+                                cursor: default;
+                            }
 
-            .game-cell.selected {
-                transform: scale(1.30);
-                box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
-                filter: brightness(1.3);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="progress-card">
-                <div class="progress-header">
-                    <span class="progress-level-label">Level</span>
-                    <span class="progress-level-value">0</span>
-                </div>
-                <div class="progress-bar-wrapper">
-                    <div class="progress-bar-fill"></div>
-                </div>
-                <div class="progress-footer">
-                    <div class="progress-points">
-                        Points: <span class="progress-points-value">0</span>
-                    </div>
-                    <div class="progress-required">
-                        Required: <span class="progress-required-value">250</span>
-                    </div>
-                </div>
-            </div>
+                            .game-cell.selected {
+                                transform: scale(1.30);
+                                box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
+                                filter: brightness(1.3);
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="container">
+                            <div class="progress-card">
+                                <div class="level-box">
+                                    <div class="level-label">Level</div>
+                                    <div class="level-value">0</div>
+                                </div>
+                                <div class="progress-section">
+                                    <div class="progress-bar-wrapper">
+                                        <div class="progress-bar-fill"></div>
+                                    </div>
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                        <div>
+                                            <div class="progress-info">Points</div>
+                                            <div class="progress-info-value" id="pointsValue">0</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div class="progress-info">Required</div>
+                                            <div class="progress-info-value" id="requiredValue">250</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
-            <div class="game-grid" id="gameGrid"></div>
-        </div>
+                            <div class="game-grid" id="gameGrid"></div>
+                        </div>
 
-        <script>
-            const GRID_COLS = 8;
-            const GRID_ROWS = 8;
-            const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
-            const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-            const POINTS_PER_PAIR = 10;
+                        <script>
+                            const GRID_COLS = 8;
+                            const GRID_ROWS = 8;
+                            const TOTAL_CELLS = GRID_COLS * GRID_ROWS;
+                            const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+                            const POINTS_PER_PAIR = 10;
 
-            let selectedCells = [];
-            let gameGrid = null;
-            let gameState = {
-                level: 0,
-                points: 0,
-                requiredPoints: 250,
-                matchedPairs: 0
-            };
+                            let selectedCells = [];
+                            let gameGrid = null;
+                            let gameState = {
+                                level: 0,
+                                points: 0,
+                                requiredPoints: 250,
+                                matchedPairs: 0
+                            };
 
-            function updateProgress() {
-                const levelEl = document.querySelector('.progress-level-value');
-                const pointsEl = document.querySelector('.progress-points-value');
-                const requiredEl = document.querySelector('.progress-required-value');
-                const progressBar = document.querySelector('.progress-bar-fill');
+                            function updateProgress() {
+                                const levelEl = document.querySelector('.level-value');
+                                const pointsEl = document.querySelector('#pointsValue');
+                                const requiredEl = document.querySelector('#requiredValue');
+                                const progressBar = document.querySelector('.progress-bar-fill');
 
-                levelEl.textContent = gameState.level;
-                pointsEl.textContent = gameState.points;
-                requiredEl.textContent = gameState.requiredPoints;
+                                levelEl.textContent = gameState.level;
+                                pointsEl.textContent = gameState.points;
+                                requiredEl.textContent = gameState.requiredPoints;
 
-                const progressPercent = Math.min(
-                    (gameState.points / gameState.requiredPoints) * 100,
-                    100
-                );
-                progressBar.style.width = progressPercent + '%';
-            }
+                                const progressPercent = Math.min(
+                                    (gameState.points / gameState.requiredPoints) * 100,
+                                    100
+                                );
+                                progressBar.style.width = progressPercent + '%';
+                            }
 
-            function addPoints(points) {
-                gameState.points += points;
-                gameState.matchedPairs++;
+                            function addPoints(points) {
+                                gameState.points += points;
+                                gameState.matchedPairs++;
 
-                // Перевіряємо, чи досягнули потрібну кількість очок
-                if (gameState.points >= gameState.requiredPoints) {
-                    levelUp();
-                } else {
-                    updateProgress();
-                }
-            }
+                                // Перевіряємо, чи досягнули потрібну кількість очок
+                                if (gameState.points >= gameState.requiredPoints) {
+                                    levelUp();
+                                } else {
+                                    updateProgress();
+                                }
+                            }
 
-            function levelUp() {
-                gameState.level++;
-                gameState.points = 0;
-                gameState.matchedPairs = 0;
+                            function levelUp() {
+                                gameState.level++;
+                                gameState.points = 0;
+                                gameState.matchedPairs = 0;
 
-                updateProgress();
-            }
+                                updateProgress();
+                            }
 
-            function generateGameCells() {
-                const cells = [];
+                            function generateGameCells() {
+                                const cells = [];
 
-                // Заповнюємо всю сітку числами (64 клітинки)
-                let numberIndex = 0;
-                for (let i = 0; i < TOTAL_CELLS; i++) {
-                    cells.push(NUMBERS[numberIndex % NUMBERS.length]);
-                    numberIndex++;
-                }
+                                // Заповнюємо всю сітку числами (64 клітинки)
+                                let numberIndex = 0;
+                                for (let i = 0; i < TOTAL_CELLS; i++) {
+                                    cells.push(NUMBERS[numberIndex % NUMBERS.length]);
+                                    numberIndex++;
+                                }
 
-                // Перемішуємо числа (Fisher-Yates shuffle)
-                for (let i = cells.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [cells[i], cells[j]] = [cells[j], cells[i]];
-                }
+                                // Перемішуємо числа (Fisher-Yates shuffle)
+                                for (let i = cells.length - 1; i > 0; i--) {
+                                    const j = Math.floor(Math.random() * (i + 1));
+                                    [cells[i], cells[j]] = [cells[j], cells[i]];
+                                }
 
-                return cells;
-            }
+                                return cells;
+                            }
 
-            function getCellIndex(cell) {
-                return Array.from(gameGrid.children).indexOf(cell);
-            }
+                            function getCellIndex(cell) {
+                                return Array.from(gameGrid.children).indexOf(cell);
+                            }
 
-            function areAdjacent(cell1, cell2) {
-                const idx1 = getCellIndex(cell1);
-                const idx2 = getCellIndex(cell2);
+                            function areAdjacent(cell1, cell2) {
+                                const idx1 = getCellIndex(cell1);
+                                const idx2 = getCellIndex(cell2);
 
-                const row1 = Math.floor(idx1 / GRID_COLS);
-                const col1 = idx1 % GRID_COLS;
-                const row2 = Math.floor(idx2 / GRID_COLS);
-                const col2 = idx2 % GRID_COLS;
+                                const row1 = Math.floor(idx1 / GRID_COLS);
+                                const col1 = idx1 % GRID_COLS;
+                                const row2 = Math.floor(idx2 / GRID_COLS);
+                                const col2 = idx2 % GRID_COLS;
 
-                // 8 напрямків: вверх, вниз, ліво, право, 4 діагоналі
-                const directions = [
-                    { dr: -1, dc: 0 }, // вверх
-                    { dr: 1, dc: 0 },  // вниз
-                    { dr: 0, dc: -1 }, // ліво
-                    { dr: 0, dc: 1 },  // право
-                    { dr: -1, dc: -1 }, // діагональ вверх-ліво
-                    { dr: -1, dc: 1 },  // діагональ вверх-право
-                    { dr: 1, dc: -1 },  // діагональ вниз-ліво
-                    { dr: 1, dc: 1 }    // діагональ вниз-право
-                ];
+                                // 8 напрямків: вверх, вниз, ліво, право, 4 діагоналі
+                                const directions = [
+                                    { dr: -1, dc: 0 }, // вверх
+                                    { dr: 1, dc: 0 },  // вниз
+                                    { dr: 0, dc: -1 }, // ліво
+                                    { dr: 0, dc: 1 },  // право
+                                    { dr: -1, dc: -1 }, // діагональ вверх-ліво
+                                    { dr: -1, dc: 1 },  // діагональ вверх-право
+                                    { dr: 1, dc: -1 },  // діагональ вниз-ліво
+                                    { dr: 1, dc: 1 }    // діагональ вниз-право
+                                ];
 
-                // Перевіряємо кожен напрямок
-                for (let dir of directions) {
-                    let r = row1 + dir.dr;
-                    let c = col1 + dir.dc;
+                                // Перевіряємо кожен напрямок
+                                for (let dir of directions) {
+                                    let r = row1 + dir.dr;
+                                    let c = col1 + dir.dc;
 
-                    // Йдемо в напрямку доки не знайдемо не-пусту клітинку
-                    while (r >= 0 && r < GRID_ROWS && c >= 0 && c < GRID_COLS) {
-                        const currentIdx = r * GRID_COLS + c;
-                        const currentCell = gameGrid.children[currentIdx];
+                                    // Йдемо в напрямку доки не знайдемо не-пусту клітинку
+                                    while (r >= 0 && r < GRID_ROWS && c >= 0 && c < GRID_COLS) {
+                                        const currentIdx = r * GRID_COLS + c;
+                                        const currentCell = gameGrid.children[currentIdx];
 
-                        // Якщо натнулись на cell2 - вони можуть бути матчені
-                        if (currentCell === cell2) {
-                            return true;
-                        }
+                                        // Якщо натнулись на cell2 - вони можуть бути матчені
+                                        if (currentCell === cell2) {
+                                            return true;
+                                        }
 
-                        // Якщо натнулись на не-пусту клітинку (не empty-glass) - стоп
-                        if (!currentCell.classList.contains('empty-glass')) {
-                            break;
-                        }
+                                        // Якщо натнулись на не-пусту клітинку (не empty-glass) - стоп
+                                        if (!currentCell.classList.contains('empty-glass')) {
+                                            break;
+                                        }
 
-                        // Рухаємось далі в напрямку
-                        r += dir.dr;
-                        c += dir.dc;
-                    }
-                }
+                                        // Рухаємось далі в напрямку
+                                        r += dir.dr;
+                                        c += dir.dc;
+                                    }
+                                }
 
-                return false;
-            }
+                                return false;
+                            }
 
-            function checkMatch() {
-                if (selectedCells.length !== 2) return;
+                            function removeEmptyRows() {
+                                let cellsToRemove = [];
 
-                const cell1 = selectedCells[0];
-                const cell2 = selectedCells[1];
-                const num1 = parseInt(cell1.getAttribute('data-number'));
-                const num2 = parseInt(cell2.getAttribute('data-number'));
+                                // Знайти пусті рядки та зібрати клітинки для видалення
+                                for (let row = 0; row < GRID_ROWS; row++) {
+                                    let isEmpty = true;
+                                    for (let col = 0; col < GRID_COLS; col++) {
+                                        const idx = row * GRID_COLS + col;
+                                        const cell = gameGrid.children[idx];
+                                        if (cell && !cell.classList.contains('empty-glass')) {
+                                            isEmpty = false;
+                                            break;
+                                        }
+                                    }
 
-                const isAdjacent = areAdjacent(cell1, cell2);
-                const isSameNumber = num1 === num2;
-                const sumToTen = num1 + num2 === 10;
+                                    // Якщо рядок пустий, додати всі клітинки рядка в список
+                                    if (isEmpty) {
+                                        for (let col = 0; col < GRID_COLS; col++) {
+                                            const idx = row * GRID_COLS + col;
+                                            const cell = gameGrid.children[idx];
+                                            if (cell) {
+                                                cellsToRemove.push(cell);
+                                            }
+                                        }
+                                    }
+                                }
 
-                // Перевіряємо, чи числа однакові або в сумі дають 10, та клітинки сусідні
-                if (isAdjacent && (isSameNumber || sumToTen)) {
-                    // Пара знайдена - робимо клітинки пустими
-                    cell1.classList.remove('selected');
-                    cell2.classList.remove('selected');
-                    cell1.classList.add('empty-glass');
-                    cell2.classList.add('empty-glass');
-                    cell1.removeAttribute('data-number');
-                    cell2.removeAttribute('data-number');
-                    cell1.textContent = '';
-                    cell2.textContent = '';
-                    addPoints(POINTS_PER_PAIR);
-                    selectedCells = [];
-                } else {
-                    // Не збіг - деселектуємо
-                    cell1.classList.remove('selected');
-                    cell2.classList.remove('selected');
-                    selectedCells = [];
-                }
-            }
+                                // Видалити всі зібрані клітинки
+                                cellsToRemove.forEach(cell => cell.remove());
+                            }
 
-            function toggleCellSelection(cell) {
-                // Не вибираємо пусту клітинку
-                if (cell.classList.contains('empty-glass')) return;
+                            function checkMatch() {
+                                if (selectedCells.length !== 2) return;
 
-                // Не вибираємо одну й ту ж клітинку двічі
-                if (cell.classList.contains('selected')) {
-                    cell.classList.remove('selected');
-                    selectedCells = selectedCells.filter(c => c !== cell);
-                    return;
-                }
+                                const cell1 = selectedCells[0];
+                                const cell2 = selectedCells[1];
+                                const num1 = parseInt(cell1.getAttribute('data-number'));
+                                const num2 = parseInt(cell2.getAttribute('data-number'));
 
-                // Вибираємо клітинку
-                cell.classList.add('selected');
-                selectedCells.push(cell);
+                                const isAdjacent = areAdjacent(cell1, cell2);
+                                const isSameNumber = num1 === num2;
+                                const sumToTen = num1 + num2 === 10;
 
-                // Коли вибрали дві клітинки - перевіряємо на збіг
-                if (selectedCells.length === 2) {
-                    setTimeout(checkMatch, 150);
-                }
-            }
+                                // Перевіряємо, чи числа однакові або в сумі дають 10, та клітинки сусідні
+                                if (isAdjacent && (isSameNumber || sumToTen)) {
+                                    // Пара знайдена - робимо клітинки пустими
+                                    cell1.classList.remove('selected');
+                                    cell2.classList.remove('selected');
+                                    cell1.classList.add('empty-glass');
+                                    cell2.classList.add('empty-glass');
+                                    cell1.removeAttribute('data-number');
+                                    cell2.removeAttribute('data-number');
+                                    cell1.textContent = '';
+                                    cell2.textContent = '';
+                                    addPoints(POINTS_PER_PAIR);
+                                    removeEmptyRows();
+                                    selectedCells = [];
+                                } else {
+                                    // Не збіг - деселектуємо
+                                    cell1.classList.remove('selected');
+                                    cell2.classList.remove('selected');
+                                    selectedCells = [];
+                                }
+                            }
 
-            function handleCellClick(event) {
-                toggleCellSelection(event.target);
-            }
+                            function toggleCellSelection(cell) {
+                                // Не вибираємо пусту клітинку
+                                if (cell.classList.contains('empty-glass')) return;
 
-            function handleCellTouch(event) {
-                event.preventDefault();
-                toggleCellSelection(event.target);
-            }
+                                // Не вибираємо одну й ту ж клітинку двічі
+                                if (cell.classList.contains('selected')) {
+                                    cell.classList.remove('selected');
+                                    selectedCells = selectedCells.filter(c => c !== cell);
+                                    return;
+                                }
 
-            function renderGameGrid() {
-                gameGrid = document.getElementById('gameGrid');
-                const cells = generateGameCells();
+                                // Вибираємо клітинку
+                                cell.classList.add('selected');
+                                selectedCells.push(cell);
 
-                cells.forEach((number) => {
-                    const cellDiv = document.createElement('div');
-                    cellDiv.className = 'game-cell';
+                                // Коли вибрали дві клітинки - перевіряємо на збіг
+                                if (selectedCells.length === 2) {
+                                    setTimeout(checkMatch, 150);
+                                }
+                            }
 
-                    cellDiv.classList.add(`num-${number}`);
-                    cellDiv.textContent = number;
-                    cellDiv.setAttribute('data-number', number);
-                    cellDiv.addEventListener('click', handleCellClick);
-                    cellDiv.addEventListener('touchend', handleCellTouch);
+                            function handleCellClick(event) {
+                                toggleCellSelection(event.target);
+                            }
 
-                    gameGrid.appendChild(cellDiv);
-                });
-            }
+                            function handleCellTouch(event) {
+                                event.preventDefault();
+                                toggleCellSelection(event.target);
+                            }
 
-            // Генеруємо сітку та ініціалізуємо прогрес при завантаженні сторінки
-            document.addEventListener('DOMContentLoaded', () => {
-                updateProgress();
-                renderGameGrid();
-            });
-        </script>
-        </div>
-    </body>
-    </html>
+                            function renderGameGrid() {
+                                gameGrid = document.getElementById('gameGrid');
+                                const cells = generateGameCells();
+
+                                cells.forEach((number) => {
+                                    const cellDiv = document.createElement('div');
+                                    cellDiv.className = 'game-cell';
+
+                                    cellDiv.classList.add(`num-${number}`);
+                                    cellDiv.textContent = number;
+                                    cellDiv.setAttribute('data-number', number);
+                                    cellDiv.addEventListener('click', handleCellClick);
+                                    cellDiv.addEventListener('touchend', handleCellTouch);
+
+                                    gameGrid.appendChild(cellDiv);
+                                });
+                            }
+
+                            // Генеруємо сітку та ініціалізуємо прогрес при завантаженні сторінки
+                            document.addEventListener('DOMContentLoaded', () => {
+                                updateProgress();
+                                renderGameGrid();
+                            });
+                        </script>
+                        </div>
+                    </body>
+                    </html>
