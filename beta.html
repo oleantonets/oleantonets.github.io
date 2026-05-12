@@ -267,13 +267,13 @@
                         const cell = gameGrid.children[r * GRID_COLS + c];
                         const data = sorted[r].cells[c];
                         if (data.isEmpty) {
-                            cell.className = 'game-cell empty-glass';
                             cell.textContent = '';
                             cell.removeAttribute('data-number');
+                            cell.className = 'game-cell empty-glass';
                         } else {
-                            cell.className = `game-cell ${NUM_CLASSES[data.number]}`;
                             cell.textContent = data.number;
                             cell.setAttribute('data-number', data.number);
+                            cell.className = `game-cell ${NUM_CLASSES[data.number]}`;
                         }
                     }
                 }
