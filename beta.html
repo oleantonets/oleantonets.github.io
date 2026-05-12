@@ -364,6 +364,13 @@
                 showLevelUpModal();
             }
 
+            function continueLevel() {
+                hideLevelUpModal();
+                gameGrid.innerHTML = '';
+                renderGameGrid();
+                checkForDeadlock();
+            }
+
             function hasAnyAvailableMatch() {
                 for (let i = 0; i < gameGrid.children.length; i++) {
                     const cell1 = gameGrid.children[i];
@@ -663,7 +670,7 @@
                 renderGameGrid();
                 checkForDeadlock();
                 document.getElementById('restartBtn').addEventListener('click', restartGame);
-                document.getElementById('continueBtn').addEventListener('click', hideLevelUpModal);
+                document.getElementById('continueBtn').addEventListener('click', continueLevel);
 
                 // Debug кнопки
                 document.getElementById('debugDeadlock').addEventListener('click', showDeadlockModal);
