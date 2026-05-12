@@ -222,6 +222,30 @@
             .levelup-button:hover {
                 transform: scale(1.05);
             }
+
+            .debug-panel {
+                position: fixed;
+                bottom: 20px;
+                left: 20px;
+                display: flex;
+                gap: 8px;
+                z-index: 99;
+            }
+
+            .debug-btn {
+                background: #a78bfa;
+                color: white;
+                border: none;
+                padding: 8px 12px;
+                border-radius: 6px;
+                font-size: 12px;
+                cursor: pointer;
+                transition: background 0.2s ease;
+            }
+
+            .debug-btn:hover {
+                background: #9370db;
+            }
         </style>
     </head>
     <body>
@@ -265,6 +289,12 @@
                 <div class="levelup-message">Keep up the great work!</div>
                 <button class="levelup-button" id="continueBtn">Continue</button>
             </div>
+        </div>
+
+        <div class="debug-panel">
+            <button class="debug-btn" id="debugDeadlock">Show Deadlock</button>
+            <button class="debug-btn" id="debugLevelUp">Show Level Up</button>
+            <button class="debug-btn" id="debugHide">Hide All</button>
         </div>
 
         <script>
@@ -621,6 +651,14 @@
                 checkForDeadlock();
                 document.getElementById('restartBtn').addEventListener('click', restartGame);
                 document.getElementById('continueBtn').addEventListener('click', hideLevelUpModal);
+
+                // Debug кнопки
+                document.getElementById('debugDeadlock').addEventListener('click', showDeadlockModal);
+                document.getElementById('debugLevelUp').addEventListener('click', showLevelUpModal);
+                document.getElementById('debugHide').addEventListener('click', () => {
+                    hideDeadlockModal();
+                    hideLevelUpModal();
+                });
             });
         </script>
         </div>
