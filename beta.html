@@ -322,7 +322,7 @@
             let gameState = {
                 level: 1,
                 points: 0,
-                requiredPoints: 320,
+                requiredPoints: 50,
                 matchedPairs: 0
             };
 
@@ -368,7 +368,7 @@
 
             function levelUp() {
                 gameState.level++;
-                gameState.requiredPoints = gameState.level * 320;
+                gameState.requiredPoints = gameState.level * 50;
                 gameState.matchedPairs = 0;
 
                 updateProgress();
