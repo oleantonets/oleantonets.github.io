@@ -389,11 +389,17 @@
 
                 function showLevelUpModal() {
                     document.getElementById('levelupValue').textContent = gameState.level;
-                    document.getElementById('levelupModal').classList.add('active');
+                    const modal = document.getElementById('levelupModal');
+                    modal.classList.add('active');
+                    modal.style.opacity = '1';
+                    modal.style.pointerEvents = 'auto';
                 }
 
                 function hideLevelUpModal() {
-                    document.getElementById('levelupModal').classList.remove('active');
+                    const modal = document.getElementById('levelupModal');
+                    modal.classList.remove('active');
+                    modal.style.opacity = '0';
+                    modal.style.pointerEvents = 'none';
                 }
 
                 function levelUp() {
@@ -431,11 +437,17 @@
                 }
 
                 function showDeadlockModal() {
-                    document.getElementById('deadlockModal').classList.add('active');
+                    const modal = document.getElementById('deadlockModal');
+                    modal.classList.add('active');
+                    modal.style.opacity = '1';
+                    modal.style.pointerEvents = 'auto';
                 }
 
                 function hideDeadlockModal() {
-                    document.getElementById('deadlockModal').classList.remove('active');
+                    const modal = document.getElementById('deadlockModal');
+                    modal.classList.remove('active');
+                    modal.style.opacity = '0';
+                    modal.style.pointerEvents = 'none';
                 }
 
                 function checkForDeadlock() {
