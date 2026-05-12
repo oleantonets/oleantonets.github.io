@@ -278,7 +278,7 @@
                 gameState.points += points;
                 gameState.pointsInCurrentLevel += points;
 
-                // Перевіряємо, чи досягнули 50 очок для переходу на наступний рівень
+                // Перевіряємо, чи досягнули 320 очок для переходу на наступний рівень
                 if (gameState.pointsInCurrentLevel >= POINTS_PER_LEVEL) {
                     levelUp();
                 } else {
@@ -289,7 +289,7 @@
             function levelUp() {
                 gameState.level++;
                 gameState.pointsInCurrentLevel = 0;
-                gameState.requiredPoints = 50 * gameState.level;
+                gameState.requiredPoints = 320 * gameState.level;
 
                 gameGrid.innerHTML = '';
                 updateProgress();
