@@ -336,8 +336,11 @@
                 pointsEl.textContent = gameState.points;
                 requiredEl.textContent = gameState.requiredPoints;
 
+                const levelStartPoints = (gameState.level - 1) * 50;
+                const levelProgress = gameState.points - levelStartPoints;
+                const levelRequired = gameState.requiredPoints - levelStartPoints;
                 const progressPercent = Math.min(
-                    (gameState.points / gameState.requiredPoints) * 100,
+                    (levelProgress / levelRequired) * 100,
                     100
                 );
                 progressBar.style.width = progressPercent + '%';
@@ -418,6 +421,7 @@
                 hideDeadlockModal();
                 gameState.level = 1;
                 gameState.points = 0;
+                gameState.requiredPoints = 50;
                 gameState.matchedPairs = 0;
                 gameGrid.innerHTML = '';
                 updateProgress();
