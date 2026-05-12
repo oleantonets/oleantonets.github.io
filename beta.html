@@ -186,6 +186,7 @@
             const TOTAL_CELLS = 64;
             const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             const POINTS_PER_PAIR = 10;
+            const NUM_CLASSES = { '1': 'num-1', '2': 'num-2', '3': 'num-3', '4': 'num-4', '5': 'num-5', '6': 'num-6', '7': 'num-7', '8': 'num-8', '9': 'num-9' };
 
             let selectedCells = [];
             let gameGrid = null;
@@ -244,8 +245,7 @@
                         if (!isEmpty) allEmpty = false;
                         cells.push({
                             isEmpty,
-                            number: cell.getAttribute('data-number'),
-                            numClass: [...cell.classList].find(cls => cls.startsWith('num-'))
+                            number: cell.getAttribute('data-number')
                         });
                     }
                     rowsData.push({ cells, allEmpty });
@@ -271,7 +271,7 @@
                             cell.textContent = '';
                             cell.removeAttribute('data-number');
                         } else {
-                            cell.className = `game-cell ${data.numClass}`;
+                            cell.className = `game-cell ${NUM_CLASSES[data.number]}`;
                             cell.textContent = data.number;
                             cell.setAttribute('data-number', data.number);
                         }
