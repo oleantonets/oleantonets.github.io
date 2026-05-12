@@ -22,7 +22,7 @@
             .container {
                 max-width: 520px;
                 margin: 0 auto;
-                padding-top: 0;
+                padding-top: max(16px, env(safe-area-inset-top));
             }
 
             .progress-card {
@@ -212,11 +212,11 @@
                 </div>
                 <div class="progress-stats">
                     <div class="progress-stat-item">
-                        <div class="progress-stat-label">Current</div>
+                        <div class="progress-stat-label">Score</div>
                         <div class="progress-stat-value" id="pointsValue">0</div>
                     </div>
                     <div class="progress-stat-item">
-                        <div class="progress-stat-label">Target</div>
+                        <div class="progress-stat-label">Goal</div>
                         <div class="progress-stat-value" id="requiredValue">320</div>
                     </div>
                     <div class="progress-stat-item">
@@ -243,6 +243,7 @@
             const TOTAL_CELLS = 64;
             const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             const POINTS_PER_PAIR = 10;
+            const POINTS_PER_LEVEL = 50;
             const NUM_CLASSES = { '1': 'num-1', '2': 'num-2', '3': 'num-3', '4': 'num-4', '5': 'num-5', '6': 'num-6', '7': 'num-7', '8': 'num-8', '9': 'num-9' };
 
             let selectedCells = [];
@@ -250,7 +251,8 @@
             let gameState = {
                 level: 1,
                 points: 0,
-                requiredPoints: 320,
+                pointsInCurrentLevel: 0,
+                requiredPoints: 50,
                 matchedPairs: 0
             };
 
@@ -265,7 +267,7 @@
                 requiredEl.textContent = gameState.requiredPoints;
 
                 const progressPercent = Math.min(
-                    (gameState.points / gameState.requiredPoints) * 100,
+                    (gameState.pointsInCurrentLevel / POINTS_PER_LEVEL) * 100,
                     100
                 );
                 progressBar.style.width = progressPercent + '%';
@@ -275,10 +277,11 @@
 
             function addPoints(points) {
                 gameState.points += points;
+                gameState.pointsInCurrentLevel += points;
                 gameState.matchedPairs++;
 
-                // Перевіряємо, чи досягнули потрібну кількість очок
-                if (gameState.points >= gameState.requiredPoints) {
+                // Перевіряємо, чи досягнули 50 очок для переходу на наступний рівень
+                if (gameState.pointsInCurrentLevel >= POINTS_PER_LEVEL) {
                     levelUp();
                 } else {
                     updateProgress();
@@ -287,10 +290,14 @@
 
             function levelUp() {
                 gameState.level++;
-                gameState.points = 0;
+                gameState.pointsInCurrentLevel = 0;
                 gameState.matchedPairs = 0;
+                gameState.requiredPoints = 50 * gameState.level;
 
+                gameGrid.innerHTML = '';
                 updateProgress();
+                renderGameGrid();
+                checkForDeadlock();
             }
 
             function hasAnyAvailableMatch() {
@@ -331,7 +338,10 @@
                 hideDeadlockModal();
                 gameState.level = 1;
                 gameState.points = 0;
+                gameState.pointsInCurrentLevel = 0;
                 gameState.matchedPairs = 0;
+                gameState.requiredPoints = 50;
+                selectedCells = [];
                 gameGrid.innerHTML = '';
                 updateProgress();
                 renderGameGrid();
