@@ -146,46 +146,22 @@
                     filter: brightness(1.3);
                 }
 
-                .deadlock-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
+                dialog {
+                    border: none;
+                    border-radius: 0;
+                    padding: 0;
+                    background: transparent;
+                    max-width: 100%;
+                }
+
+                dialog::backdrop {
                     background: rgba(0, 0, 0, 0.7);
+                }
+
+                dialog[open] {
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    z-index: 100;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    pointer-events: none;
-                }
-
-                .deadlock-modal.active {
-                    opacity: 1;
-                    pointer-events: auto;
-                }
-
-                .levelup-modal {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0, 0, 0, 0.7);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 100;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    pointer-events: none;
-                }
-
-                .levelup-modal.active {
-                    opacity: 1;
-                    pointer-events: auto;
                 }
 
                 .deadlock-content {
@@ -275,10 +251,7 @@
                 }
 
                 @supports (-webkit-touch-callout: none) {
-                    .deadlock-modal {
-                        background: rgba(0, 0, 0, 0.85);
-                    }
-                    .levelup-modal {
+                    dialog::backdrop {
                         background: rgba(0, 0, 0, 0.85);
                     }
                     .deadlock-content {
@@ -320,22 +293,22 @@
                 <div class="game-grid" id="gameGrid"></div>
             </div>
 
-            <div class="deadlock-modal" id="deadlockModal">
+            <dialog id="deadlockModal">
                 <div class="deadlock-content">
                     <div class="deadlock-title">No More Moves!</div>
                     <div class="deadlock-message">There are no more possible matches on the board.</div>
                     <button class="deadlock-button" id="restartBtn">Restart Game</button>
                 </div>
-            </div>
+            </dialog>
 
-            <div class="levelup-modal" id="levelupModal">
+            <dialog id="levelupModal">
                 <div class="levelup-content">
                     <div class="levelup-title">Level Up!</div>
                     <div class="levelup-level" id="levelupValue">2</div>
                     <div class="levelup-message">Keep up the great work!</div>
                     <button class="levelup-button" id="continueBtn">Continue</button>
                 </div>
-            </div>
+            </dialog>
 
             <script>
                 const GRID_COLS = 8;
@@ -390,17 +363,11 @@
 
                 function showLevelUpModal() {
                     document.getElementById('levelupValue').textContent = gameState.level;
-                    const modal = document.getElementById('levelupModal');
-                    modal.classList.add('active');
-                    modal.style.opacity = '1';
-                    modal.style.pointerEvents = 'auto';
+                    document.getElementById('levelupModal').showModal();
                 }
 
                 function hideLevelUpModal() {
-                    const modal = document.getElementById('levelupModal');
-                    modal.classList.remove('active');
-                    modal.style.opacity = '0';
-                    modal.style.pointerEvents = 'none';
+                    document.getElementById('levelupModal').close();
                 }
 
                 function levelUp() {
@@ -438,17 +405,11 @@
                 }
 
                 function showDeadlockModal() {
-                    const modal = document.getElementById('deadlockModal');
-                    modal.classList.add('active');
-                    modal.style.opacity = '1';
-                    modal.style.pointerEvents = 'auto';
+                    document.getElementById('deadlockModal').showModal();
                 }
 
                 function hideDeadlockModal() {
-                    const modal = document.getElementById('deadlockModal');
-                    modal.classList.remove('active');
-                    modal.style.opacity = '0';
-                    modal.style.pointerEvents = 'none';
+                    document.getElementById('deadlockModal').close();
                 }
 
                 function checkForDeadlock() {
