@@ -31,8 +31,8 @@
                 border-radius: 28px;
                 padding: 24px;
                 margin-bottom: 24px;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(60px);
+                -webkit-backdrop-filter: blur(60px);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
@@ -152,7 +152,7 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0, 0, 0, 0.2);
+                background: rgba(0, 0, 0, 0.7);
                 display: none;
                 align-items: center;
                 justify-content: center;
@@ -164,13 +164,12 @@
             }
 
             .deadlock-content {
-                background: rgba(255, 255, 255, 0.01);
-                border: 2px solid rgba(255, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
                 border-radius: 24px;
                 padding: 40px;
                 text-align: center;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(60px);
                 max-width: 400px;
             }
 
@@ -209,7 +208,7 @@
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgba(0, 0, 0, 0.2);
+                background: rgba(0, 0, 0, 0.7);
                 display: none;
                 align-items: center;
                 justify-content: center;
@@ -221,13 +220,12 @@
             }
 
             .levelup-content {
-                background: rgba(255, 255, 255, 0.08);
-                border: 2px solid rgba(255, 255, 255, 0.3);
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
                 border-radius: 24px;
                 padding: 40px;
                 text-align: center;
-                backdrop-filter: blur(10px);
-                -webkit-backdrop-filter: blur(10px);
+                backdrop-filter: blur(60px);
                 max-width: 400px;
             }
 
@@ -324,7 +322,7 @@
             let gameState = {
                 level: 1,
                 points: 0,
-                requiredPoints: 50,
+                requiredPoints: 320,
                 matchedPairs: 0
             };
 
@@ -373,7 +371,7 @@
 
             function levelUp() {
                 gameState.level++;
-                gameState.requiredPoints = gameState.level * 50;
+                gameState.requiredPoints = gameState.level * 320;
                 gameState.matchedPairs = 0;
 
                 updateProgress();
@@ -423,7 +421,7 @@
                 hideDeadlockModal();
                 gameState.level = 1;
                 gameState.points = 0;
-                gameState.requiredPoints = 50;
+                gameState.requiredPoints = 320;
                 gameState.matchedPairs = 0;
                 gameGrid.innerHTML = '';
                 updateProgress();
