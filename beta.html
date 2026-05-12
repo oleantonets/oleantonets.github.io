@@ -146,7 +146,62 @@
                 filter: brightness(1.3);
             }
 
-            .deadlock-modal,
+            .deadlock-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .deadlock-modal.active {
+                display: flex;
+            }
+
+            .deadlock-content {
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
+                border-radius: 24px;
+                padding: 40px;
+                text-align: center;
+                backdrop-filter: blur(60px);
+                max-width: 400px;
+            }
+
+            .deadlock-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin-bottom: 16px;
+            }
+
+            .deadlock-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
+            }
+
+            .deadlock-button {
+                background: linear-gradient(90deg, #a78bfa, #ec4899);
+                border: none;
+                color: white;
+                padding: 12px 32px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+            }
+
+            .deadlock-button:hover {
+                transform: scale(1.05);
+            }
+
             .levelup-modal {
                 position: fixed;
                 top: 0;
@@ -160,12 +215,10 @@
                 z-index: 100;
             }
 
-            .deadlock-modal.active,
             .levelup-modal.active {
                 display: flex;
             }
 
-            .deadlock-content,
             .levelup-content {
                 background: rgba(255, 255, 255, 0.15);
                 border: 2px solid rgba(255, 255, 255, 0.4);
@@ -173,29 +226,20 @@
                 padding: 40px;
                 text-align: center;
                 backdrop-filter: blur(60px);
-            }
-
-            .deadlock-content {
                 max-width: 400px;
             }
 
-            .levelup-content {
-                max-width: 350px;
-            }
-
-            .deadlock-title,
             .levelup-title {
                 font-size: 28px;
                 font-weight: 700;
+                color: #a78bfa;
                 margin-bottom: 16px;
             }
 
-            .deadlock-title {
-                color: #f1f5f9;
-            }
-
-            .levelup-title {
-                color: #a78bfa;
+            .levelup-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
             }
 
             .levelup-level {
@@ -205,14 +249,6 @@
                 margin-bottom: 24px;
             }
 
-            .deadlock-message,
-            .levelup-message {
-                font-size: 16px;
-                color: #cbd5e1;
-                margin-bottom: 24px;
-            }
-
-            .deadlock-button,
             .levelup-button {
                 background: linear-gradient(90deg, #a78bfa, #ec4899);
                 border: none;
@@ -225,33 +261,8 @@
                 transition: transform 0.2s ease;
             }
 
-            .deadlock-button:hover,
             .levelup-button:hover {
                 transform: scale(1.05);
-            }
-
-            .debug-panel {
-                position: fixed;
-                bottom: 20px;
-                left: 20px;
-                display: flex;
-                gap: 8px;
-                z-index: 99;
-            }
-
-            .debug-btn {
-                background: #a78bfa;
-                color: white;
-                border: none;
-                padding: 8px 12px;
-                border-radius: 6px;
-                font-size: 12px;
-                cursor: pointer;
-                transition: background 0.2s ease;
-            }
-
-            .debug-btn:hover {
-                background: #9370db;
             }
         </style>
     </head>
@@ -264,11 +275,11 @@
                 </div>
                 <div class="progress-stats">
                     <div class="progress-stat-item">
-                        <div class="progress-stat-label">Score</div>
+                        <div class="progress-stat-label">Current</div>
                         <div class="progress-stat-value" id="pointsValue">0</div>
                     </div>
                     <div class="progress-stat-item">
-                        <div class="progress-stat-label">Goal</div>
+                        <div class="progress-stat-label">Target</div>
                         <div class="progress-stat-value" id="requiredValue">320</div>
                     </div>
                     <div class="progress-stat-item">
@@ -298,19 +309,12 @@
             </div>
         </div>
 
-        <div class="debug-panel">
-            <button class="debug-btn" id="debugDeadlock">Show Deadlock</button>
-            <button class="debug-btn" id="debugLevelUp">Show Level Up</button>
-            <button class="debug-btn" id="debugHide">Hide All</button>
-        </div>
-
         <script>
             const GRID_COLS = 8;
             const GRID_ROWS = 8;
             const TOTAL_CELLS = 64;
             const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             const POINTS_PER_PAIR = 10;
-            const TARGET_POINTS_PER_LEVEL = 320;
             const NUM_CLASSES = { '1': 'num-1', '2': 'num-2', '3': 'num-3', '4': 'num-4', '5': 'num-5', '6': 'num-6', '7': 'num-7', '8': 'num-8', '9': 'num-9' };
 
             let selectedCells = [];
@@ -318,7 +322,7 @@
             let gameState = {
                 level: 1,
                 points: 0,
-                requiredPoints: TARGET_POINTS_PER_LEVEL,
+                requiredPoints: 50,
                 matchedPairs: 0
             };
 
@@ -332,10 +336,11 @@
                 pointsEl.textContent = gameState.points;
                 requiredEl.textContent = gameState.requiredPoints;
 
-                const prevLevelsPoints = (gameState.level - 1) * TARGET_POINTS_PER_LEVEL;
-                const levelProgress = gameState.points - prevLevelsPoints;
+                const levelStartPoints = (gameState.level - 1) * 50;
+                const levelProgress = gameState.points - levelStartPoints;
+                const levelRequired = gameState.requiredPoints - levelStartPoints;
                 const progressPercent = Math.min(
-                    (levelProgress / TARGET_POINTS_PER_LEVEL) * 100,
+                    (levelProgress / levelRequired) * 100,
                     100
                 );
                 progressBar.style.width = progressPercent + '%';
@@ -355,17 +360,24 @@
                 }
             }
 
+            function showLevelUpModal() {
+                document.getElementById('levelupValue').textContent = gameState.level;
+                document.getElementById('levelupModal').classList.add('active');
+            }
+
+            function hideLevelUpModal() {
+                document.getElementById('levelupModal').classList.remove('active');
+            }
+
             function levelUp() {
                 gameState.level++;
-                gameState.requiredPoints = gameState.level * TARGET_POINTS_PER_LEVEL;
+                gameState.requiredPoints = gameState.level * 50;
                 gameState.matchedPairs = 0;
 
                 updateProgress();
                 showLevelUpModal();
-            }
 
-            function continueLevel() {
-                hideLevelUpModal();
+                selectedCells = [];
                 gameGrid.innerHTML = '';
                 renderGameGrid();
                 checkForDeadlock();
@@ -391,32 +403,12 @@
                 return false;
             }
 
-            function showModal(modalId, levelNumber = null) {
-                const modal = document.getElementById(modalId);
-                if (levelNumber !== null) {
-                    document.getElementById('levelupValue').textContent = levelNumber;
-                }
-                modal.classList.add('active');
-            }
-
-            function hideModal(modalId) {
-                document.getElementById(modalId).classList.remove('active');
-            }
-
             function showDeadlockModal() {
-                showModal('deadlockModal');
+                document.getElementById('deadlockModal').classList.add('active');
             }
 
             function hideDeadlockModal() {
-                hideModal('deadlockModal');
-            }
-
-            function showLevelUpModal() {
-                showModal('levelupModal', gameState.level);
-            }
-
-            function hideLevelUpModal() {
-                hideModal('levelupModal');
+                document.getElementById('deadlockModal').classList.remove('active');
             }
 
             function checkForDeadlock() {
@@ -429,7 +421,7 @@
                 hideDeadlockModal();
                 gameState.level = 1;
                 gameState.points = 0;
-                gameState.requiredPoints = TARGET_POINTS_PER_LEVEL;
+                gameState.requiredPoints = 50;
                 gameState.matchedPairs = 0;
                 gameGrid.innerHTML = '';
                 updateProgress();
@@ -670,15 +662,7 @@
                 renderGameGrid();
                 checkForDeadlock();
                 document.getElementById('restartBtn').addEventListener('click', restartGame);
-                document.getElementById('continueBtn').addEventListener('click', continueLevel);
-
-                // Debug кнопки
-                document.getElementById('debugDeadlock').addEventListener('click', showDeadlockModal);
-                document.getElementById('debugLevelUp').addEventListener('click', showLevelUpModal);
-                document.getElementById('debugHide').addEventListener('click', () => {
-                    hideDeadlockModal();
-                    hideLevelUpModal();
-                });
+                document.getElementById('continueBtn').addEventListener('click', hideLevelUpModal);
             });
         </script>
         </div>
