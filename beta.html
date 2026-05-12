@@ -146,16 +146,46 @@
                     filter: brightness(1.3);
                 }
 
-                dialog.game-dialog {
-                    border: none;
-                    border-radius: 24px;
-                    padding: 0;
-                    background: transparent;
-                    max-width: 400px;
+                .deadlock-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 100;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    pointer-events: none;
                 }
 
-                dialog.game-dialog::backdrop {
+                .deadlock-modal.active {
+                    opacity: 1;
+                    pointer-events: auto;
+                }
+
+                .levelup-modal {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
                     background: rgba(0, 0, 0, 0.7);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 100;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    pointer-events: none;
+                }
+
+                .levelup-modal.active {
+                    opacity: 1;
+                    pointer-events: auto;
                 }
 
                 .deadlock-content {
@@ -245,7 +275,10 @@
                 }
 
                 @supports (-webkit-touch-callout: none) {
-                    dialog.game-dialog::backdrop {
+                    .deadlock-modal {
+                        background: rgba(0, 0, 0, 0.85);
+                    }
+                    .levelup-modal {
                         background: rgba(0, 0, 0, 0.85);
                     }
                     .deadlock-content {
@@ -275,7 +308,7 @@
                         </div>
                         <div class="progress-stat-item">
                             <div class="progress-stat-label">Target</div>
-                            <div class="progress-stat-value" id="requiredValue">320</div>
+                            <div class="progress-stat-value" id="requiredValue">50</div>
                         </div>
                         <div class="progress-stat-item">
                             <div class="progress-stat-label">Progress</div>
@@ -287,22 +320,22 @@
                 <div class="game-grid" id="gameGrid"></div>
             </div>
 
-            <dialog id="deadlockModal" class="game-dialog">
-                <div class="dialog-content deadlock-content">
+            <div class="deadlock-modal" id="deadlockModal">
+                <div class="deadlock-content">
                     <div class="deadlock-title">No More Moves!</div>
                     <div class="deadlock-message">There are no more possible matches on the board.</div>
                     <button class="deadlock-button" id="restartBtn">Restart Game</button>
                 </div>
-            </dialog>
+            </div>
 
-            <dialog id="levelupModal" class="game-dialog">
-                <div class="dialog-content levelup-content">
+            <div class="levelup-modal" id="levelupModal">
+                <div class="levelup-content">
                     <div class="levelup-title">Level Up!</div>
                     <div class="levelup-level" id="levelupValue">2</div>
                     <div class="levelup-message">Keep up the great work!</div>
                     <button class="levelup-button" id="continueBtn">Continue</button>
                 </div>
-            </dialog>
+            </div>
 
             <script>
                 const GRID_COLS = 8;
@@ -317,7 +350,7 @@
                 let gameState = {
                     level: 1,
                     points: 0,
-                    requiredPoints: 320,
+                    requiredPoints: 50,
                     matchedPairs: 0
                 };
 
@@ -358,12 +391,16 @@
                 function showLevelUpModal() {
                     document.getElementById('levelupValue').textContent = gameState.level;
                     const modal = document.getElementById('levelupModal');
-                    modal.showModal();
+                    modal.classList.add('active');
+                    modal.style.opacity = '1';
+                    modal.style.pointerEvents = 'auto';
                 }
 
                 function hideLevelUpModal() {
                     const modal = document.getElementById('levelupModal');
-                    modal.close();
+                    modal.classList.remove('active');
+                    modal.style.opacity = '0';
+                    modal.style.pointerEvents = 'none';
                 }
 
                 function levelUp() {
@@ -402,12 +439,16 @@
 
                 function showDeadlockModal() {
                     const modal = document.getElementById('deadlockModal');
-                    modal.showModal();
+                    modal.classList.add('active');
+                    modal.style.opacity = '1';
+                    modal.style.pointerEvents = 'auto';
                 }
 
                 function hideDeadlockModal() {
                     const modal = document.getElementById('deadlockModal');
-                    modal.close();
+                    modal.classList.remove('active');
+                    modal.style.opacity = '0';
+                    modal.style.pointerEvents = 'none';
                 }
 
                 function checkForDeadlock() {
