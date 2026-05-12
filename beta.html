@@ -19,6 +19,10 @@
                 padding: 0 24px;
             }
 
+            body.modal-open {
+                overflow: hidden;
+            }
+
             .container {
                 max-width: 520px;
                 margin: 0 auto;
@@ -156,7 +160,7 @@
                 display: none;
                 align-items: center;
                 justify-content: center;
-                z-index: 100;
+                z-index: 1000;
             }
 
             .deadlock-modal.active {
@@ -164,13 +168,15 @@
             }
 
             .deadlock-content {
-                background: rgba(255, 255, 255, 0.15);
-                border: 2px solid rgba(255, 255, 255, 0.4);
+                background: rgba(255, 255, 255, 0.08);
+                border: 2px solid rgba(255, 255, 255, 0.3);
                 border-radius: 24px;
                 padding: 40px;
                 text-align: center;
-                backdrop-filter: blur(60px);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
                 max-width: 400px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 32px rgba(0, 0, 0, 0.1);
             }
 
             .deadlock-title {
@@ -212,7 +218,7 @@
                 display: none;
                 align-items: center;
                 justify-content: center;
-                z-index: 100;
+                z-index: 1000;
             }
 
             .levelup-modal.active {
@@ -220,13 +226,28 @@
             }
 
             .levelup-content {
-                background: rgba(255, 255, 255, 0.15);
-                border: 2px solid rgba(255, 255, 255, 0.4);
+                background: rgba(255, 255, 255, 0.08);
+                border: 2px solid rgba(255, 255, 255, 0.3);
                 border-radius: 24px;
                 padding: 40px;
                 text-align: center;
-                backdrop-filter: blur(60px);
+                backdrop-filter: blur(20px);
+                -webkit-backdrop-filter: blur(20px);
                 max-width: 400px;
+                box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 8px 32px rgba(0, 0, 0, 0.1);
+            }
+
+            @supports (-webkit-touch-callout: none) {
+                .deadlock-content {
+                    backdrop-filter: none;
+                    -webkit-backdrop-filter: none;
+                    background: rgba(30, 30, 50, 0.95);
+                }
+                .levelup-content {
+                    backdrop-filter: none;
+                    -webkit-backdrop-filter: none;
+                    background: rgba(30, 30, 50, 0.95);
+                }
             }
 
             .levelup-title {
@@ -264,6 +285,7 @@
             .levelup-button:hover {
                 transform: scale(1.05);
             }
+
         </style>
     </head>
     <body>
@@ -280,7 +302,7 @@
                     </div>
                     <div class="progress-stat-item">
                         <div class="progress-stat-label">Target</div>
-                        <div class="progress-stat-value" id="requiredValue">320</div>
+                        <div class="progress-stat-value" id="requiredValue">50</div>
                     </div>
                     <div class="progress-stat-item">
                         <div class="progress-stat-label">Progress</div>
@@ -363,10 +385,12 @@
             function showLevelUpModal() {
                 document.getElementById('levelupValue').textContent = gameState.level;
                 document.getElementById('levelupModal').classList.add('active');
+                document.body.classList.add('modal-open');
             }
 
             function hideLevelUpModal() {
                 document.getElementById('levelupModal').classList.remove('active');
+                document.body.classList.remove('modal-open');
             }
 
             function levelUp() {
@@ -405,10 +429,12 @@
 
             function showDeadlockModal() {
                 document.getElementById('deadlockModal').classList.add('active');
+                document.body.classList.add('modal-open');
             }
 
             function hideDeadlockModal() {
                 document.getElementById('deadlockModal').classList.remove('active');
+                document.body.classList.remove('modal-open');
             }
 
             function checkForDeadlock() {
