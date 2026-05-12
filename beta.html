@@ -336,9 +336,9 @@
                 pointsEl.textContent = gameState.points;
                 requiredEl.textContent = gameState.requiredPoints;
 
-                const levelStartPoints = (gameState.level - 1) * 50;
-                const levelProgress = gameState.points - levelStartPoints;
-                const levelRequired = gameState.requiredPoints - levelStartPoints;
+                const prevLevelsPoints = (gameState.level - 1) * 320;
+                const levelProgress = gameState.points - prevLevelsPoints;
+                const levelRequired = 320;
                 const progressPercent = Math.min(
                     (levelProgress / levelRequired) * 100,
                     100
