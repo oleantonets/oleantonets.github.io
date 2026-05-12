@@ -243,7 +243,7 @@
             const TOTAL_CELLS = 64;
             const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             const POINTS_PER_PAIR = 10;
-            const POINTS_PER_LEVEL = 50;
+            const POINTS_PER_LEVEL = 320;
             const NUM_CLASSES = { '1': 'num-1', '2': 'num-2', '3': 'num-3', '4': 'num-4', '5': 'num-5', '6': 'num-6', '7': 'num-7', '8': 'num-8', '9': 'num-9' };
 
             let selectedCells = [];
@@ -252,8 +252,7 @@
                 level: 1,
                 points: 0,
                 pointsInCurrentLevel: 0,
-                requiredPoints: 50,
-                matchedPairs: 0
+                requiredPoints: 320
             };
 
             function updateProgress() {
@@ -278,7 +277,6 @@
             function addPoints(points) {
                 gameState.points += points;
                 gameState.pointsInCurrentLevel += points;
-                gameState.matchedPairs++;
 
                 // Перевіряємо, чи досягнули 50 очок для переходу на наступний рівень
                 if (gameState.pointsInCurrentLevel >= POINTS_PER_LEVEL) {
@@ -291,7 +289,6 @@
             function levelUp() {
                 gameState.level++;
                 gameState.pointsInCurrentLevel = 0;
-                gameState.matchedPairs = 0;
                 gameState.requiredPoints = 50 * gameState.level;
 
                 gameGrid.innerHTML = '';
@@ -339,8 +336,7 @@
                 gameState.level = 1;
                 gameState.points = 0;
                 gameState.pointsInCurrentLevel = 0;
-                gameState.matchedPairs = 0;
-                gameState.requiredPoints = 50;
+                gameState.requiredPoints = 320;
                 selectedCells = [];
                 gameGrid.innerHTML = '';
                 updateProgress();
