@@ -145,6 +145,62 @@
                 box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
                 filter: brightness(1.3);
             }
+
+            .deadlock-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .deadlock-modal.active {
+                display: flex;
+            }
+
+            .deadlock-content {
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
+                border-radius: 24px;
+                padding: 40px;
+                text-align: center;
+                backdrop-filter: blur(60px);
+                max-width: 400px;
+            }
+
+            .deadlock-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin-bottom: 16px;
+            }
+
+            .deadlock-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
+            }
+
+            .deadlock-button {
+                background: linear-gradient(90deg, #a78bfa, #ec4899);
+                border: none;
+                color: white;
+                padding: 12px 32px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+            }
+
+            .deadlock-button:hover {
+                transform: scale(1.05);
+            }
         </style>
     </head>
     <body>
@@ -171,6 +227,14 @@
             </div>
 
             <div class="game-grid" id="gameGrid"></div>
+        </div>
+
+        <div class="deadlock-modal" id="deadlockModal">
+            <div class="deadlock-content">
+                <div class="deadlock-title">No More Moves!</div>
+                <div class="deadlock-message">There are no more possible matches on the board.</div>
+                <button class="deadlock-button" id="restartBtn">Restart Game</button>
+            </div>
         </div>
 
         <script>
@@ -227,6 +291,50 @@
                 gameState.matchedPairs = 0;
 
                 updateProgress();
+            }
+
+            function hasAnyAvailableMatch() {
+                for (let i = 0; i < gameGrid.children.length; i++) {
+                    const cell1 = gameGrid.children[i];
+                    if (cell1.classList.contains('empty-glass')) continue;
+
+                    for (let j = i + 1; j < gameGrid.children.length; j++) {
+                        const cell2 = gameGrid.children[j];
+                        if (cell2.classList.contains('empty-glass')) continue;
+
+                        const num1 = parseInt(cell1.getAttribute('data-number'));
+                        const num2 = parseInt(cell2.getAttribute('data-number'));
+
+                        if (areAdjacent(cell1, cell2) && (num1 === num2 || num1 + num2 === 10)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function showDeadlockModal() {
+                document.getElementById('deadlockModal').classList.add('active');
+            }
+
+            function hideDeadlockModal() {
+                document.getElementById('deadlockModal').classList.remove('active');
+            }
+
+            function checkForDeadlock() {
+                if (!hasAnyAvailableMatch()) {
+                    showDeadlockModal();
+                }
+            }
+
+            function restartGame() {
+                hideDeadlockModal();
+                gameState.level = 1;
+                gameState.points = 0;
+                gameState.matchedPairs = 0;
+                gameGrid.innerHTML = '';
+                updateProgress();
+                renderGameGrid();
             }
 
             function checkForClearedRows() {
@@ -400,6 +508,7 @@
                     addPoints(POINTS_PER_PAIR);
                     selectedCells = [];
                     checkForClearedRows();
+                    checkForDeadlock();
                 } else {
                     // Не збіг - деселектуємо
                     cell1.classList.remove('selected');
@@ -460,6 +569,8 @@
             document.addEventListener('DOMContentLoaded', () => {
                 updateProgress();
                 renderGameGrid();
+                checkForDeadlock();
+                document.getElementById('restartBtn').addEventListener('click', restartGame);
             });
         </script>
         </div>
