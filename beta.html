@@ -201,6 +201,69 @@
             .deadlock-button:hover {
                 transform: scale(1.05);
             }
+
+            .levelup-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .levelup-modal.active {
+                display: flex;
+            }
+
+            .levelup-content {
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
+                border-radius: 24px;
+                padding: 40px;
+                text-align: center;
+                backdrop-filter: blur(60px);
+                max-width: 400px;
+            }
+
+            .levelup-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #a78bfa;
+                margin-bottom: 16px;
+            }
+
+            .levelup-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
+            }
+
+            .levelup-level {
+                font-size: 48px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin-bottom: 24px;
+            }
+
+            .levelup-button {
+                background: linear-gradient(90deg, #a78bfa, #ec4899);
+                border: none;
+                color: white;
+                padding: 12px 32px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+            }
+
+            .levelup-button:hover {
+                transform: scale(1.05);
+            }
         </style>
     </head>
     <body>
@@ -234,6 +297,15 @@
                 <div class="deadlock-title">No More Moves!</div>
                 <div class="deadlock-message">There are no more possible matches on the board.</div>
                 <button class="deadlock-button" id="restartBtn">Restart Game</button>
+            </div>
+        </div>
+
+        <div class="levelup-modal" id="levelupModal">
+            <div class="levelup-content">
+                <div class="levelup-title">Level Up!</div>
+                <div class="levelup-level" id="levelupValue">2</div>
+                <div class="levelup-message">Keep up the great work!</div>
+                <button class="levelup-button" id="continueBtn">Continue</button>
             </div>
         </div>
 
@@ -285,12 +357,27 @@
                 }
             }
 
+            function showLevelUpModal() {
+                document.getElementById('levelupValue').textContent = gameState.level;
+                document.getElementById('levelupModal').classList.add('active');
+            }
+
+            function hideLevelUpModal() {
+                document.getElementById('levelupModal').classList.remove('active');
+            }
+
             function levelUp() {
                 gameState.level++;
-                gameState.points = 0;
+                gameState.requiredPoints = gameState.level * 320;
                 gameState.matchedPairs = 0;
 
                 updateProgress();
+                showLevelUpModal();
+
+                selectedCells = [];
+                gameGrid.innerHTML = '';
+                renderGameGrid();
+                checkForDeadlock();
             }
 
             function hasAnyAvailableMatch() {
@@ -571,6 +658,7 @@
                 renderGameGrid();
                 checkForDeadlock();
                 document.getElementById('restartBtn').addEventListener('click', restartGame);
+                document.getElementById('continueBtn').addEventListener('click', hideLevelUpModal);
             });
         </script>
         </div>
