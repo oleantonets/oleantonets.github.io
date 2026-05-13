@@ -22,21 +22,24 @@
             .container {
                 max-width: 520px;
                 margin: 0 auto;
-                padding-top: max(16px, env(safe-area-inset-top));
+                padding-top: 0;
             }
 
             .progress-card {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1.5px solid rgba(255, 255, 255, 0.4);
-                border-radius: 28px;
+                background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(167, 139, 250, 0.15) 45%, rgba(255, 255, 255, 0.15) 100%);
+                border: 2px solid rgba(255, 255, 255, 0.35);
+                border-radius: 32px;
                 padding: 24px;
                 margin-bottom: 24px;
-                backdrop-filter: blur(60px);
-                -webkit-backdrop-filter: blur(60px);
+                backdrop-filter: blur(80px);
+                -webkit-backdrop-filter: blur(80px);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 gap: 16px;
+                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+                position: relative;
+                overflow: hidden;
             }
 
             .progress-bar-wrapper {
@@ -49,6 +52,7 @@
                 display: flex;
                 align-items: center;
                 position: relative;
+                margin-bottom: 0;
             }
 
             .progress-bar-fill {
@@ -68,28 +72,28 @@
                 z-index: 10;
             }
 
-            .progress-stats {
+            .stats {
                 width: 100%;
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 12px;
             }
 
-            .progress-stat-item {
+            .stat-item {
                 background: rgba(167, 139, 250, 0.1);
                 border-radius: 12px;
                 padding: 12px;
                 text-align: center;
             }
 
-            .progress-stat-label {
+            .stat-label {
                 font-size: 10px;
                 color: #cbd5e1;
                 margin-bottom: 6px;
                 text-transform: uppercase;
             }
 
-            .progress-stat-value {
+            .stat-value {
                 font-size: 20px;
                 font-weight: 600;
                 color: #f8fafc;
@@ -98,8 +102,14 @@
             .game-grid {
                 display: grid;
                 grid-template-columns: repeat(8, 1fr);
-                gap: 8px;
+                gap: 6px;
                 margin-top: 24px;
+                background: rgba(255, 255, 255, 0.05);
+                border-radius: 24px;
+                padding: 0;
+                backdrop-filter: blur(40px);
+                -webkit-backdrop-filter: blur(40px);
+                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             }
 
             .game-cell {
@@ -107,20 +117,21 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 8px;
+                border-radius: 12px;
                 font-size: 28px;
                 font-weight: 500;
                 cursor: pointer;
-                transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
+                transition: all 0.2s ease;
                 -webkit-touch-callout: none;
                 -webkit-user-select: none;
                 user-select: none;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
             }
 
             @media (hover: hover) {
                 .game-cell:not(.empty-glass):hover {
                     transform: scale(1.30);
-                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
                     filter: brightness(1.2);
                 }
             }
@@ -145,62 +156,6 @@
                 box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
                 filter: brightness(1.3);
             }
-
-            .deadlock-modal {
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.7);
-                display: none;
-                align-items: center;
-                justify-content: center;
-                z-index: 100;
-            }
-
-            .deadlock-modal.active {
-                display: flex;
-            }
-
-            .deadlock-content {
-                background: rgba(255, 255, 255, 0.15);
-                border: 2px solid rgba(255, 255, 255, 0.4);
-                border-radius: 24px;
-                padding: 40px;
-                text-align: center;
-                backdrop-filter: blur(60px);
-                max-width: 400px;
-            }
-
-            .deadlock-title {
-                font-size: 28px;
-                font-weight: 700;
-                color: #f1f5f9;
-                margin-bottom: 16px;
-            }
-
-            .deadlock-message {
-                font-size: 16px;
-                color: #cbd5e1;
-                margin-bottom: 24px;
-            }
-
-            .deadlock-button {
-                background: linear-gradient(90deg, #a78bfa, #ec4899);
-                border: none;
-                color: white;
-                padding: 12px 32px;
-                font-size: 16px;
-                font-weight: 600;
-                border-radius: 12px;
-                cursor: pointer;
-                transition: transform 0.2s ease;
-            }
-
-            .deadlock-button:hover {
-                transform: scale(1.05);
-            }
         </style>
     </head>
     <body>
@@ -210,31 +165,23 @@
                     <div class="progress-text" id="progressText">Level 1 • 0%</div>
                     <div class="progress-bar-fill"></div>
                 </div>
-                <div class="progress-stats">
-                    <div class="progress-stat-item">
-                        <div class="progress-stat-label">Score</div>
-                        <div class="progress-stat-value" id="pointsValue">0</div>
+                <div class="stats">
+                    <div class="stat-item">
+                        <div class="stat-label">Score</div>
+                        <div class="stat-value" id="scoreValue">0</div>
                     </div>
-                    <div class="progress-stat-item">
-                        <div class="progress-stat-label">Goal</div>
-                        <div class="progress-stat-value" id="requiredValue">320</div>
+                    <div class="stat-item">
+                        <div class="stat-label">Goal</div>
+                        <div class="stat-value" id="goalValue">250</div>
                     </div>
-                    <div class="progress-stat-item">
-                        <div class="progress-stat-label">Progress</div>
-                        <div class="progress-stat-value" id="progressValue">0%</div>
+                    <div class="stat-item">
+                        <div class="stat-label">Progress</div>
+                        <div class="stat-value" id="progressValue">0%</div>
                     </div>
                 </div>
             </div>
 
             <div class="game-grid" id="gameGrid"></div>
-        </div>
-
-        <div class="deadlock-modal" id="deadlockModal">
-            <div class="deadlock-content">
-                <div class="deadlock-title">No More Moves!</div>
-                <div class="deadlock-message">There are no more possible matches on the board.</div>
-                <button class="deadlock-button" id="restartBtn">Restart Game</button>
-            </div>
         </div>
 
         <script>
@@ -243,7 +190,6 @@
             const TOTAL_CELLS = 64;
             const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
             const POINTS_PER_PAIR = 10;
-            const POINTS_PER_LEVEL = 320;
             const NUM_CLASSES = { '1': 'num-1', '2': 'num-2', '3': 'num-3', '4': 'num-4', '5': 'num-5', '6': 'num-6', '7': 'num-7', '8': 'num-8', '9': 'num-9' };
 
             let selectedCells = [];
@@ -251,35 +197,39 @@
             let gameState = {
                 level: 1,
                 points: 0,
-                pointsInCurrentLevel: 0,
-                requiredPoints: 320
+                requiredPoints: 250,
+                matchedPairs: 0
             };
 
+            function getGoalForLevel(level) {
+                return 250 + (level - 1) * 50;
+            }
+
             function updateProgress() {
-                const pointsEl = document.querySelector('#pointsValue');
-                const requiredEl = document.querySelector('#requiredValue');
-                const progressValueEl = document.querySelector('#progressValue');
-                const progressTextEl = document.querySelector('#progressText');
+                const progressText = document.querySelector('#progressText');
+                const scoreValue = document.querySelector('#scoreValue');
+                const goalValue = document.querySelector('#goalValue');
+                const progressValue = document.querySelector('#progressValue');
                 const progressBar = document.querySelector('.progress-bar-fill');
 
-                pointsEl.textContent = gameState.points;
-                requiredEl.textContent = gameState.requiredPoints;
-
                 const progressPercent = Math.min(
-                    (gameState.pointsInCurrentLevel / POINTS_PER_LEVEL) * 100,
+                    (gameState.points / gameState.requiredPoints) * 100,
                     100
                 );
+
+                progressText.textContent = `Level ${gameState.level} • ${Math.round(progressPercent)}%`;
+                scoreValue.textContent = gameState.points;
+                goalValue.textContent = gameState.requiredPoints;
+                progressValue.textContent = `${Math.round(progressPercent)}%`;
                 progressBar.style.width = progressPercent + '%';
-                progressValueEl.textContent = Math.round(progressPercent) + '%';
-                progressTextEl.textContent = `Level ${gameState.level} • ${Math.round(progressPercent)}%`;
             }
 
             function addPoints(points) {
                 gameState.points += points;
-                gameState.pointsInCurrentLevel += points;
+                gameState.matchedPairs++;
 
-                // Перевіряємо, чи досягнули 320 очок для переходу на наступний рівень
-                if (gameState.pointsInCurrentLevel >= POINTS_PER_LEVEL) {
+                // Перевіряємо, чи досягнули потрібну кількість очок
+                if (gameState.points >= gameState.requiredPoints) {
                     levelUp();
                 } else {
                     updateProgress();
@@ -288,59 +238,11 @@
 
             function levelUp() {
                 gameState.level++;
-                gameState.pointsInCurrentLevel = 0;
-                gameState.requiredPoints = 320 * gameState.level;
-
-                gameGrid.innerHTML = '';
-                updateProgress();
-                renderGameGrid();
-                checkForDeadlock();
-            }
-
-            function hasAnyAvailableMatch() {
-                for (let i = 0; i < gameGrid.children.length; i++) {
-                    const cell1 = gameGrid.children[i];
-                    if (cell1.classList.contains('empty-glass')) continue;
-
-                    for (let j = i + 1; j < gameGrid.children.length; j++) {
-                        const cell2 = gameGrid.children[j];
-                        if (cell2.classList.contains('empty-glass')) continue;
-
-                        const num1 = parseInt(cell1.getAttribute('data-number'));
-                        const num2 = parseInt(cell2.getAttribute('data-number'));
-
-                        if (areAdjacent(cell1, cell2) && (num1 === num2 || num1 + num2 === 10)) {
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }
-
-            function showDeadlockModal() {
-                document.getElementById('deadlockModal').classList.add('active');
-            }
-
-            function hideDeadlockModal() {
-                document.getElementById('deadlockModal').classList.remove('active');
-            }
-
-            function checkForDeadlock() {
-                if (!hasAnyAvailableMatch()) {
-                    showDeadlockModal();
-                }
-            }
-
-            function restartGame() {
-                hideDeadlockModal();
-                gameState.level = 1;
                 gameState.points = 0;
-                gameState.pointsInCurrentLevel = 0;
-                gameState.requiredPoints = 320;
-                selectedCells = [];
-                gameGrid.innerHTML = '';
+                gameState.matchedPairs = 0;
+                gameState.requiredPoints = getGoalForLevel(gameState.level);
+
                 updateProgress();
-                renderGameGrid();
             }
 
             function checkForClearedRows() {
@@ -514,7 +416,6 @@
                     addPoints(POINTS_PER_PAIR);
                     selectedCells = [];
                     checkForClearedRows();
-                    checkForDeadlock();
                 } else {
                     // Не збіг - деселектуємо
                     cell1.classList.remove('selected');
@@ -573,10 +474,9 @@
 
             // Генеруємо сітку та ініціалізуємо прогрес при завантаженні сторінки
             document.addEventListener('DOMContentLoaded', () => {
+                gameState.requiredPoints = getGoalForLevel(gameState.level);
                 updateProgress();
                 renderGameGrid();
-                checkForDeadlock();
-                document.getElementById('restartBtn').addEventListener('click', restartGame);
             });
         </script>
     </body>
