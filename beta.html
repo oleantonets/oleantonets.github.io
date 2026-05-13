@@ -26,20 +26,17 @@
             }
 
             .progress-card {
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(167, 139, 250, 0.15) 45%, rgba(255, 255, 255, 0.15) 100%);
-                border: 2px solid rgba(255, 255, 255, 0.35);
-                border-radius: 32px;
+                background: rgba(255, 255, 255, 0.2);
+                border: 1.5px solid rgba(255, 255, 255, 0.4);
+                border-radius: 28px;
                 padding: 24px;
                 margin-bottom: 24px;
-                backdrop-filter: blur(80px);
-                -webkit-backdrop-filter: blur(80px);
+                backdrop-filter: blur(60px);
+                -webkit-backdrop-filter: blur(60px);
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 gap: 16px;
-                box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.4);
-                position: relative;
-                overflow: hidden;
             }
 
             .progress-bar-wrapper {
@@ -71,28 +68,28 @@
                 z-index: 10;
             }
 
-            .stats {
+            .progress-stats {
                 width: 100%;
                 display: grid;
                 grid-template-columns: repeat(3, 1fr);
                 gap: 12px;
             }
 
-            .stat-item {
+            .progress-stat-item {
                 background: rgba(167, 139, 250, 0.1);
                 border-radius: 12px;
                 padding: 12px;
                 text-align: center;
             }
 
-            .stat-label {
+            .progress-stat-label {
                 font-size: 10px;
                 color: #cbd5e1;
                 margin-bottom: 6px;
                 text-transform: uppercase;
             }
 
-            .stat-value {
+            .progress-stat-value {
                 font-size: 20px;
                 font-weight: 600;
                 color: #f8fafc;
@@ -101,15 +98,8 @@
             .game-grid {
                 display: grid;
                 grid-template-columns: repeat(8, 1fr);
-                gap: 6px;
+                gap: 8px;
                 margin-top: 24px;
-                background: rgba(255, 255, 255, 0.05);
-                border: none;
-                border-radius: 24px;
-                padding: 0;
-                backdrop-filter: blur(40px);
-                -webkit-backdrop-filter: blur(40px);
-                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
             }
 
             .game-cell {
@@ -117,21 +107,22 @@
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 12px;
+                border-radius: 8px;
                 font-size: 28px;
                 font-weight: 500;
                 cursor: pointer;
-                transition: all 0.2s ease;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+                transition: transform 0.2s ease, box-shadow 0.2s ease, filter 0.2s ease;
                 -webkit-touch-callout: none;
                 -webkit-user-select: none;
                 user-select: none;
             }
 
-            .game-cell:hover:not(.empty-glass) {
-                transform: scale(1.30);
-                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-                filter: brightness(1.2);
+            @media (hover: hover) {
+                .game-cell:not(.empty-glass):hover {
+                    transform: scale(1.30);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+                    filter: brightness(1.2);
+                }
             }
 
             .num-1 { background: #f472b6; color: white; }
@@ -149,18 +140,130 @@
                 cursor: default;
             }
 
-            .empty-glass:hover {
-                transform: none;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                filter: none;
-            }
-
             .game-cell.selected {
                 transform: scale(1.30);
                 box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
                 filter: brightness(1.3);
             }
 
+            .deadlock-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .deadlock-modal.active {
+                display: flex;
+            }
+
+            .deadlock-content {
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
+                border-radius: 24px;
+                padding: 40px;
+                text-align: center;
+                backdrop-filter: blur(60px);
+                max-width: 400px;
+            }
+
+            .deadlock-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin-bottom: 16px;
+            }
+
+            .deadlock-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
+            }
+
+            .deadlock-button {
+                background: linear-gradient(90deg, #a78bfa, #ec4899);
+                border: none;
+                color: white;
+                padding: 12px 32px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+            }
+
+            .deadlock-button:hover {
+                transform: scale(1.05);
+            }
+
+            .levelup-modal {
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.7);
+                display: none;
+                align-items: center;
+                justify-content: center;
+                z-index: 100;
+            }
+
+            .levelup-modal.active {
+                display: flex;
+            }
+
+            .levelup-content {
+                background: rgba(255, 255, 255, 0.15);
+                border: 2px solid rgba(255, 255, 255, 0.4);
+                border-radius: 24px;
+                padding: 40px;
+                text-align: center;
+                backdrop-filter: blur(60px);
+                max-width: 400px;
+            }
+
+            .levelup-title {
+                font-size: 28px;
+                font-weight: 700;
+                color: #a78bfa;
+                margin-bottom: 16px;
+            }
+
+            .levelup-message {
+                font-size: 16px;
+                color: #cbd5e1;
+                margin-bottom: 24px;
+            }
+
+            .levelup-level {
+                font-size: 48px;
+                font-weight: 700;
+                color: #f1f5f9;
+                margin-bottom: 24px;
+            }
+
+            .levelup-button {
+                background: linear-gradient(90deg, #a78bfa, #ec4899);
+                border: none;
+                color: white;
+                padding: 12px 32px;
+                font-size: 16px;
+                font-weight: 600;
+                border-radius: 12px;
+                cursor: pointer;
+                transition: transform 0.2s ease;
+            }
+
+            .levelup-button:hover {
+                transform: scale(1.05);
+            }
         </style>
     </head>
     <body>
@@ -170,23 +273,40 @@
                     <div class="progress-text" id="progressText">Level 1 • 0%</div>
                     <div class="progress-bar-fill"></div>
                 </div>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Score</div>
-                        <div class="stat-value" id="pointsValue">0</div>
+                <div class="progress-stats">
+                    <div class="progress-stat-item">
+                        <div class="progress-stat-label">Current</div>
+                        <div class="progress-stat-value" id="pointsValue">0</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Goal</div>
-                        <div class="stat-value" id="requiredValue">320</div>
+                    <div class="progress-stat-item">
+                        <div class="progress-stat-label">Target</div>
+                        <div class="progress-stat-value" id="requiredValue">320</div>
                     </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Progress</div>
-                        <div class="stat-value" id="progressValue">0%</div>
+                    <div class="progress-stat-item">
+                        <div class="progress-stat-label">Progress</div>
+                        <div class="progress-stat-value" id="progressValue">0%</div>
                     </div>
                 </div>
             </div>
 
             <div class="game-grid" id="gameGrid"></div>
+        </div>
+
+        <div class="deadlock-modal" id="deadlockModal">
+            <div class="deadlock-content">
+                <div class="deadlock-title">No More Moves!</div>
+                <div class="deadlock-message">There are no more possible matches on the board.</div>
+                <button class="deadlock-button" id="restartBtn">Restart Game</button>
+            </div>
+        </div>
+
+        <div class="levelup-modal" id="levelupModal">
+            <div class="levelup-content">
+                <div class="levelup-title">Level Up!</div>
+                <div class="levelup-level" id="levelupValue">2</div>
+                <div class="levelup-message">Keep up the great work!</div>
+                <button class="levelup-button" id="continueBtn">Continue</button>
+            </div>
         </div>
 
         <script>
@@ -202,7 +322,7 @@
             let gameState = {
                 level: 1,
                 points: 0,
-                requiredPoints: 320,
+                requiredPoints: 50,
                 matchedPairs: 0
             };
 
@@ -216,8 +336,11 @@
                 pointsEl.textContent = gameState.points;
                 requiredEl.textContent = gameState.requiredPoints;
 
+                const levelStartPoints = (gameState.level - 1) * 50;
+                const levelProgress = gameState.points - levelStartPoints;
+                const levelRequired = gameState.requiredPoints - levelStartPoints;
                 const progressPercent = Math.min(
-                    (gameState.points / gameState.requiredPoints) * 100,
+                    (levelProgress / levelRequired) * 100,
                     100
                 );
                 progressBar.style.width = progressPercent + '%';
@@ -229,18 +352,76 @@
                 gameState.points += points;
                 gameState.matchedPairs++;
 
+                // Перевіряємо, чи досягнули потрібну кількість очок
                 if (gameState.points >= gameState.requiredPoints) {
-                    gameState.level++;
-                    gameState.points = 0;
-                    gameState.matchedPairs = 0;
+                    levelUp();
+                } else {
+                    updateProgress();
                 }
+            }
+
+            function showLevelUpModal() {
+                document.getElementById('levelupValue').textContent = gameState.level;
+                document.getElementById('levelupModal').classList.add('active');
+            }
+
+            function hideLevelUpModal() {
+                document.getElementById('levelupModal').classList.remove('active');
+            }
+
+            function levelUp() {
+                gameState.level++;
+                gameState.requiredPoints = gameState.level * 50;
+                gameState.matchedPairs = 0;
 
                 updateProgress();
+                showLevelUpModal();
+
+                selectedCells = [];
+                gameGrid.innerHTML = '';
+                renderGameGrid();
+                checkForDeadlock();
+            }
+
+            function hasAnyAvailableMatch() {
+                for (let i = 0; i < gameGrid.children.length; i++) {
+                    const cell1 = gameGrid.children[i];
+                    if (cell1.classList.contains('empty-glass')) continue;
+
+                    for (let j = i + 1; j < gameGrid.children.length; j++) {
+                        const cell2 = gameGrid.children[j];
+                        if (cell2.classList.contains('empty-glass')) continue;
+
+                        const num1 = parseInt(cell1.getAttribute('data-number'));
+                        const num2 = parseInt(cell2.getAttribute('data-number'));
+
+                        if (areAdjacent(cell1, cell2) && (num1 === num2 || num1 + num2 === 10)) {
+                            return true;
+                        }
+                    }
+                }
+                return false;
+            }
+
+            function showDeadlockModal() {
+                document.getElementById('deadlockModal').classList.add('active');
+            }
+
+            function hideDeadlockModal() {
+                document.getElementById('deadlockModal').classList.remove('active');
+            }
+
+            function checkForDeadlock() {
+                if (!hasAnyAvailableMatch()) {
+                    showDeadlockModal();
+                }
             }
 
             function restartGame() {
+                hideDeadlockModal();
                 gameState.level = 1;
                 gameState.points = 0;
+                gameState.requiredPoints = 50;
                 gameState.matchedPairs = 0;
                 gameGrid.innerHTML = '';
                 updateProgress();
@@ -325,6 +506,8 @@
 
                 const row1 = Math.floor(idx1 / GRID_COLS);
                 const col1 = idx1 % GRID_COLS;
+                const row2 = Math.floor(idx2 / GRID_COLS);
+                const col2 = idx2 % GRID_COLS;
 
                 // 8 напрямків: вверх, вниз, ліво, право, 4 діагоналі
                 const directions = [
@@ -402,7 +585,11 @@
                 const isSameNumber = num1 === num2;
                 const sumToTen = num1 + num2 === 10;
 
+                // Перевіряємо, чи числа однакові або в сумі дають 10, та клітинки сусідні
                 if (isAdjacent && (isSameNumber || sumToTen)) {
+                    // Пара знайдена - робимо клітинки пустими
+                    cell1.classList.remove('selected');
+                    cell2.classList.remove('selected');
                     cell1.classList.add('empty-glass');
                     cell2.classList.add('empty-glass');
                     cell1.removeAttribute('data-number');
@@ -410,12 +597,15 @@
                     cell1.textContent = '';
                     cell2.textContent = '';
                     addPoints(POINTS_PER_PAIR);
+                    selectedCells = [];
                     checkForClearedRows();
+                    checkForDeadlock();
+                } else {
+                    // Не збіг - деселектуємо
+                    cell1.classList.remove('selected');
+                    cell2.classList.remove('selected');
+                    selectedCells = [];
                 }
-
-                cell1.classList.remove('selected');
-                cell2.classList.remove('selected');
-                selectedCells = [];
             }
 
             function toggleCellSelection(cell) {
@@ -470,6 +660,9 @@
             document.addEventListener('DOMContentLoaded', () => {
                 updateProgress();
                 renderGameGrid();
+                checkForDeadlock();
+                document.getElementById('restartBtn').addEventListener('click', restartGame);
+                document.getElementById('continueBtn').addEventListener('click', hideLevelUpModal);
             });
         </script>
         </div>
