@@ -352,8 +352,12 @@
         }
 
         function matchCells(cell1, cell2) {
-            cell1.remove();
-            cell2.remove();
+            cell1.className = 'game-cell empty-glass';
+            cell1.textContent = '';
+
+            cell2.className = 'game-cell empty-glass';
+            cell2.textContent = '';
+
             selectedCells = [];
             isProcessing = false;
             progressCard.addScore(10);
