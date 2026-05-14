@@ -183,25 +183,6 @@
             filter: none;
         }
 
-        @keyframes matchAnimation {
-            0% {
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% {
-                transform: scale(1.2) rotate(5deg);
-            }
-            100% {
-                transform: scale(0.5) rotate(-10deg);
-                opacity: 0;
-            }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-8px); }
-            75% { transform: translateX(8px); }
-        }
     </style>
 </head>
 <body>
@@ -372,6 +353,7 @@
 
         function renderGameGrid() {
             const gameGrid = document.getElementById('gameGrid');
+            gameGrid.innerHTML = '';
             const numbers = generateNumbers();
 
             numbers.forEach((number) => {
