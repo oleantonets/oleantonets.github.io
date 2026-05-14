@@ -140,7 +140,7 @@
             font-size: 28px;
             font-weight: 500;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: box-shadow 0.2s ease, filter 0.2s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
@@ -158,7 +158,8 @@
 
         .game-cell.selected {
             box-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 4px 12px rgba(0, 0, 0, 0.2);
-            transform: scale(1.15);
+            transform: scale(1.15) !important;
+            transition: none !important;
         }
 
         .num-1 { background: #f472b6; color: white; }
