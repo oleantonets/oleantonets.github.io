@@ -283,7 +283,11 @@
 
             updateDisplay() {
                 this.scoreEl.textContent = this.score;
+                this.animateStatUpdate(this.scoreEl);
+
                 this.goalEl.textContent = this.goal;
+                this.animateStatUpdate(this.goalEl);
+
                 this.updateProgress();
             }
 
