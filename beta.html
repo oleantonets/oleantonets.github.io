@@ -348,6 +348,15 @@
             const r1 = pos1.row, c1 = pos1.col;
             const r2 = pos2.row, c2 = pos2.col;
 
+            const flat = gameState.flat();
+            const firstIdx = flat.findIndex(v => v !== null);
+            const lastIdx = flat.length - 1 - [...flat].reverse().findIndex(v => v !== null);
+            const idx1 = r1 * 8 + c1;
+            const idx2 = r2 * 8 + c2;
+            if ((idx1 === firstIdx && idx2 === lastIdx) || (idx1 === lastIdx && idx2 === firstIdx)) {
+                return true;
+            }
+
             if (r1 === r2) {
                 const minC = Math.min(c1, c2);
                 const maxC = Math.max(c1, c2);
@@ -378,8 +387,6 @@
                 return true;
             }
 
-            const idx1 = r1 * 8 + c1;
-            const idx2 = r2 * 8 + c2;
             const minIdx = Math.min(idx1, idx2);
             const maxIdx = Math.max(idx1, idx2);
             for (let i = minIdx + 1; i < maxIdx; i++) {
@@ -422,14 +429,14 @@
             if (isMatch(num1, num2) && isConnected(pos1, pos2)) {
                 setTimeout(() => {
                     matchCells(cell1, cell2);
-                }, 100);
+                }, 200);
             } else {
                 setTimeout(() => {
                     cell1.classList.remove('selected');
                     cell2.classList.remove('selected');
                     selectedCells = [];
                     isProcessing = false;
-                }, 200);
+                }, 400);
             }
         }
 
