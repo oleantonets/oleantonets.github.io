@@ -140,11 +140,14 @@
             font-size: 28px;
             font-weight: 500;
             cursor: pointer;
-            transition: box-shadow 0.2s ease, filter 0.2s ease;
+            transition: all 0.15s ease;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
-        .game-cell:hover {
+        .game-cell:hover:not(.empty-glass) {
             transform: scale(1.30);
             box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
             filter: brightness(1.2);
@@ -157,9 +160,9 @@
         }
 
         .game-cell.selected {
-            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 4px 12px rgba(0, 0, 0, 0.2);
-            transform: scale(1.15) !important;
-            transition: none !important;
+            transform: scale(1.30);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+            filter: brightness(1.3);
         }
 
         .num-1 { background: #f472b6; color: white; }
