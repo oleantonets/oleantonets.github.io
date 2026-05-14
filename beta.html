@@ -323,6 +323,7 @@
         function updateGridDisplay() {
             const cells = document.querySelectorAll('.game-cell');
             cells.forEach((cell, index) => {
+                cell.style.transition = 'none';
                 const row = Math.floor(index / 8);
                 const col = index % 8;
                 const value = gameState[row][col];
@@ -334,6 +335,9 @@
                     cell.textContent = value;
                 }
             });
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                document.querySelectorAll('.game-cell').forEach(cell => cell.style.transition = '');
+            }));
         }
 
         function handleCellClick(event) {
