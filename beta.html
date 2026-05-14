@@ -1,490 +1,429 @@
-    <!DOCTYPE html>
-    <html lang="uk">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Number Match</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Match</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e1a;
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 0 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding-top: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Progress Card Styles */
+        .progress-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(167, 139, 250, 0.15) 45%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 32px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(80px);
+            -webkit-backdrop-filter: blur(80px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 40px;
+            background: rgba(167, 139, 250, 0.15);
+            border: 2px solid rgba(167, 139, 250, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-bottom: 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a78bfa, #ec4899);
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            z-index: 10;
+        }
+
+        .stats {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #f8fafc;
+            transition: color 0.3s ease;
+        }
+
+        .stat-value.updated {
+            color: #a78bfa;
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        /* Game Grid Styles */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            margin-top: 24px;
+            background: transparent;
+            border: none;
+            border-radius: 24px;
+            padding: 0;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+        }
+
+        .game-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 28px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .game-cell:hover {
+            transform: scale(1.30);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.2);
+        }
+
+        .game-cell.matched {
+            animation: matchAnimation 0.4s ease;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .num-1 { background: #f472b6; color: white; }
+        .num-2 { background: #60a5fa; color: white; }
+        .num-3 { background: #34d399; color: white; }
+        .num-4 { background: #fbbf24; color: white; }
+        .num-5 { background: #a78bfa; color: white; }
+        .num-6 { background: #fb7185; color: white; }
+        .num-7 { background: #06b6d4; color: white; }
+        .num-8 { background: #c084fc; color: white; }
+        .num-9 { background: #f97316; color: white; }
+
+        .empty-glass {
+            background: #4b5563;
+            border: none;
+            cursor: default;
+        }
+
+        .empty-glass:hover {
+            transform: none;
+            box-shadow: none;
+            filter: none;
+        }
+
+        @keyframes matchAnimation {
+            0% {
+                transform: scale(1);
+                opacity: 1;
             }
-
-            body {
-                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-                background: #0a0e1a;
-                color: #f1f5f9;
-                min-height: 100vh;
-                padding: 0 24px;
+            50% {
+                transform: scale(1.2) rotate(5deg);
             }
-
-            .container {
-                max-width: 520px;
-                margin: 0 auto;
-                padding-top: 0;
+            100% {
+                transform: scale(0.5) rotate(-10deg);
+                opacity: 0;
             }
+        }
 
-            .progress-card {
-                background: rgba(255, 255, 255, 0.2);
-                border: 1.5px solid rgba(255, 255, 255, 0.4);
-                border-radius: 28px;
-                padding: 24px;
-                margin-bottom: 24px;
-                backdrop-filter: blur(60px);
-                -webkit-backdrop-filter: blur(60px);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 16px;
-            }
-
-            .progress-bar-wrapper {
-                width: 100%;
-                height: 40px;
-                background: rgba(167, 139, 250, 0.15);
-                border: 2px solid rgba(167, 139, 250, 0.3);
-                border-radius: 20px;
-                overflow: hidden;
-                display: flex;
-                align-items: center;
-                position: relative;
-            }
-
-            .progress-bar-fill {
-                height: 100%;
-                width: 0%;
-                background: linear-gradient(90deg, #a78bfa, #ec4899);
-                border-radius: 20px;
-            }
-
-            .progress-text {
-                position: absolute;
-                width: 100%;
-                text-align: center;
-                font-size: 14px;
-                font-weight: 600;
-                color: white;
-                z-index: 10;
-            }
-
-            .stats {
-                width: 100%;
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
-            }
-
-            .stat-item {
-                background: rgba(167, 139, 250, 0.1);
-                border-radius: 12px;
-                padding: 12px;
-                text-align: center;
-            }
-
-            .stat-label {
-                font-size: 10px;
-                color: #cbd5e1;
-                margin-bottom: 6px;
-                text-transform: uppercase;
-            }
-
-            .stat-value {
-                font-size: 20px;
-                font-weight: 600;
-                color: #f8fafc;
-            }
-
-            .game-grid {
-                display: grid;
-                grid-template-columns: repeat(8, 1fr);
-                gap: 6px;
-                margin-top: 24px;
-                background: rgba(255, 255, 255, 0.05);
-                border: none;
-                border-radius: 24px;
-                padding: 0;
-                backdrop-filter: blur(40px);
-                -webkit-backdrop-filter: blur(40px);
-                box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
-            }
-
-            .game-cell {
-                aspect-ratio: 1;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border-radius: 12px;
-                font-size: 28px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-                -webkit-touch-callout: none;
-                -webkit-user-select: none;
-                user-select: none;
-            }
-
-            .game-cell:hover:not(.empty-glass) {
-                transform: scale(1.30);
-                box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-                filter: brightness(1.2);
-            }
-
-            .num-1 { background: #f472b6; color: white; }
-            .num-2 { background: #60a5fa; color: white; }
-            .num-3 { background: #34d399; color: white; }
-            .num-4 { background: #fbbf24; color: white; }
-            .num-5 { background: #a78bfa; color: white; }
-            .num-6 { background: #fb7185; color: white; }
-            .num-7 { background: #06b6d4; color: white; }
-            .num-8 { background: #c084fc; color: white; }
-            .num-9 { background: #f97316; color: white; }
-
-            .empty-glass {
-                background: #4b5563;
-                cursor: default;
-            }
-
-            .game-cell.selected {
-                transform: scale(1.30);
-                box-shadow: 0 0 20px rgba(248, 250, 252, 0.6);
-                filter: brightness(1.3);
-            }
-
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="progress-card">
-                <div class="progress-bar-wrapper">
-                    <div class="progress-text" id="progressText">Level 1 • 0%</div>
-                    <div class="progress-bar-fill"></div>
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="progress-card" id="progressCard">
+            <div class="progress-bar-wrapper">
+                <div class="progress-text" id="progressText">Level 1 • 0%</div>
+                <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="scoreValue">0</div>
                 </div>
-                <div class="stats">
-                    <div class="stat-item">
-                        <div class="stat-label">Score</div>
-                        <div class="stat-value" id="pointsValue">0</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Goal</div>
-                        <div class="stat-value" id="requiredValue">320</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-label">Progress</div>
-                        <div class="stat-value" id="progressValue">0%</div>
-                    </div>
+                <div class="stat-item">
+                    <div class="stat-label">Goal</div>
+                    <div class="stat-value" id="goalValue">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Progress</div>
+                    <div class="stat-value" id="progressValue">0%</div>
                 </div>
             </div>
-
-            <div class="game-grid" id="gameGrid"></div>
         </div>
 
-        <script>
-            const GRID_COLS = 8;
-            const GRID_ROWS = 8;
-            const TOTAL_CELLS = 64;
-            const NUMBERS = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-            const POINTS_PER_PAIR = 10;
-            const NUM_CLASSES = { '1': 'num-1', '2': 'num-2', '3': 'num-3', '4': 'num-4', '5': 'num-5', '6': 'num-6', '7': 'num-7', '8': 'num-8', '9': 'num-9' };
+        <div class="game-grid" id="gameGrid"></div>
+    </div>
 
-            let selectedCells = [];
-            let gameGrid = null;
-            let gameState = {
-                level: 1,
-                points: 0,
-                requiredPoints: 320,
-                matchedPairs: 0
-            };
+    <script>
+        class ProgressCard {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.scoreEl = document.getElementById('scoreValue');
+                this.goalEl = document.getElementById('goalValue');
+                this.progressEl = document.getElementById('progressValue');
+                this.progressTextEl = document.getElementById('progressText');
+                this.progressBarFill = document.getElementById('progressBarFill');
 
-            function updateProgress() {
-                const pointsEl = document.querySelector('#pointsValue');
-                const requiredEl = document.querySelector('#requiredValue');
-                const progressValueEl = document.querySelector('#progressValue');
-                const progressTextEl = document.querySelector('#progressText');
-                const progressBar = document.querySelector('.progress-bar-fill');
-
-                pointsEl.textContent = gameState.points;
-                requiredEl.textContent = gameState.requiredPoints;
-
-                const levelStartPoints = (gameState.level - 1) * 50;
-                const levelProgress = gameState.points - levelStartPoints;
-                const levelRequired = gameState.requiredPoints - levelStartPoints;
-                const progressPercent = Math.min(
-                    (levelProgress / levelRequired) * 100,
-                    100
-                );
-                progressBar.style.width = progressPercent + '%';
-                progressValueEl.textContent = Math.round(progressPercent) + '%';
-                progressTextEl.textContent = `Level ${gameState.level} • ${Math.round(progressPercent)}%`;
+                this.level = 1;
+                this.score = 0;
+                this.goal = 100;
             }
 
-            function addPoints(points) {
-                gameState.points += points;
-                gameState.matchedPairs++;
-
-                // Перевіряємо, чи досягнули потрібну кількість очок
-                if (gameState.points >= gameState.requiredPoints) {
-                    levelUp();
-                } else {
-                    updateProgress();
-                }
+            setLevel(level) {
+                this.level = level;
+                this.updateProgressText();
             }
 
-            function levelUp() {
-                gameState.level++;
-                gameState.requiredPoints = 320;
-                gameState.matchedPairs = 0;
-
-                updateProgress();
-                selectedCells = [];
-                gameGrid.innerHTML = '';
-                renderGameGrid();
+            setScore(score) {
+                this.score = score;
+                this.animateStatUpdate(this.scoreEl);
+                this.updateProgress();
             }
 
-            function restartGame() {
-                gameState.level = 1;
-                gameState.points = 0;
-                gameState.requiredPoints = 320;
-                gameState.matchedPairs = 0;
-                gameGrid.innerHTML = '';
-                updateProgress();
-                renderGameGrid();
+            addScore(points) {
+                this.setScore(this.score + points);
             }
 
-            function checkForClearedRows() {
-                const rowsData = [];
-                for (let r = 0; r < GRID_ROWS; r++) {
-                    const cells = [];
-                    let allEmpty = true;
-                    for (let c = 0; c < GRID_COLS; c++) {
-                        const cell = gameGrid.children[r * GRID_COLS + c];
-                        const isEmpty = cell.classList.contains('empty-glass');
-                        if (!isEmpty) allEmpty = false;
-                        cells.push({
-                            isEmpty,
-                            number: cell.getAttribute('data-number')
-                        });
-                    }
-                    rowsData.push({ cells, allEmpty });
-                }
-
-                const hasEmptyAboveNumbers = rowsData.some(
-                    (row, r) => row.allEmpty &&
-                    rowsData.slice(r + 1).some(below => !below.allEmpty)
-                );
-                if (!hasEmptyAboveNumbers) return;
-
-                const sorted = [
-                    ...rowsData.filter(r => !r.allEmpty),
-                    ...rowsData.filter(r => r.allEmpty)
-                ];
-
-                for (let r = 0; r < GRID_ROWS; r++) {
-                    for (let c = 0; c < GRID_COLS; c++) {
-                        const cell = gameGrid.children[r * GRID_COLS + c];
-                        const data = sorted[r].cells[c];
-                        if (data.isEmpty) {
-                            cell.textContent = '';
-                            cell.removeAttribute('data-number');
-                            cell.className = 'game-cell empty-glass';
-                        } else {
-                            cell.textContent = data.number;
-                            cell.setAttribute('data-number', data.number);
-                            cell.className = `game-cell ${NUM_CLASSES[data.number]}`;
-                        }
-                    }
-                }
+            setGoal(goal) {
+                this.goal = goal;
+                this.animateStatUpdate(this.goalEl);
+                this.updateProgress();
             }
 
-            function generateGameCells() {
-                const cells = [];
-                const pairsNeeded = TOTAL_CELLS / 2;
+            updateProgress() {
+                const progressPercent = Math.min(Math.round((this.score / this.goal) * 100), 100);
 
-                for (let i = 0; i < pairsNeeded; i++) {
-                    const number = NUMBERS[i % NUMBERS.length];
-                    cells.push(number);
-                    cells.push(number);
+                this.progressEl.textContent = `${progressPercent}%`;
+                this.progressBarFill.style.width = `${progressPercent}%`;
+                this.updateProgressText();
+
+                this.animateStatUpdate(this.progressEl);
+            }
+
+            updateProgressText() {
+                this.progressTextEl.textContent = `Level ${this.level} • ${Math.round((this.score / this.goal) * 100)}%`;
+            }
+
+            updateDisplay() {
+                this.scoreEl.textContent = this.score;
+                this.goalEl.textContent = this.goal;
+                this.updateProgress();
+            }
+
+            animateStatUpdate(element) {
+                element.classList.remove('updated');
+                void element.offsetWidth;
+                element.classList.add('updated');
+            }
+        }
+
+        class GameGrid {
+            constructor(containerId, gridSize = 8) {
+                this.container = document.getElementById(containerId);
+                this.gridSize = gridSize;
+                this.totalCells = gridSize * gridSize;
+                this.grid = [];
+                this.cells = [];
+                this.selectedCells = [];
+                this.onMatchCallback = null;
+
+                this.initializeGrid();
+                this.render();
+            }
+
+            initializeGrid() {
+                this.grid = [];
+                const numbersCount = 9;
+                const numbersPerRow = Math.ceil(this.totalCells / numbersCount);
+
+                for (let i = 0; i < this.totalCells; i++) {
+                    const number = (i % numbersCount) + 1;
+                    this.grid.push(number);
                 }
 
-                for (let i = cells.length - 1; i > 0; i--) {
+                this.shuffleArray(this.grid);
+            }
+
+            shuffleArray(array) {
+                for (let i = array.length - 1; i > 0; i--) {
                     const j = Math.floor(Math.random() * (i + 1));
-                    [cells[i], cells[j]] = [cells[j], cells[i]];
-                }
-
-                return cells;
-            }
-
-            function getCellIndex(cell) {
-                const children = gameGrid.children;
-                for (let i = 0; i < children.length; i++) {
-                    if (children[i] === cell) return i;
-                }
-                return -1;
-            }
-
-            function areAdjacent(cell1, cell2) {
-                const currentRows = Math.floor(gameGrid.children.length / GRID_COLS);
-                const idx1 = getCellIndex(cell1);
-                const idx2 = getCellIndex(cell2);
-
-                const row1 = Math.floor(idx1 / GRID_COLS);
-                const col1 = idx1 % GRID_COLS;
-                const row2 = Math.floor(idx2 / GRID_COLS);
-                const col2 = idx2 % GRID_COLS;
-
-                // 8 напрямків: вверх, вниз, ліво, право, 4 діагоналі
-                const directions = [
-                    { dr: -1, dc: 0 }, // вверх
-                    { dr: 1, dc: 0 },  // вниз
-                    { dr: 0, dc: -1 }, // ліво
-                    { dr: 0, dc: 1 },  // право
-                    { dr: -1, dc: -1 }, // діагональ вверх-ліво
-                    { dr: -1, dc: 1 },  // діагональ вверх-право
-                    { dr: 1, dc: -1 },  // діагональ вниз-ліво
-                    { dr: 1, dc: 1 }    // діагональ вниз-право
-                ];
-
-                // Перевіряємо кожен напрямок
-                for (let dir of directions) {
-                    let r = row1 + dir.dr;
-                    let c = col1 + dir.dc;
-
-                    // Йдемо в напрямку доки не знайдемо не-пусту клітинку
-                    while (r >= 0 && r < currentRows && c >= 0 && c < GRID_COLS) {
-                        const currentIdx = r * GRID_COLS + c;
-                        const currentCell = gameGrid.children[currentIdx];
-
-                        // Якщо натнулись на cell2 - вони можуть бути матчені
-                        if (currentCell === cell2) {
-                            return true;
-                        }
-
-                        // Якщо натнулись на не-пусту клітинку (не empty-glass) - стоп
-                        if (!currentCell.classList.contains('empty-glass')) {
-                            break;
-                        }
-
-                        // Рухаємось далі в напрямку
-                        r += dir.dr;
-                        c += dir.dc;
-                    }
-                }
-
-                // Лінійне обвивання: кінець рядка → початок наступного
-                const totalCells = gameGrid.children.length;
-                for (let i = idx1 + 1; i < totalCells; i++) {
-                    const cell = gameGrid.children[i];
-                    if (cell === cell2) {
-                        return true;
-                    }
-                    if (!cell.classList.contains('empty-glass')) {
-                        break;
-                    }
-                }
-
-                // Лінійне обвивання: початок рядка → кінець попереднього
-                for (let i = idx1 - 1; i >= 0; i--) {
-                    const cell = gameGrid.children[i];
-                    if (cell === cell2) {
-                        return true;
-                    }
-                    if (!cell.classList.contains('empty-glass')) {
-                        break;
-                    }
-                }
-
-                return false;
-            }
-
-            function checkMatch() {
-                if (selectedCells.length !== 2) return;
-
-                const cell1 = selectedCells[0];
-                const cell2 = selectedCells[1];
-                const num1 = parseInt(cell1.getAttribute('data-number'));
-                const num2 = parseInt(cell2.getAttribute('data-number'));
-
-                const isAdjacent = areAdjacent(cell1, cell2);
-                const isSameNumber = num1 === num2;
-                const sumToTen = num1 + num2 === 10;
-
-                // Перевіряємо, чи числа однакові або в сумі дають 10, та клітинки сусідні
-                if (isAdjacent && (isSameNumber || sumToTen)) {
-                    // Пара знайдена - робимо клітинки пустими
-                    cell1.classList.remove('selected');
-                    cell2.classList.remove('selected');
-                    cell1.classList.add('empty-glass');
-                    cell2.classList.add('empty-glass');
-                    cell1.removeAttribute('data-number');
-                    cell2.removeAttribute('data-number');
-                    cell1.textContent = '';
-                    cell2.textContent = '';
-                    addPoints(POINTS_PER_PAIR);
-                    selectedCells = [];
-                    checkForClearedRows();
-                } else {
-                    // Не збіг - деселектуємо
-                    cell1.classList.remove('selected');
-                    cell2.classList.remove('selected');
-                    selectedCells = [];
+                    [array[i], array[j]] = [array[j], array[i]];
                 }
             }
 
-            function toggleCellSelection(cell) {
-                // Не вибираємо пусту клітинку
-                if (cell.classList.contains('empty-glass')) return;
+            render() {
+                this.container.innerHTML = '';
+                this.cells = [];
 
-                // Не вибираємо одну й ту ж клітинку двічі
-                if (cell.classList.contains('selected')) {
-                    cell.classList.remove('selected');
-                    selectedCells = selectedCells.filter(c => c !== cell);
-                    return;
-                }
+                this.grid.forEach((number, index) => {
+                    const cellEl = document.createElement('div');
+                    cellEl.className = `game-cell num-${number}`;
+                    cellEl.textContent = number;
+                    cellEl.dataset.index = index;
+                    cellEl.dataset.number = number;
 
-                // Вибираємо клітинку
-                cell.classList.add('selected');
-                selectedCells.push(cell);
+                    cellEl.addEventListener('click', () => this.handleCellClick(index, cellEl));
 
-                // Коли вибрали дві клітинки - перевіряємо на збіг
-                if (selectedCells.length === 2) {
-                    setTimeout(checkMatch, 150);
-                }
-            }
-
-            function handleCellClick(event) {
-                toggleCellSelection(event.target);
-            }
-
-            function handleCellTouch(event) {
-                event.preventDefault();
-                toggleCellSelection(event.target);
-            }
-
-            function renderGameGrid() {
-                gameGrid = document.getElementById('gameGrid');
-                const cells = generateGameCells();
-
-                cells.forEach((number) => {
-                    const cellDiv = document.createElement('div');
-                    cellDiv.className = 'game-cell';
-
-                    cellDiv.classList.add(`num-${number}`);
-                    cellDiv.textContent = number;
-                    cellDiv.setAttribute('data-number', number);
-                    cellDiv.addEventListener('click', handleCellClick);
-                    cellDiv.addEventListener('touchend', handleCellTouch);
-
-                    gameGrid.appendChild(cellDiv);
+                    this.container.appendChild(cellEl);
+                    this.cells.push(cellEl);
                 });
             }
 
-            // Генеруємо сітку та ініціалізуємо прогрес при завантаженні сторінки
-            document.addEventListener('DOMContentLoaded', () => {
-                updateProgress();
-                renderGameGrid();
-            });
-        </script>
-        </div>
-    </body>
-    </html>
+            handleCellClick(index, cellEl) {
+                if (cellEl.classList.contains('matched')) return;
+
+                const number = this.grid[index];
+                this.selectedCells.push({ index, number, element: cellEl });
+
+                if (this.selectedCells.length === 2) {
+                    this.checkMatch();
+                }
+            }
+
+            checkMatch() {
+                const [first, second] = this.selectedCells;
+
+                if (first.number === second.number) {
+                    this.handleMatch([first, second]);
+                } else {
+                    this.handleMismatch([first, second]);
+                }
+
+                this.selectedCells = [];
+            }
+
+            handleMatch(cells) {
+                cells.forEach(cell => {
+                    cell.element.classList.add('matched');
+                });
+
+                if (this.onMatchCallback) {
+                    this.onMatchCallback(cells[0].number);
+                }
+
+                setTimeout(() => {
+                    cells.forEach(cell => {
+                        this.grid[cell.index] = null;
+                    });
+                }, 400);
+            }
+
+            handleMismatch(cells) {
+                // Клітинки мають тряснення при неправильному виборі
+                cells.forEach(cell => {
+                    cell.element.style.animation = 'shake 0.3s ease';
+                });
+
+                setTimeout(() => {
+                    cells.forEach(cell => {
+                        cell.element.style.animation = '';
+                    });
+                }, 300);
+            }
+
+            reset() {
+                this.selectedCells = [];
+                this.initializeGrid();
+                this.render();
+            }
+
+            getRemainingCells() {
+                return this.grid.filter(num => num !== null).length;
+            }
+        }
+
+        // Ініціалізація
+        const progressCard = new ProgressCard('progressCard');
+        progressCard.setGoal(36);
+        progressCard.updateDisplay();
+
+        const gameGrid = new GameGrid('gameGrid', 8);
+
+        gameGrid.onMatchCallback = (number) => {
+            const points = number * 10;
+            progressCard.addScore(points);
+            progressCard.updateDisplay();
+
+            if (progressCard.score >= progressCard.goal) {
+                setTimeout(() => {
+                    alert(`🎉 Рівень пройдений! Очки: ${progressCard.score}`);
+                    gameGrid.reset();
+                    progressCard.setScore(0);
+                    progressCard.updateDisplay();
+                }, 500);
+            }
+        };
+    </script>
+</body>
+</html>
