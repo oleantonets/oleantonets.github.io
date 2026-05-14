@@ -297,114 +297,29 @@
             }
         }
 
-        class GameGrid {
-            constructor(gridId, progressCard) {
-                this.gridEl = document.getElementById(gridId);
-                this.progressCard = progressCard;
-                this.cells = [];
-                this.selectedCells = [];
-                this.isProcessing = false;
+        function generateNumbers() {
+            const numbers = [];
+            for (let i = 1; i <= 9; i++) {
+                numbers.push(i);
+                numbers.push(i);
             }
-
-            generateNumbers() {
-                const numbers = [];
-                for (let i = 1; i <= 9; i++) {
-                    numbers.push(i);
-                    numbers.push(i);
-                }
-                return this.shuffle(numbers);
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
             }
+            return numbers;
+        }
 
-            shuffle(array) {
-                for (let i = array.length - 1; i > 0; i--) {
-                    const j = Math.floor(Math.random() * (i + 1));
-                    [array[i], array[j]] = [array[j], array[i]];
-                }
-                return array;
-            }
+        function renderGameGrid() {
+            const gameGrid = document.getElementById('gameGrid');
+            const numbers = generateNumbers();
 
-            render() {
-                this.gridEl.innerHTML = '';
-                this.cells = [];
-                const numbers = this.generateNumbers();
-
-                numbers.forEach((number, index) => {
-                    const cell = document.createElement('div');
-                    cell.className = `game-cell num-${number}`;
-                    cell.textContent = number;
-                    cell.setAttribute('data-number', number);
-                    cell.setAttribute('data-index', index);
-                    cell.addEventListener('click', (e) => this.handleCellClick(e));
-
-                    this.cells.push(cell);
-                    this.gridEl.appendChild(cell);
-                });
-            }
-
-            handleCellClick(event) {
-                if (this.isProcessing) return;
-
-                const cell = event.target;
-                const index = parseInt(cell.getAttribute('data-index'));
-                const isSelected = cell.classList.contains('selected');
-
-                if (isSelected) {
-                    this.deselectCell(cell);
-                } else {
-                    this.selectCell(cell);
-                }
-            }
-
-            selectCell(cell) {
-                cell.classList.add('selected');
-                this.selectedCells.push(cell);
-
-                if (this.selectedCells.length === 2) {
-                    this.checkMatch();
-                }
-            }
-
-            deselectCell(cell) {
-                cell.classList.remove('selected');
-                this.selectedCells = this.selectedCells.filter(c => c !== cell);
-            }
-
-            checkMatch() {
-                this.isProcessing = true;
-
-                const cell1 = this.selectedCells[0];
-                const cell2 = this.selectedCells[1];
-                const num1 = parseInt(cell1.getAttribute('data-number'));
-                const num2 = parseInt(cell2.getAttribute('data-number'));
-
-                if (num1 === num2) {
-                    setTimeout(() => {
-                        this.matchCells(cell1, cell2);
-                    }, 300);
-                } else {
-                    setTimeout(() => {
-                        cell1.classList.remove('selected');
-                        cell2.classList.remove('selected');
-                        this.selectedCells = [];
-                        this.isProcessing = false;
-                    }, 600);
-                }
-            }
-
-            matchCells(cell1, cell2) {
-                cell1.classList.add('matched');
-                cell2.classList.add('matched');
-
-                setTimeout(() => {
-                    cell1.remove();
-                    cell2.remove();
-                    this.cells = this.cells.filter(c => c !== cell1 && c !== cell2);
-                    this.selectedCells = [];
-                    this.isProcessing = false;
-
-                    this.progressCard.addScore(10);
-                }, 300);
-            }
+            numbers.forEach((number) => {
+                const cell = document.createElement('div');
+                cell.className = `game-cell num-${number}`;
+                cell.textContent = number;
+                gameGrid.appendChild(cell);
+            });
         }
 
         // Ініціалізація
@@ -412,8 +327,7 @@
         progressCard.setGoal(320);
         progressCard.updateDisplay();
 
-        const gameGrid = new GameGrid('gameGrid', progressCard);
-        gameGrid.render();
+        renderGameGrid();
     </script>
 </body>
 </html>
