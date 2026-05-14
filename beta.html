@@ -301,6 +301,78 @@
         const progressCard = new ProgressCard('progressCard');
         progressCard.setGoal(320);
         progressCard.updateDisplay();
+
+        // Заповнення сітки
+        const gameGrid = document.getElementById('gameGrid');
+        const numbers = [];
+        let selectedCells = [];
+
+        // Генеруємо числа 1-9, по 7-8 разів кожне
+        for (let i = 0; i < 64; i++) {
+            numbers.push((i % 9) + 1);
+        }
+
+        // Перемішуємо
+        for (let i = numbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+        }
+
+        // Заповнюємо сітку
+        numbers.forEach((num, index) => {
+            const cell = document.createElement('div');
+            cell.className = `game-cell num-${num}`;
+            cell.textContent = num;
+            cell.dataset.index = index;
+            cell.dataset.number = num;
+
+            // Логіка вибору/деселекції
+            cell.addEventListener('click', () => {
+                if (cell.classList.contains('selected')) {
+                    // Деселекція
+                    cell.classList.remove('selected');
+                    selectedCells = selectedCells.filter(c => c !== cell);
+                } else {
+                    // Вибір
+                    cell.classList.add('selected');
+                    selectedCells.push(cell);
+
+                    // Перевіряємо матч, коли вибрано 2 клітинки
+                    if (selectedCells.length === 2) {
+                        const [first, second] = selectedCells;
+                        const firstNum = parseInt(first.dataset.number);
+                        const secondNum = parseInt(second.dataset.number);
+
+                        if (firstNum === secondNum) {
+                            // Матч! Видаляємо клітинки
+                            setTimeout(() => {
+                                first.classList.add('matched');
+                                second.classList.add('matched');
+                                selectedCells = [];
+                                progressCard.addScore(10);
+                                progressCard.updateDisplay();
+
+                                if (progressCard.score >= progressCard.goal) {
+                                    setTimeout(() => {
+                                        alert(`🎉 Рівень пройдений! Очки: ${progressCard.score}`);
+                                        location.reload();
+                                    }, 300);
+                                }
+                            }, 150);
+                        } else {
+                            // Не матч - видаляємо вибір
+                            setTimeout(() => {
+                                first.classList.remove('selected');
+                                second.classList.remove('selected');
+                                selectedCells = [];
+                            }, 150);
+                        }
+                    }
+                }
+            });
+
+            gameGrid.appendChild(cell);
+        });
     </script>
 </body>
 </html>
