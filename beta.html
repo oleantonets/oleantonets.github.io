@@ -340,6 +340,42 @@
             }));
         }
 
+        function isMatch(num1, num2) {
+            return num1 === num2 || num1 + num2 === 10;
+        }
+
+        function isConnected(pos1, pos2) {
+            const r1 = pos1.row, c1 = pos1.col;
+            const r2 = pos2.row, c2 = pos2.col;
+
+            if (r1 === r2) {
+                const minC = Math.min(c1, c2);
+                const maxC = Math.max(c1, c2);
+                for (let c = minC + 1; c < maxC; c++) {
+                    if (gameState[r1][c] !== null) return false;
+                }
+                return true;
+            }
+
+            if (c1 === c2) {
+                const minR = Math.min(r1, r2);
+                const maxR = Math.max(r1, r2);
+                for (let r = minR + 1; r < maxR; r++) {
+                    if (gameState[r][c1] !== null) return false;
+                }
+                return true;
+            }
+
+            const idx1 = r1 * 8 + c1;
+            const idx2 = r2 * 8 + c2;
+            const minIdx = Math.min(idx1, idx2);
+            const maxIdx = Math.max(idx1, idx2);
+            for (let i = minIdx + 1; i < maxIdx; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) return false;
+            }
+            return true;
+        }
+
         function handleCellClick(event) {
             const cell = event.target;
 
@@ -368,8 +404,10 @@
             const cell2 = selectedCells[1];
             const num1 = parseInt(cell1.textContent);
             const num2 = parseInt(cell2.textContent);
+            const pos1 = getCellPosition(cell1);
+            const pos2 = getCellPosition(cell2);
 
-            if (num1 === num2) {
+            if (isMatch(num1, num2) && isConnected(pos1, pos2)) {
                 setTimeout(() => {
                     matchCells(cell1, cell2);
                 }, 200);
