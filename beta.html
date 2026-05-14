@@ -252,6 +252,7 @@
 
             setScore(score) {
                 this.score = score;
+                this.scoreEl.textContent = this.score;
                 this.animateStatUpdate(this.scoreEl);
                 this.updateProgress();
             }
