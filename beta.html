@@ -311,6 +311,16 @@
             return numbers;
         }
 
+        function handleCellClick(event) {
+            const cell = event.target;
+
+            if (cell.classList.contains('selected')) {
+                cell.classList.remove('selected');
+            } else {
+                cell.classList.add('selected');
+            }
+        }
+
         function renderGameGrid() {
             const gameGrid = document.getElementById('gameGrid');
             const numbers = generateNumbers();
@@ -319,6 +329,7 @@
                 const cell = document.createElement('div');
                 cell.className = `game-cell num-${number}`;
                 cell.textContent = number;
+                cell.addEventListener('click', handleCellClick);
                 gameGrid.appendChild(cell);
             });
         }
