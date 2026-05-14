@@ -343,11 +343,19 @@
             handleCellClick(index, cellEl) {
                 if (cellEl.classList.contains('matched')) return;
 
-                const number = this.grid[index];
-                this.selectedCells.push({ index, number, element: cellEl });
+                const selectedIndex = this.selectedCells.findIndex(cell => cell.index === index);
 
-                if (this.selectedCells.length === 2) {
-                    this.checkMatch();
+                if (selectedIndex !== -1) {
+                    // Снімаємо вибір, якщо клітинка вже вибрана
+                    this.selectedCells.splice(selectedIndex, 1);
+                } else {
+                    // Додаємо нову клітинку
+                    const number = this.grid[index];
+                    this.selectedCells.push({ index, number, element: cellEl });
+
+                    if (this.selectedCells.length === 2) {
+                        this.checkMatch();
+                    }
                 }
             }
 
@@ -405,13 +413,13 @@
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
-        progressCard.setGoal(360);
+        progressCard.setGoal(320);
         progressCard.updateDisplay();
 
         const gameGrid = new GameGrid('gameGrid', 8);
 
         gameGrid.onMatchCallback = (number) => {
-            const points = number * 10;
+            const points = 10;
             progressCard.addScore(points);
             progressCard.updateDisplay();
 
