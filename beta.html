@@ -352,20 +352,19 @@
             handleCellClick(index, cellEl) {
                 if (cellEl.classList.contains('matched')) return;
 
-                const selectedIndex = this.selectedCells.findIndex(cell => cell.index === index);
-
-                if (selectedIndex !== -1) {
-                    // Снімаємо вибір, якщо клітинка вже вибрана
+                // Клас як джерело істини
+                if (cellEl.classList.contains('selected')) {
+                    // Снімаємо вибір
                     cellEl.classList.remove('selected');
-                    this.selectedCells.splice(selectedIndex, 1);
+                    this.selectedCells = this.selectedCells.filter(cell => cell.index !== index);
                 } else {
-                    // Додаємо нову клітинку
+                    // Додаємо вибір
                     cellEl.classList.add('selected');
                     const number = this.grid[index];
                     this.selectedCells.push({ index, number, element: cellEl });
 
                     if (this.selectedCells.length === 2) {
-                        this.checkMatch();
+                        setTimeout(() => this.checkMatch(), 150);
                     }
                 }
             }
@@ -379,12 +378,9 @@
                     this.handleMismatch([first, second]);
                 }
 
-                // Видаляємо вибір з клітинок, які не матчать
-                if (first.number !== second.number) {
-                    first.element.classList.remove('selected');
-                    second.element.classList.remove('selected');
-                }
-
+                // Завжди видаляємо вибір перед очищенням масиву
+                first.element.classList.remove('selected');
+                second.element.classList.remove('selected');
                 this.selectedCells = [];
             }
 
