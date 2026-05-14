@@ -317,6 +317,8 @@
                 cell.classList.remove('selected');
                 selectedCells = selectedCells.filter(c => c !== cell);
             } else {
+                if (isProcessing) return;
+
                 cell.classList.add('selected');
                 selectedCells.push(cell);
 
@@ -338,14 +340,14 @@
             if (num1 === num2) {
                 setTimeout(() => {
                     matchCells(cell1, cell2);
-                }, 300);
+                }, 200);
             } else {
                 setTimeout(() => {
                     cell1.classList.remove('selected');
                     cell2.classList.remove('selected');
                     selectedCells = [];
                     isProcessing = false;
-                }, 600);
+                }, 400);
             }
         }
 
