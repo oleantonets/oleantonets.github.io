@@ -370,6 +370,8 @@
             }
 
             checkMatch() {
+                if (this.selectedCells.length !== 2) return;
+
                 const [first, second] = this.selectedCells;
 
                 if (first.number === second.number) {
