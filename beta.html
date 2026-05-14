@@ -293,8 +293,48 @@
             return numbers;
         }
 
+        let gameState = [];
         let selectedCells = [];
         let isProcessing = false;
+
+        function initState() {
+            const numbers = generateNumbers();
+            gameState = [];
+            for (let row = 0; row < 8; row++) {
+                gameState[row] = [];
+                for (let col = 0; col < 8; col++) {
+                    gameState[row][col] = numbers[row * 8 + col];
+                }
+            }
+        }
+
+        function getCellPosition(cell) {
+            const cells = document.querySelectorAll('.game-cell');
+            const index = Array.from(cells).indexOf(cell);
+            return { row: Math.floor(index / 8), col: index % 8 };
+        }
+
+        function applyGravity() {
+            const nonEmptyRows = gameState.filter(row => row.some(cell => cell !== null));
+            const emptyRows = gameState.filter(row => row.every(cell => cell === null));
+            gameState = [...nonEmptyRows, ...emptyRows];
+        }
+
+        function updateGridDisplay() {
+            const cells = document.querySelectorAll('.game-cell');
+            cells.forEach((cell, index) => {
+                const row = Math.floor(index / 8);
+                const col = index % 8;
+                const value = gameState[row][col];
+                if (value === null) {
+                    cell.className = 'game-cell empty-glass';
+                    cell.textContent = '';
+                } else {
+                    cell.className = `game-cell num-${value}`;
+                    cell.textContent = value;
+                }
+            });
+        }
 
         function handleCellClick(event) {
             const cell = event.target;
@@ -340,29 +380,35 @@
         }
 
         function matchCells(cell1, cell2) {
-            cell1.className = 'game-cell empty-glass';
-            cell1.textContent = '';
+            const pos1 = getCellPosition(cell1);
+            const pos2 = getCellPosition(cell2);
 
-            cell2.className = 'game-cell empty-glass';
-            cell2.textContent = '';
+            gameState[pos1.row][pos1.col] = null;
+            gameState[pos2.row][pos2.col] = null;
 
             selectedCells = [];
             isProcessing = false;
+
+            applyGravity();
+            updateGridDisplay();
             progressCard.addScore(10);
         }
 
         function renderGameGrid() {
             const gameGrid = document.getElementById('gameGrid');
             gameGrid.innerHTML = '';
-            const numbers = generateNumbers();
+            initState();
 
-            numbers.forEach((number) => {
-                const cell = document.createElement('div');
-                cell.className = `game-cell num-${number}`;
-                cell.textContent = number;
-                cell.addEventListener('click', handleCellClick);
-                gameGrid.appendChild(cell);
-            });
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    const value = gameState[row][col];
+                    cell.className = `game-cell num-${value}`;
+                    cell.textContent = value;
+                    cell.addEventListener('click', handleCellClick);
+                    gameGrid.appendChild(cell);
+                }
+            }
         }
 
         // Ініціалізація
