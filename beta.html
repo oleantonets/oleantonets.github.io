@@ -366,6 +366,18 @@
                 return true;
             }
 
+            if (Math.abs(r2 - r1) === Math.abs(c2 - c1)) {
+                const dr = r2 > r1 ? 1 : -1;
+                const dc = c2 > c1 ? 1 : -1;
+                let r = r1 + dr, c = c1 + dc;
+                while (r !== r2 || c !== c2) {
+                    if (gameState[r][c] !== null) return false;
+                    r += dr;
+                    c += dc;
+                }
+                return true;
+            }
+
             const idx1 = r1 * 8 + c1;
             const idx2 = r2 * 8 + c2;
             const minIdx = Math.min(idx1, idx2);
