@@ -318,6 +318,8 @@
         function handleCellClick(event) {
             const cell = event.target;
 
+            if (cell.classList.contains('empty-glass')) return;
+
             if (cell.classList.contains('selected')) {
                 cell.classList.remove('selected');
                 selectedCells = selectedCells.filter(c => c !== cell);
