@@ -422,14 +422,14 @@
             if (isMatch(num1, num2) && isConnected(pos1, pos2)) {
                 setTimeout(() => {
                     matchCells(cell1, cell2);
-                }, 200);
+                }, 100);
             } else {
                 setTimeout(() => {
                     cell1.classList.remove('selected');
                     cell2.classList.remove('selected');
                     selectedCells = [];
                     isProcessing = false;
-                }, 400);
+                }, 200);
             }
         }
 
