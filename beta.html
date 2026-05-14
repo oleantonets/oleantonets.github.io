@@ -147,24 +147,17 @@
             user-select: none;
         }
 
-        .game-cell:hover:not(.empty-glass) {
-            transform: scale(1.35);
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
-            filter: brightness(1.2);
+        .game-cell:hover {
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
         }
 
-        .game-cell.matched {
-            animation: matchAnimation 0.4s ease;
-            opacity: 0;
-            pointer-events: none;
+        .game-cell.selected {
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+            filter: brightness(1.3);
         }
 
-        .game-cell.selected,
-        .game-cell.selected:hover {
-            transform: scale(1.30);
-            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8) !important;
-            filter: brightness(1.3) !important;
-        }
 
         .num-1 { background: #f472b6; color: white; }
         .num-2 { background: #60a5fa; color: white; }
@@ -312,14 +305,54 @@
             return numbers;
         }
 
+        let selectedCells = [];
+        let isProcessing = false;
+
         function handleCellClick(event) {
             const cell = event.target;
 
             if (cell.classList.contains('selected')) {
                 cell.classList.remove('selected');
+                selectedCells = selectedCells.filter(c => c !== cell);
             } else {
                 cell.classList.add('selected');
+                selectedCells.push(cell);
+
+                if (selectedCells.length === 2) {
+                    checkMatch();
+                }
             }
+        }
+
+        function checkMatch() {
+            if (selectedCells.length !== 2) return;
+
+            isProcessing = true;
+            const cell1 = selectedCells[0];
+            const cell2 = selectedCells[1];
+            const num1 = parseInt(cell1.textContent);
+            const num2 = parseInt(cell2.textContent);
+
+            if (num1 === num2) {
+                setTimeout(() => {
+                    matchCells(cell1, cell2);
+                }, 300);
+            } else {
+                setTimeout(() => {
+                    cell1.classList.remove('selected');
+                    cell2.classList.remove('selected');
+                    selectedCells = [];
+                    isProcessing = false;
+                }, 600);
+            }
+        }
+
+        function matchCells(cell1, cell2) {
+            cell1.remove();
+            cell2.remove();
+            selectedCells = [];
+            isProcessing = false;
+            progressCard.addScore(10);
         }
 
         function renderGameGrid() {
