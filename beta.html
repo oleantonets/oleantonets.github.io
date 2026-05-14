@@ -156,6 +156,11 @@
             pointer-events: none;
         }
 
+        .game-cell.selected {
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8), 0 4px 12px rgba(0, 0, 0, 0.2);
+            transform: scale(1.15);
+        }
+
         .num-1 { background: #f472b6; color: white; }
         .num-2 { background: #60a5fa; color: white; }
         .num-3 { background: #34d399; color: white; }
@@ -347,9 +352,11 @@
 
                 if (selectedIndex !== -1) {
                     // Снімаємо вибір, якщо клітинка вже вибрана
+                    cellEl.classList.remove('selected');
                     this.selectedCells.splice(selectedIndex, 1);
                 } else {
                     // Додаємо нову клітинку
+                    cellEl.classList.add('selected');
                     const number = this.grid[index];
                     this.selectedCells.push({ index, number, element: cellEl });
 
@@ -366,6 +373,12 @@
                     this.handleMatch([first, second]);
                 } else {
                     this.handleMismatch([first, second]);
+                }
+
+                // Видаляємо вибір з клітинок, які не матчать
+                if (first.number !== second.number) {
+                    first.element.classList.remove('selected');
+                    second.element.classList.remove('selected');
                 }
 
                 this.selectedCells = [];
