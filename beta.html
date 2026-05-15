@@ -665,6 +665,8 @@
 
         function restartGame() {
             progressCard.levelScore = 0;
+            progressCard.totalScore = (progressCard.level - 1) * 320;
+            progressCard.scoreEl.textContent = progressCard.totalScore;
             progressCard.updateProgress();
 
             const modal = document.getElementById('gameOverModal');
