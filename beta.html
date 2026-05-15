@@ -258,8 +258,7 @@
 
             nextLevel() {
                 this.level++;
-                this.score = 0;
-                this.goal = 320;
+                this.goal = 320 * this.level;
                 this.updateDisplay();
             }
 
