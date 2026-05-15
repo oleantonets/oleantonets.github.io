@@ -116,6 +116,16 @@
             100% { transform: scale(1); }
         }
 
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .game-cell.shake {
+            animation: shake 0.4s ease;
+        }
+
         /* Game Grid Styles */
         .game-grid {
             display: grid;
@@ -442,9 +452,13 @@
                     matchCells(cell1, cell2);
                 }, 200);
             } else {
+                cell1.classList.add('shake');
+                cell2.classList.add('shake');
                 setTimeout(() => {
                     cell1.classList.remove('selected');
                     cell2.classList.remove('selected');
+                    cell1.classList.remove('shake');
+                    cell2.classList.remove('shake');
                     selectedCells = [];
                     isProcessing = false;
                 }, 400);
