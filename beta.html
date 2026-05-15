@@ -304,6 +304,17 @@
         let cachedFirstIdx = -1;
         let cachedLastIdx = -1;
 
+        function updateBoundaryCache() {
+            cachedFirstIdx = -1;
+            cachedLastIdx = -1;
+            for (let i = 0; i < 64; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) {
+                    if (cachedFirstIdx === -1) cachedFirstIdx = i;
+                    cachedLastIdx = i;
+                }
+            }
+        }
+
         function initState() {
             const numbers = generateNumbers();
             gameState = [];
@@ -499,6 +510,10 @@
         progressCard.scoreEl.textContent = '0';
         progressCard.progressEl.textContent = '0%';
         progressCard.updateProgressText();
+
+        progressCard.animateStatUpdate(progressCard.scoreEl);
+        progressCard.animateStatUpdate(progressCard.goalEl);
+        progressCard.animateStatUpdate(progressCard.progressEl);
 
         renderGameGrid();
     </script>
