@@ -244,6 +244,7 @@
 
             setGoal(goal) {
                 this.goal = goal;
+                this.goalEl.textContent = this.goal;
                 this.animateStatUpdate(this.goalEl);
                 this.updateProgress();
             }
@@ -281,10 +282,10 @@
 
         function generateNumbers() {
             const numbers = [];
-            for (let i = 0; i < 32; i++) {
-                const num = (i % 9) + 1;
-                numbers.push(num);
-                numbers.push(num);
+            for (let i = 1; i <= 8; i++) {
+                for (let j = 0; j < 8; j++) {
+                    numbers.push(i);
+                }
             }
             for (let i = numbers.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -296,6 +297,8 @@
         let gameState = [];
         let selectedCells = [];
         let isProcessing = false;
+        let cachedFirstIdx = -1;
+        let cachedLastIdx = -1;
 
         function initState() {
             const numbers = generateNumbers();
@@ -306,12 +309,23 @@
                     gameState[row][col] = numbers[row * 8 + col];
                 }
             }
+            updateBoundaryCache();
         }
 
         function getCellPosition(cell) {
-            const cells = document.querySelectorAll('.game-cell');
-            const index = Array.from(cells).indexOf(cell);
+            const index = parseInt(cell.dataset.index);
             return { row: Math.floor(index / 8), col: index % 8 };
+        }
+
+        function updateBoundaryCache() {
+            cachedFirstIdx = -1;
+            cachedLastIdx = -1;
+            for (let i = 0; i < 64; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) {
+                    if (cachedFirstIdx === -1) cachedFirstIdx = i;
+                    cachedLastIdx = i;
+                }
+            }
         }
 
         function applyGravity() {
@@ -348,12 +362,9 @@
             const r1 = pos1.row, c1 = pos1.col;
             const r2 = pos2.row, c2 = pos2.col;
 
-            const flat = gameState.flat();
-            const firstIdx = flat.findIndex(v => v !== null);
-            const lastIdx = flat.length - 1 - [...flat].reverse().findIndex(v => v !== null);
             const idx1 = r1 * 8 + c1;
             const idx2 = r2 * 8 + c2;
-            if ((idx1 === firstIdx && idx2 === lastIdx) || (idx1 === lastIdx && idx2 === firstIdx)) {
+            if ((idx1 === cachedFirstIdx && idx2 === cachedLastIdx) || (idx1 === cachedLastIdx && idx2 === cachedFirstIdx)) {
                 return true;
             }
 
@@ -446,6 +457,7 @@
 
             gameState[pos1.row][pos1.col] = null;
             gameState[pos2.row][pos2.col] = null;
+            updateBoundaryCache();
 
             selectedCells = [];
             isProcessing = false;
@@ -466,6 +478,7 @@
                     const value = gameState[row][col];
                     cell.className = `game-cell num-${value}`;
                     cell.textContent = value;
+                    cell.dataset.index = row * 8 + col;
                     cell.addEventListener('click', handleCellClick);
                     gameGrid.appendChild(cell);
                 }
