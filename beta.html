@@ -366,7 +366,6 @@
 
             <div class="modal-buttons">
                 <button class="modal-btn primary" id="restartBtn">Нова гра</button>
-                <button class="modal-btn secondary" id="continueBtn">Продовжити з рівня 1</button>
             </div>
         </div>
     </div>
@@ -659,13 +658,9 @@
         }
 
         function restartGame() {
-            progressCard.level = 1;
-            progressCard.totalScore = 0;
             progressCard.levelScore = 0;
-            progressCard.levelGoal = 320;
-            progressCard.goalEl.textContent = '320';
-            progressCard.scoreEl.textContent = '0';
             progressCard.progressEl.textContent = '0%';
+            progressCard.progressBarFill.style.width = '0%';
             progressCard.updateProgressText();
 
             const modal = document.getElementById('gameOverModal');
@@ -705,7 +700,6 @@
         progressCard.animateStatUpdate(progressCard.progressEl);
 
         document.getElementById('restartBtn').addEventListener('click', restartGame);
-        document.getElementById('continueBtn').addEventListener('click', restartGame);
 
         renderGameGrid();
     </script>
