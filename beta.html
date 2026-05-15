@@ -250,6 +250,17 @@
 
             addScore(points) {
                 this.setScore(this.score + points);
+                if (this.score >= this.goal) {
+                    this.nextLevel();
+                    renderGameGrid();
+                }
+            }
+
+            nextLevel() {
+                this.level++;
+                this.score = 0;
+                this.goal = 320;
+                this.updateDisplay();
             }
 
             setGoal(goal) {
