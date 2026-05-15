@@ -232,8 +232,9 @@
                 this.progressBarFill = document.getElementById('progressBarFill');
 
                 this.level = 1;
-                this.score = 0;
-                this.goal = 100;
+                this.totalScore = 0;
+                this.levelScore = 0;
+                this.levelGoal = 320;
             }
 
             setLevel(level) {
@@ -241,16 +242,14 @@
                 this.updateProgressText();
             }
 
-            setScore(score) {
-                this.score = score;
-                this.scoreEl.textContent = this.score;
+            addScore(points) {
+                this.levelScore += points;
+                this.totalScore += points;
+                this.scoreEl.textContent = this.totalScore;
                 this.animateStatUpdate(this.scoreEl);
                 this.updateProgress();
-            }
 
-            addScore(points) {
-                this.setScore(this.score + points);
-                if (this.score >= this.goal) {
+                if (this.levelScore >= this.levelGoal) {
                     this.nextLevel();
                     renderGameGrid();
                 }
@@ -258,19 +257,14 @@
 
             nextLevel() {
                 this.level++;
-                this.goal = 320 * this.level;
-                this.updateDisplay();
-            }
-
-            setGoal(goal) {
-                this.goal = goal;
-                this.goalEl.textContent = this.goal;
+                this.levelScore = 0;
+                this.goalEl.textContent = 320 * this.level;
                 this.animateStatUpdate(this.goalEl);
                 this.updateProgress();
             }
 
             updateProgress() {
-                const progressPercent = Math.min(Math.round((this.score / this.goal) * 100), 100);
+                const progressPercent = Math.min(Math.round((this.levelScore / this.levelGoal) * 100), 100);
 
                 this.progressEl.textContent = `${progressPercent}%`;
                 this.progressBarFill.style.width = `${progressPercent}%`;
@@ -280,17 +274,7 @@
             }
 
             updateProgressText() {
-                this.progressTextEl.textContent = `Level ${this.level} • ${Math.round((this.score / this.goal) * 100)}%`;
-            }
-
-            updateDisplay() {
-                this.scoreEl.textContent = this.score;
-                this.animateStatUpdate(this.scoreEl);
-
-                this.goalEl.textContent = this.goal;
-                this.animateStatUpdate(this.goalEl);
-
-                this.updateProgress();
+                this.progressTextEl.textContent = `Level ${this.level} • ${Math.round((this.levelScore / this.levelGoal) * 100)}%`;
             }
 
             animateStatUpdate(element) {
@@ -511,8 +495,10 @@
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
-        progressCard.setGoal(320);
-        progressCard.updateDisplay();
+        progressCard.goalEl.textContent = '320';
+        progressCard.scoreEl.textContent = '0';
+        progressCard.progressEl.textContent = '0%';
+        progressCard.updateProgressText();
 
         renderGameGrid();
     </script>
