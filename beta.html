@@ -700,6 +700,10 @@
         progressCard.progressEl.textContent = '0%';
         progressCard.updateProgressText();
 
+        progressCard.animateStatUpdate(progressCard.scoreEl);
+        progressCard.animateStatUpdate(progressCard.goalEl);
+        progressCard.animateStatUpdate(progressCard.progressEl);
+
         document.getElementById('restartBtn').addEventListener('click', restartGame);
         document.getElementById('continueBtn').addEventListener('click', restartGame);
 
