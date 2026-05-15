@@ -193,6 +193,133 @@
             filter: none;
         }
 
+        /* Modal Styles */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(167, 139, 250, 0.15) 45%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 32px;
+            padding: 40px 32px;
+            max-width: 400px;
+            width: 90%;
+            backdrop-filter: blur(80px);
+            -webkit-backdrop-filter: blur(80px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+            text-align: center;
+            animation: slideIn 0.4s ease;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #f1f5f9;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .modal-text {
+            font-size: 16px;
+            color: #cbd5e1;
+            margin-bottom: 32px;
+            line-height: 1.5;
+        }
+
+        .modal-stats {
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .modal-stat {
+            text-align: center;
+        }
+
+        .modal-stat-label {
+            font-size: 12px;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .modal-stat-value {
+            font-size: 28px;
+            font-weight: 600;
+            color: #a78bfa;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 12px;
+            flex-direction: column;
+        }
+
+        .modal-btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        .modal-btn.primary {
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            color: white;
+            box-shadow: 0 8px 20px rgba(167, 139, 250, 0.3);
+        }
+
+        .modal-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(167, 139, 250, 0.5);
+        }
+
+        .modal-btn.secondary {
+            background: rgba(167, 139, 250, 0.2);
+            color: #cbd5e1;
+            border: 1px solid rgba(167, 139, 250, 0.3);
+        }
+
+        .modal-btn.secondary:hover {
+            background: rgba(167, 139, 250, 0.3);
+            color: #f1f5f9;
+        }
+
     </style>
 </head>
 <body>
@@ -219,6 +346,29 @@
         </div>
 
         <div class="game-grid" id="gameGrid"></div>
+    </div>
+
+    <div class="modal-overlay" id="gameOverModal">
+        <div class="modal">
+            <div class="modal-title">Game Over</div>
+            <div class="modal-text">Немає більше валідних ходів</div>
+
+            <div class="modal-stats">
+                <div class="modal-stat">
+                    <div class="modal-stat-label">Level</div>
+                    <div class="modal-stat-value" id="modalLevel">1</div>
+                </div>
+                <div class="modal-stat">
+                    <div class="modal-stat-label">Score</div>
+                    <div class="modal-stat-value" id="modalScore">0</div>
+                </div>
+            </div>
+
+            <div class="modal-buttons">
+                <button class="modal-btn primary" id="restartBtn">Нова гра</button>
+                <button class="modal-btn secondary" id="continueBtn">Продовжити з рівня 1</button>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -473,6 +623,56 @@
             applyGravity();
             updateGridDisplay();
             progressCard.addScore(10);
+
+            if (!hasValidMoves()) {
+                showGameOver();
+            }
+        }
+
+        function hasValidMoves() {
+            for (let i = 0; i < 64; i++) {
+                const row1 = Math.floor(i / 8), col1 = i % 8;
+                if (gameState[row1][col1] === null) continue;
+
+                for (let j = i + 1; j < 64; j++) {
+                    const row2 = Math.floor(j / 8), col2 = j % 8;
+                    if (gameState[row2][col2] === null) continue;
+
+                    const num1 = gameState[row1][col1];
+                    const num2 = gameState[row2][col2];
+
+                    if (isMatch(num1, num2) &&
+                        isConnected({row: row1, col: col1}, {row: row2, col: col2})) {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        function showGameOver() {
+            isProcessing = true;
+            const modal = document.getElementById('gameOverModal');
+            document.getElementById('modalLevel').textContent = progressCard.level;
+            document.getElementById('modalScore').textContent = progressCard.totalScore;
+            modal.classList.add('active');
+        }
+
+        function restartGame() {
+            progressCard.level = 1;
+            progressCard.totalScore = 0;
+            progressCard.levelScore = 0;
+            progressCard.levelGoal = 320;
+            progressCard.goalEl.textContent = '320';
+            progressCard.scoreEl.textContent = '0';
+            progressCard.progressEl.textContent = '0%';
+            progressCard.updateProgressText();
+
+            const modal = document.getElementById('gameOverModal');
+            modal.classList.remove('active');
+            isProcessing = false;
+
+            renderGameGrid();
         }
 
         function renderGameGrid() {
@@ -499,6 +699,9 @@
         progressCard.scoreEl.textContent = '0';
         progressCard.progressEl.textContent = '0%';
         progressCard.updateProgressText();
+
+        document.getElementById('restartBtn').addEventListener('click', restartGame);
+        document.getElementById('continueBtn').addEventListener('click', restartGame);
 
         renderGameGrid();
     </script>
