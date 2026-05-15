@@ -398,7 +398,7 @@
                 this.animateStatUpdate(this.scoreEl);
                 this.updateProgress();
 
-                if (this.levelScore >= this.levelGoal) {
+                if (this.totalScore >= this.level * 320) {
                     this.nextLevel();
                     renderGameGrid();
                 }
@@ -413,7 +413,9 @@
             }
 
             updateProgress() {
-                const progressPercent = Math.min(Math.round((this.levelScore / this.levelGoal) * 100), 100);
+                const levelStartScore = (this.level - 1) * 320;
+                const levelCurrentScore = this.totalScore - levelStartScore;
+                const progressPercent = Math.min(Math.round((levelCurrentScore / 320) * 100), 100);
 
                 this.progressEl.textContent = `${progressPercent}%`;
                 this.progressBarFill.style.width = `${progressPercent}%`;
@@ -423,7 +425,9 @@
             }
 
             updateProgressText() {
-                this.progressTextEl.textContent = `Level ${this.level} • ${Math.round((this.levelScore / this.levelGoal) * 100)}%`;
+                const levelStartScore = (this.level - 1) * 320;
+                const levelCurrentScore = this.totalScore - levelStartScore;
+                this.progressTextEl.textContent = `Level ${this.level} • ${Math.round((levelCurrentScore / 320) * 100)}%`;
             }
 
             animateStatUpdate(element) {
@@ -651,17 +655,17 @@
 
         function showGameOver() {
             isProcessing = true;
+            const levelStartScore = (progressCard.level - 1) * 320;
+            const levelCurrentScore = progressCard.totalScore - levelStartScore;
             const modal = document.getElementById('gameOverModal');
             document.getElementById('modalLevel').textContent = progressCard.level;
-            document.getElementById('modalScore').textContent = progressCard.totalScore;
+            document.getElementById('modalScore').textContent = levelCurrentScore;
             modal.classList.add('active');
         }
 
         function restartGame() {
             progressCard.levelScore = 0;
-            progressCard.progressEl.textContent = '0%';
-            progressCard.progressBarFill.style.width = '0%';
-            progressCard.updateProgressText();
+            progressCard.updateProgress();
 
             const modal = document.getElementById('gameOverModal');
             modal.classList.remove('active');
