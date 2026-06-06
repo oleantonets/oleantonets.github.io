@@ -197,6 +197,7 @@
         .controls {
             display: flex;
             justify-content: center;
+            gap: 12px;
             margin-top: 24px;
         }
 
@@ -295,6 +296,7 @@
 
         <div class="controls">
             <button class="hint-btn" id="hintBtn">💡 Підказка</button>
+            <button class="hint-btn" id="showDeadlockBtn">🚫 Немає ходів</button>
         </div>
     </div>
 
@@ -640,6 +642,7 @@
 
         document.getElementById('hintBtn').addEventListener('click', showHint);
         document.getElementById('newGameBtn').addEventListener('click', newGame);
+        document.getElementById('showDeadlockBtn').addEventListener('click', showDeadlock);
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
