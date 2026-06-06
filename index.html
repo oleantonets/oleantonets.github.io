@@ -1,1331 +1,677 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number Match</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;900&family=Roboto+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-  :root {
-    /* Dark theme */
-    --bg: #0f1117;
-    --surface: #1a1d2e;
-    --surface2: #22263a;
-    --border: #2e3250;
-    --accent: #4f8ef7;
-    --accent2: #7c5aff;
-    --yellow: #f5c842;
-    --green: #3dd68c;
-    --red: #f05a5a;
-    --text: #e8eaf6;
-    --muted: #5a6080;
-    --cell-size: 44px;
-    --gap: 5px;
-    --radius: 10px;
-
-    /* Body background gradients */
-    --body-g1: rgba(79,142,247,.07);
-    --body-g2: rgba(124,90,255,.07);
-
-    /* Grid */
-    --grid-from: #1c2035;
-    --grid-to: #181b2c;
-    --grid-g1: rgba(79,142,247,.06);
-    --grid-g2: rgba(124,90,255,.04);
-    --grid-brd: rgba(60,66,100,.45);
-    --grid-brd-t: rgba(100,120,180,.25);
-    --grid-sh-top: rgba(255,255,255,.04);
-    --grid-sh-bot: rgba(0,0,0,.2);
-    --grid-glow1: rgba(79,142,247,.05);
-    --grid-glow2: rgba(124,90,255,.03);
-    --grid-outer: rgba(0,0,0,.3);
-    --grid-outer-glow: rgba(79,142,247,.04);
-
-    /* Cells */
-    --cell-from: #272b42;
-    --cell-to: #1f2338;
-    --cell-brd: rgba(90,100,145,.5);
-    --cell-brd-t: rgba(110,120,165,.45);
-    --cell-sh-outer: 0 1px 3px rgba(0,0,0,.2);
-    --cell-sh-inset: rgba(255,255,255,.04);
-    --cell-hover-from: #2e3358;
-    --cell-hover-to: #262a44;
-    --cell-hover-sh: rgba(79,142,247,.12);
-    --cell-hover-inset: rgba(255,255,255,.05);
-    --empty-bg: rgba(20,23,36,.3);
-    --empty-brd: rgba(70,76,110,.2);
-    --empty-sh: rgba(0,0,0,.15);
-
-    /* Digit colors */
-    --d1: #4f8ef7; --d2: #7c5aff; --d3: #3dd68c; --d4: #f5c842;
-    --d5: #f08228; --d6: #f05a5a; --d7: #c75af7; --d8: #5af7e0; --d9: #f7a25a;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-
-  body {
-    font-family: 'Outfit', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    overflow-x: hidden;
-  }
-
-  /* Background subtle pattern */
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: radial-gradient(circle at 20% 20%, var(--body-g1) 0%, transparent 50%),
-                      radial-gradient(circle at 80% 80%, var(--body-g2) 0%, transparent 50%);
-    pointer-events: none;
-    z-index: 0;
-  }
-
-  header {
-    width: 100%;
-    max-width: 480px;
-    padding: 16px 20px 12px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 28px;
-    position: relative;
-    z-index: 1;
-  }
-
-  .header-row {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    position: relative;
-  }
-
-  .logo-row {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
-    position: relative;
-  }
-
-  .logo {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 1.5rem;
-    font-weight: 500;
-    letter-spacing: 0px;
-    color: var(--text);
-    flex: 1;
-  }
-
-
-  .scores {
-    display: flex;
-    gap: 10px;
-    flex: 1;
-  }
-
-  .score-box {
-    flex: 1;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 18px 20px;
-    text-align: left;
-    min-width: 0;
-  }
-
-  .score-label {
-    font-size: 0.62rem;
-    color: var(--muted);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 4px;
-  }
-
-  .score-val {
-    font-family: 'Roboto Mono', monospace;
-    font-size: 2.2rem;
-    font-weight: 500;
-    color: var(--text);
-    line-height: 1.1;
-  }
-
-  #score-val { color: var(--text); }
-  #best-val  { color: var(--muted); }
-
-  .fab-restart {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(79,142,247,.4);
-  }
-
-  main {
-    flex: 1;
-    width: 100%;
-    max-width: 480px;
-    padding: 0 12px 16px;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-
-  /* Progress bar */
-  .progress-wrapper {
-    width: 100%;
-    max-width: 480px;
-    padding: 0 20px 10px;
-    position: relative;
-    z-index: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .progress-track {
-    flex: 1;
-    height: 4px;
-    background: var(--surface2);
-    border-radius: 4px;
-    overflow: hidden;
-    position: relative;
-  }
-
-  .progress-fill {
-    height: 100%;
-    width: 0%;
-    border-radius: 4px;
-    background: linear-gradient(90deg, var(--accent), var(--green));
-    box-shadow: 0 0 8px rgba(61, 214, 140, .4);
-    transition: width .5s cubic-bezier(.4, 0, .2, 1);
-    position: relative;
-  }
-
-  .progress-fill::after {
-    content: '';
-    position: absolute;
-    right: 0;
-    top: -2px;
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 10px rgba(61, 214, 140, .7), 0 0 20px rgba(61, 214, 140, .3);
-    opacity: 0;
-    transition: opacity .3s;
-  }
-
-  .progress-fill.active::after {
-    opacity: 1;
-  }
-
-  .progress-label {
-    font-size: .68rem;
-    font-weight: 600;
-    color: var(--muted);
-    white-space: nowrap;
-    min-width: 50px;
-    text-align: right;
-    letter-spacing: .02em;
-  }
-
-  /* Combo badge */
-  /* Combo badge — overlay on grid */
-  #combo-badge {
-    display: none;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(.6);
-    background: linear-gradient(135deg, var(--yellow), #f08228);
-    color: #1a1200;
-    font-weight: 800;
-    font-size: 1rem;
-    padding: 6px 18px;
-    border-radius: 99px;
-    letter-spacing: .04em;
-    align-items: center;
-    gap: 4px;
-    z-index: 10;
-    opacity: 0;
-    pointer-events: none;
-    box-shadow: 0 4px 20px rgba(240, 130, 40, .4);
-  }
-
-  #combo-badge.visible {
-    display: inline-flex;
-    animation: comboIn .4s cubic-bezier(.2, .8, .3, 1.2) forwards;
-  }
-
-  @keyframes comboIn {
-    0%   { opacity: 0; transform: translate(-50%, -50%) scale(.6); }
-    50%  { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
-    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  }
-
-  #combo-badge.fade-out {
-    animation: comboOut .3s ease forwards;
-  }
-
-  @keyframes comboOut {
-    to { opacity: 0; transform: translate(-50%, -50%) scale(.7); }
-  }
-
-  .combo-flame {
-    flex-shrink: 0;
-    filter: drop-shadow(0 0 2px rgba(200, 80, 0, .4));
-  }
-
-  /* Grid wrapper — "table" container */
-  #grid-wrapper {
-    width: 100%;
-    max-height: calc(100vh - 260px);
-    overflow-y: auto;
-    overflow-x: hidden;
-    padding: 16px 10px 18px;
-    scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
-    background:
-      radial-gradient(ellipse at 50% 0%, var(--grid-g1) 0%, transparent 60%),
-      radial-gradient(ellipse at 50% 100%, var(--grid-g2) 0%, transparent 60%),
-      linear-gradient(180deg, var(--grid-from) 0%, var(--grid-to) 100%);
-    border: 1px solid var(--grid-brd);
-    border-top-color: var(--grid-brd-t);
-    border-radius: 18px;
-    box-shadow:
-      inset 0 1px 0 var(--grid-sh-top),
-      inset 0 -1px 0 var(--grid-sh-bot),
-      inset 0 0 30px var(--grid-glow1),
-      inset 0 0 60px var(--grid-glow2),
-      0 2px 12px var(--grid-outer),
-      0 0 40px var(--grid-outer-glow);
-    position: relative;
-  }
-
-  #grid {
-    display: grid;
-    grid-template-columns: repeat(9, var(--cell-size));
-    gap: var(--gap);
-    justify-content: center;
-  }
-
-  /* Cells */
-  .cell {
-    width: var(--cell-size);
-    height: var(--cell-size);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: 'Roboto Mono', monospace;
-    font-size: 1.65rem;
-    font-weight: 700;
-    border-radius: var(--radius);
-    background: linear-gradient(180deg, var(--cell-from) 0%, var(--cell-to) 100%);
-    border: 1px solid var(--cell-brd);
-    border-top-color: var(--cell-brd-t);
-    cursor: pointer;
-    user-select: none;
-    transition: background .2s, border-color .2s, transform .15s, opacity .3s, box-shadow .2s;
-    position: relative;
-    box-shadow: var(--cell-sh-outer), inset 0 1px 0 var(--cell-sh-inset);
-  }
-
-  @media (hover: hover) {
-    .cell:not(.empty):hover {
-      background: linear-gradient(180deg, var(--cell-hover-from) 0%, var(--cell-hover-to) 100%);
-      border-color: rgba(79, 142, 247, .35);
-      transform: scale(1.05);
-      box-shadow: 0 2px 10px var(--cell-hover-sh), inset 0 1px 0 var(--cell-hover-inset);
-      z-index: 2;
-    }
-  }
-
-  .cell.empty {
-    cursor: default;
-    pointer-events: none;
-  }
-
-  .cell.selected {
-    background: linear-gradient(135deg, #1e4fd8, #4f8ef7);
-    border-color: rgba(122, 179, 255, .4);
-    color: #fff;
-    transform: scale(1.07) translateY(-1px);
-    box-shadow: 0 4px 16px rgba(79,142,247,.3), 0 0 20px rgba(79,142,247,.12), inset 0 1px 0 rgba(255,255,255,.1);
-    z-index: 3;
-  }
-
-  .cell.error {
-    background: linear-gradient(135deg, #b83030, #f05a5a) !important;
-    border-color: rgba(240, 90, 90, .5) !important;
-    color: #fff !important;
-    transform: scale(1.05);
-    box-shadow: 0 0 12px rgba(240, 90, 90, .3);
-    z-index: 3;
-    animation: errorShake .35s ease;
-  }
-
-  @keyframes errorShake {
-    0%, 100% { translate: 0; }
-    20% { translate: -3px 0; }
-    40% { translate: 3px 0; }
-    60% { translate: -2px 0; }
-    80% { translate: 2px 0; }
-  }
-
-  .cell.hint {
-    border-color: var(--yellow);
-    box-shadow: 0 0 12px rgba(245,200,66,.5);
-    animation: hintPulse 0.8s ease infinite alternate;
-  }
-
-  @keyframes hintPulse {
-    from { box-shadow: 0 0 6px rgba(245,200,66,.3); }
-    to   { box-shadow: 0 0 18px rgba(245,200,66,.8); }
-  }
-
-  .cell.removing {
-    animation: cellPop .35s ease forwards;
-    pointer-events: none;
-  }
-
-  @keyframes cellPop {
-    0%   { transform: scale(1); opacity: 1; }
-    40%  { transform: scale(1.2); opacity: .8; }
-    100% { transform: scale(0); opacity: 0; }
-  }
-
-  /* Particles */
-  .particle {
-    position: fixed;
-    pointer-events: none;
-    border-radius: 50%;
-    z-index: 90;
-    will-change: transform, opacity;
-  }
-
-  /* Floating points */
-  .float-pts {
-    position: fixed;
-    pointer-events: none;
-    z-index: 91;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 800;
-    font-size: 1.15rem;
-    color: var(--accent);
-    text-shadow: 0 0 8px rgba(79,142,247,.35);
-    white-space: nowrap;
-  }
-
-  .float-pts.combo {
-    font-size: 1.35rem;
-    color: var(--yellow);
-    text-shadow: 0 0 10px rgba(245,200,66,.45);
-  }
-
-  @keyframes floatUp {
-    0%   { opacity: 0; transform: translate(-50%, 6px); }
-    10%  { opacity: 1; }
-    75%  { opacity: 1; }
-    100% { opacity: 0; transform: translate(-50%, -50px); }
-  }
-
-  .cell.new-row {
-    animation: slideIn .4s ease both;
-  }
-
-  @keyframes slideIn {
-    from { transform: translateY(20px); opacity: 0; }
-    to   { transform: translateY(0); opacity: 1; }
-  }
-
-  /* Number colors by digit */
-  .cell[data-n="1"]  { color: var(--d1); }
-  .cell[data-n="2"]  { color: var(--d2); }
-  .cell[data-n="3"]  { color: var(--d3); }
-  .cell[data-n="4"]  { color: var(--d4); }
-  .cell[data-n="5"]  { color: var(--d5); }
-  .cell[data-n="6"]  { color: var(--d6); }
-  .cell[data-n="7"]  { color: var(--d7); }
-  .cell[data-n="8"]  { color: var(--d8); }
-  .cell[data-n="9"]  { color: var(--d9); }
-  .cell.selected[data-n] { color: #fff; }
-
-  /* Bottom action bar */
-  .action-bar {
-    display: flex;
-    gap: 14px;
-    margin-top: 14px;
-    justify-content: center;
-    align-items: center;
-  }
-
-  .fab {
-    width: 54px;
-    height: 54px;
-    border-radius: 50%;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    position: relative;
-    transition: transform .15s, box-shadow .15s;
-    font-family: inherit;
-    font-weight: 700;
-  }
-
-  .fab svg {
-    display: block;
-    flex-shrink: 0;
-  }
-
-  .fab:active { transform: scale(.93); }
-
-  .fab-add {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(79,142,247,.4);
-  }
-
-  .fab-hint {
-    background: linear-gradient(135deg, var(--yellow), #f08228);
-    color: #1a1200;
-    box-shadow: 0 4px 18px rgba(245,200,66,.35);
-  }
-
-  .fab-undo {
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    color: #fff;
-    box-shadow: 0 4px 18px rgba(79,142,247,.4);
-  }
-
-  .fab:disabled {
-    opacity: 0.35;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .fab .badge {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: var(--surface);
-    border: 1.5px solid var(--border);
-    color: var(--text);
-    font-size: .85rem;
-    font-weight: 700;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  /* Modal */
-  #modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,.75);
-    backdrop-filter: blur(6px);
-    z-index: 100;
-    align-items: center;
-    justify-content: center;
-  }
-
-  #modal-overlay.open { display: flex; }
-
-  #modal {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px;
-    padding: 32px 28px;
-    max-width: 320px;
-    width: 90%;
-    text-align: center;
-    animation: modalIn .35s ease;
-    box-shadow: 0 24px 60px rgba(0,0,0,.5);
-  }
-
-  @keyframes modalIn {
-    from { transform: scale(.85) translateY(20px); opacity: 0; }
-    to   { transform: scale(1) translateY(0); opacity: 1; }
-  }
-
-  #modal-icon { margin-bottom: 10px; display: flex; justify-content: center; }
-  #modal-title { font-size: 1.6rem; font-weight: 900; margin-bottom: 6px; }
-  #modal-sub { color: var(--muted); font-size: .95rem; margin-bottom: 22px; }
-
-  .modal-btns { display: flex; gap: 10px; justify-content: center; }
-
-  .modal-btn {
-    padding: 11px 24px;
-    border-radius: 12px;
-    border: none;
-    font-family: inherit;
-    font-weight: 700;
-    font-size: .95rem;
-    cursor: pointer;
-    transition: opacity .15s;
-  }
-
-  @media (hover: hover) {
-    .modal-btn:hover { opacity: .85; }
-  }
-  .modal-btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #fff; }
-  .modal-btn.secondary { background: var(--surface2); color: var(--muted); border: 1px solid var(--border); }
-
-  /* Toast */
-  #toast {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: 0;
-    background: transparent;
-    border: 1.5px solid var(--yellow);
-    color: var(--yellow);
-    padding: 6px 16px;
-    border-radius: 99px;
-    font-size: .75rem;
-    font-weight: 600;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity .25s;
-    z-index: 50;
-    white-space: nowrap;
-  }
-
-  #toast.show {
-    opacity: 1;
-  }
-
-  footer {
-    text-align: center;
-    color: var(--muted);
-    font-size: .72rem;
-    padding: 8px 0 12px;
-    position: relative;
-    z-index: 1;
-  }
-
-  @media (max-width: 430px) {
-    :root { --cell-size: 38px; --gap: 4px; }
-    .logo { font-size: 1.35rem; }
-    .score-box { min-width: 60px; padding: 5px 10px; }
-    .score-val { font-size: 1.8rem; }
-    header { padding: 12px 12px 8px; gap: 28px; }
-    main { padding: 0 6px 10px; }
-    .progress-wrapper { padding: 0 12px 8px; }
-  }
-
-  @media (max-width: 360px) {
-    :root { --cell-size: 34px; --gap: 3px; }
-    .progress-wrapper { padding: 0 8px 6px; }
-    .logo { font-size: 1.35rem; }
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Number Match</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #0a0e1a;
+            color: #f1f5f9;
+            min-height: 100vh;
+            padding: 0 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .container {
+            max-width: 520px;
+            margin: 0 auto;
+            padding-top: 40px;
+            position: relative;
+            z-index: 1;
+            transition: filter 0.3s ease;
+        }
+
+        .container.blurred {
+            filter: blur(10px);
+        }
+
+        /* Progress Card Styles */
+        .progress-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(167, 139, 250, 0.15) 45%, rgba(255, 255, 255, 0.15) 100%);
+            border: 2px solid rgba(255, 255, 255, 0.35);
+            border-radius: 32px;
+            padding: 24px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(80px);
+            -webkit-backdrop-filter: blur(80px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(255, 255, 255, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar-wrapper {
+            width: 100%;
+            height: 40px;
+            background: rgba(167, 139, 250, 0.15);
+            border: 2px solid rgba(167, 139, 250, 0.3);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            position: relative;
+            margin-bottom: 0;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #a78bfa, #ec4899);
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 600;
+            color: white;
+            z-index: 10;
+        }
+
+        .stats {
+            width: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(167, 139, 250, 0.1);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-label {
+            font-size: 10px;
+            color: #cbd5e1;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 600;
+            color: #f8fafc;
+            transition: color 0.3s ease;
+        }
+
+        .stat-value.updated {
+            color: #a78bfa;
+            animation: pulse 0.6s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            75% { transform: translateX(8px); }
+        }
+
+        .game-cell.shake {
+            animation: shake 0.4s ease;
+        }
+
+        /* Game Grid Styles */
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            margin-top: 24px;
+            background: transparent;
+            border: none;
+            border-radius: 24px;
+            padding: 0;
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            box-shadow: none;
+        }
+
+        .game-cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 28px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+
+        @media (hover: hover) {
+            .game-cell:hover {
+                transform: scale(1.1);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            }
+        }
+
+        .game-cell.selected {
+            transform: scale(1.3);
+            box-shadow: 0 0 20px rgba(167, 139, 250, 0.8);
+            filter: brightness(1.3);
+        }
+
+
+        .num-1 { background: #f472b6; color: white; }
+        .num-2 { background: #60a5fa; color: white; }
+        .num-3 { background: #34d399; color: white; }
+        .num-4 { background: #fbbf24; color: white; }
+        .num-5 { background: #a78bfa; color: white; }
+        .num-6 { background: #fb7185; color: white; }
+        .num-7 { background: #06b6d4; color: white; }
+        .num-8 { background: #c084fc; color: white; }
+        .num-9 { background: #f97316; color: white; }
+
+        .empty-glass {
+            background: #4b5563;
+            border: none;
+            cursor: default;
+        }
+
+        .empty-glass:hover {
+            transform: none;
+            box-shadow: none;
+            filter: none;
+        }
+
+        /* Hint button */
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 24px;
+        }
+
+        .hint-btn {
+            background: rgba(167, 139, 250, 0.2);
+            border: 2px solid rgba(167, 139, 250, 0.4);
+            color: #f1f5f9;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .hint-btn:hover {
+            background: rgba(167, 139, 250, 0.35);
+        }
+
+        .hint-btn:active {
+            transform: scale(0.96);
+        }
+
+        #newGameBtn {
+            background: #a78bfa;
+            border-color: #a78bfa;
+            color: white;
+        }
+
+        #newGameBtn:hover {
+            background: #b9a4fc;
+            border-color: #b9a4fc;
+        }
+
+        /* Hint highlight animation */
+        @keyframes hintPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+            50% { transform: scale(1.2); box-shadow: 0 0 24px rgba(251, 191, 36, 0.9); }
+        }
+
+        .game-cell.hint {
+            animation: hintPulse 0.6s ease 2;
+        }
+
+        /* No-moves (deadlock) modal — single CSS for macOS & iOS, no backdrop-filter */
+        .deadlock-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 26, 0.45);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .deadlock-overlay.active {
+            display: flex;
+        }
+
+        .deadlock-content {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .deadlock-content h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .deadlock-content p {
+            color: #cbd5e1;
+            margin-bottom: 24px;
+        }
+
+    </style>
 </head>
 <body>
+    <div class="container">
+        <div class="progress-card" id="progressCard">
+            <div class="progress-bar-wrapper">
+                <div class="progress-text" id="progressText">Level 1 • 0%</div>
+                <div class="progress-bar-fill" id="progressBarFill" style="width: 0%"></div>
+            </div>
+            <div class="stats">
+                <div class="stat-item">
+                    <div class="stat-label">Score</div>
+                    <div class="stat-value" id="scoreValue">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Goal</div>
+                    <div class="stat-value" id="goalValue">100</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Progress</div>
+                    <div class="stat-value" id="progressValue">0%</div>
+                </div>
+            </div>
+        </div>
 
-<header>
-  <div class="logo-row">
-    <div class="logo">Number Match</div>
-    <div id="toast"></div>
-  </div>
-  <div class="header-row">
-    <div class="scores">
-      <div class="score-box">
-        <div class="score-label">Рахунок</div>
-        <div class="score-val" id="score-val">0</div>
-      </div>
-      <div class="score-box">
-        <div class="score-label">Рекорд</div>
-        <div class="score-val" id="best-val">0</div>
-      </div>
+        <div class="game-grid" id="gameGrid"></div>
+
+        <div class="controls">
+            <button class="hint-btn" id="hintBtn">💡 Підказка</button>
+        </div>
     </div>
-  </div>
-</header>
 
-<div class="progress-wrapper">
-  <div class="progress-track">
-    <div class="progress-fill" id="progress-fill"></div>
-  </div>
-  <div class="progress-label" id="progress-label">0 / 0</div>
-</div>
-
-<main>
-  <div id="grid-wrapper">
-    <div id="combo-badge"><svg class="combo-flame" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 23c-4.4 0-8-3.2-8-7.2 0-2.8 2-5.9 3.5-7.2 0 3.2 1.9 4.8 3.1 4.4 1.4-.5 1.3-3.1 3.1-6.3 1.3 2.7 2.6 4.5 2.6 7.6S16.4 23 12 23z"/></svg> КОМБО x<span id="combo-count">2</span></div>
-    <div id="grid"></div>
-  </div>
-  <div class="action-bar">
-    <button class="fab fab-restart" id="btn-restart" title="Заново">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
-    </button>
-    <button class="fab fab-hint" id="btn-hint" title="Підказка">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
-      <span class="badge" id="hint-badge">3</span>
-    </button>
-    <button class="fab fab-add" id="btn-add" title="Додати рядки">
-      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-      <span class="badge" id="add-badge">5</span>
-    </button>
-  </div>
-</main>
-
-<div id="modal-overlay">
-  <div id="modal">
-    <div id="modal-icon"></div>
-    <div id="modal-title">You Win!</div>
-    <div id="modal-sub">Final score: <strong id="modal-score">0</strong></div>
-    <div class="modal-btns">
-      <button class="modal-btn secondary" id="modal-no">Cancel</button>
-      <button class="modal-btn primary" id="modal-yes">Play Again</button>
+    <div class="deadlock-overlay" id="deadlockModal">
+        <div class="deadlock-content">
+            <h2>Немає ходів 😕</h2>
+            <p>Більше немає доступних з'єднань на полі.</p>
+            <button class="hint-btn" id="newGameBtn">Нова гра</button>
+        </div>
     </div>
-  </div>
-</div>
 
-<script>
-/* ─────────────────────────────────────────────
-   Safe localStorage wrapper
-   ───────────────────────────────────────────── */
-const Storage = {
-  _ok: (() => { try { localStorage.setItem('_t', '1'); localStorage.removeItem('_t'); return true; } catch(e) { return false; } })(),
-  get(k)    { try { return this._ok ? localStorage.getItem(k) : null; } catch(e) { return null; } },
-  set(k, v) { try { if (this._ok) localStorage.setItem(k, v); } catch(e) {} },
-  remove(k) { try { if (this._ok) localStorage.removeItem(k); } catch(e) {} }
-};
-
-/* ─────────────────────────────────────────────
-   GameBoard
-   ───────────────────────────────────────────── */
-class GameBoard {
-  constructor(cols = 9) {
-    this.cols = cols;
-    this.cells = []; // flat 1-D array, length = rows*cols
-  }
-
-  get rows() { return this.cells.length / this.cols; }
-
-  generate() {
-    // sequence 1-9 repeated 8 times → 72 cells = 8 rows
-    // Even count of every digit guarantees full clearability
-    const seq = [];
-    for (let rep = 0; rep < 8; rep++)
-      for (let n = 1; n <= 9; n++) seq.push(n);
-    // Fisher-Yates shuffle
-    for (let i = seq.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [seq[i], seq[j]] = [seq[j], seq[i]];
-    }
-    this.cells = seq;
-  }
-
-  idx(r, c) { return r * this.cols + c; }
-  getCell(r, c) { return this.cells[this.idx(r, c)]; }
-  isEmpty(r, c) { return this.cells[this.idx(r, c)] === 0; }
-  removeCell(r, c) { this.cells[this.idx(r, c)] = 0; }
-
-  addRows() {
-    const remaining = this.cells.filter(v => v !== 0);
-    if (remaining.length === 0) return false;
-    let toAdd = [...remaining];
-    while (toAdd.length % this.cols !== 0) toAdd.push(0);
-    this.cells = [...this.cells, ...toAdd];
-    return true;
-  }
-
-  compact() {
-    // Remove fully-empty rows
-    let changed = false;
-    const newCells = [];
-    for (let r = 0; r < this.rows; r++) {
-      const row = this.cells.slice(r * this.cols, (r + 1) * this.cols);
-      if (row.some(v => v !== 0)) newCells.push(...row);
-      else changed = true;
-    }
-    this.cells = newCells;
-    return changed;
-  }
-
-  isCleared() { return this.cells.every(v => v === 0); }
-
-  countNonEmpty() { return this.cells.filter(v => v !== 0).length; }
-
-  hasAnyMoves() {
-    const h = this.hint();
-    return h !== null;
-  }
-
-  hint() {
-    // Pre-collect non-empty cell indices to avoid iterating empties
-    const nonEmpty = [];
-    for (let i = 0; i < this.cells.length; i++) {
-      if (this.cells[i] !== 0) nonEmpty.push(i);
-    }
-    for (let a = 0; a < nonEmpty.length; a++) {
-      const i = nonEmpty[a];
-      const r1 = Math.floor(i / this.cols), c1 = i % this.cols;
-      for (let b = a + 1; b < nonEmpty.length; b++) {
-        const j = nonEmpty[b];
-        const r2 = Math.floor(j / this.cols), c2 = j % this.cols;
-        if (Validator.isMatch(this.cells[i], this.cells[j]) &&
-            Validator.areNeighbors(this, {r: r1, c: c1}, {r: r2, c: c2})) {
-          return [{r: r1, c: c1}, {r: r2, c: c2}];
-        }
-      }
-    }
-    return null;
-  }
-}
-
-/* ─────────────────────────────────────────────
-   Validator
-   ───────────────────────────────────────────── */
-class Validator {
-  static isMatch(a, b) { return a === b || a + b === 10; }
-
-  static areNeighbors(board, p1, p2) {
-    const {cols} = board;
-    const i1 = p1.r * cols + p1.c;
-    const i2 = p2.r * cols + p2.c;
-    if (i1 === i2) return false;
-
-    const dr = Math.abs(p1.r - p2.r);
-    const dc = Math.abs(p1.c - p2.c);
-    const minI = Math.min(i1, i2), maxI = Math.max(i1, i2);
-
-    // 1. Direct adjacent (horizontal, vertical or diagonal)
-    if (dr <= 1 && dc <= 1) return true;
-
-    // 2. Same row, all between empty
-    if (p1.r === p2.r) {
-      const minC = Math.min(p1.c, p2.c), maxC = Math.max(p1.c, p2.c);
-      let allEmpty = true;
-      for (let c = minC + 1; c < maxC; c++) {
-        if (!board.isEmpty(p1.r, c)) { allEmpty = false; break; }
-      }
-      if (allEmpty) return true;
-    }
-
-    // 3. Same column, all between empty
-    if (p1.c === p2.c) {
-      const minR = Math.min(p1.r, p2.r), maxR = Math.max(p1.r, p2.r);
-      let allEmpty = true;
-      for (let r = minR + 1; r < maxR; r++) {
-        if (!board.isEmpty(r, p1.c)) { allEmpty = false; break; }
-      }
-      if (allEmpty) return true;
-    }
-
-    // 4. Diagonal through empty cells (same step ratio)
-    if (dr === dc) {
-      const stepR = (p2.r - p1.r) / dr;
-      const stepC = (p2.c - p1.c) / dc;
-      let allEmpty = true;
-      for (let k = 1; k < dr; k++) {
-        if (!board.isEmpty(p1.r + k * stepR, p1.c + k * stepC)) { allEmpty = false; break; }
-      }
-      if (allEmpty) return true;
-    }
-
-    // 5. Wrap-around (all linear cells between them empty)
-    let allEmpty = true;
-    for (let k = minI + 1; k < maxI; k++) {
-      if (board.cells[k] !== 0) { allEmpty = false; break; }
-    }
-    if (allEmpty) return true;
-
-    return false;
-  }
-}
-
-/* ─────────────────────────────────────────────
-   Particle System
-   ───────────────────────────────────────────── */
-function spawnParticles(el) {
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const cx = rect.left + rect.width / 2;
-  const cy = rect.top + rect.height / 2;
-  const color = getComputedStyle(el).color || '#888';
-  const count = 10;
-
-  for (let i = 0; i < count; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    const size = 3 + Math.random() * 4;
-    const angle = (Math.PI * 2 / count) * i + (Math.random() - 0.5) * 0.8;
-    const dist = 28 + Math.random() * 36;
-    const dx = Math.cos(angle) * dist;
-    const dy = Math.sin(angle) * dist;
-    const dur = 400 + Math.random() * 250;
-
-    p.style.cssText = `
-      width: ${size}px; height: ${size}px;
-      left: ${cx - size / 2}px; top: ${cy - size / 2}px;
-      background: ${color};
-      box-shadow: 0 0 ${size + 3}px ${color}88, 0 0 ${size + 8}px ${color}44;
-      opacity: 1;
-      transition: transform ${dur}ms cubic-bezier(.2,.8,.3,1), opacity ${dur}ms ease-out;
-    `;
-    document.body.appendChild(p);
-
-    // force reflow then animate
-    p.offsetWidth;
-    p.style.transform = `translate(${dx}px, ${dy}px) scale(0.3)`;
-    p.style.opacity = '0';
-
-    setTimeout(() => p.remove(), dur + 20);
-  }
-}
-
-function spawnFloatPts(el, pts, isCombo) {
-  if (!el) return;
-  const rect = el.getBoundingClientRect();
-  const color = getComputedStyle(el).color;
-  const span = document.createElement('div');
-  span.className = 'float-pts' + (isCombo ? ' combo' : '');
-  span.textContent = '+' + pts;
-  span.style.left = (rect.left + rect.width / 2) + 'px';
-  span.style.top = rect.top + 'px';
-  span.style.color = color;
-  span.style.textShadow = `0 0 10px ${color}`;
-  span.style.animation = 'floatUp 1.2s linear forwards';
-  document.body.appendChild(span);
-  setTimeout(() => span.remove(), 1250);
-}
-
-/* ─────────────────────────────────────────────
-   GameUI
-   ───────────────────────────────────────────── */
-class GameUI {
-  constructor() {
-    this.grid = document.getElementById('grid');
-    this.scoreEl = document.getElementById('score-val');
-    this.bestEl = document.getElementById('best-val');
-    this.hintBadge = document.getElementById('hint-badge');
-    this.comboBadge = document.getElementById('combo-badge');
-    this.comboCount = document.getElementById('combo-count');
-  }
-
-  render(board, onCellClick, newRowStartIdx = -1) {
-    this.grid.innerHTML = '';
-    const total = board.cells.length;
-    for (let i = 0; i < total; i++) {
-      const val = board.cells[i];
-      const r = Math.floor(i / board.cols), c = i % board.cols;
-      const div = document.createElement('div');
-      div.className = 'cell';
-      if (val !== 0) {
-        div.textContent = val;
-        div.dataset.n = val;
-        div.dataset.r = r;
-        div.dataset.c = c;
-        div.addEventListener('click', () => onCellClick(r, c));
-        if (newRowStartIdx >= 0 && i >= newRowStartIdx) {
-          div.classList.add('new-row');
-          div.style.animationDelay = ((i - newRowStartIdx) * 0.02) + 's';
-        }
-      } else {
-        div.style.pointerEvents = 'none';
-      }
-      this.grid.appendChild(div);
-    }
-  }
-
-  getCellEl(r, c) {
-    return this.grid.querySelector(`.cell[data-r="${r}"][data-c="${c}"]`);
-  }
-
-  clearStates() {
-    this.grid.querySelectorAll('.selected,.hint').forEach(el => {
-      el.classList.remove('selected', 'hint');
-    });
-  }
-
-  selectCell(r, c) {
-    const el = this.getCellEl(r, c);
-    if (el) el.classList.add('selected');
-  }
-
-  showError(p1, p2) {
-    [p1, p2].forEach(p => {
-      const el = this.getCellEl(p.r, p.c);
-      if (el) {
-        el.classList.remove('selected');
-        el.classList.add('error');
-      }
-    });
-    setTimeout(() => {
-      [p1, p2].forEach(p => {
-        const el = this.getCellEl(p.r, p.c);
-        if (el) el.classList.remove('error');
-      });
-    }, 400);
-  }
-
-  showHint(p1, p2) {
-    [p1, p2].forEach(p => {
-      const el = this.getCellEl(p.r, p.c);
-      if (el) el.classList.add('hint');
-    });
-    setTimeout(() => {
-      [p1, p2].forEach(p => {
-        const el = this.getCellEl(p.r, p.c);
-        if (el) el.classList.remove('hint');
-      });
-    }, 2000);
-  }
-
-  animateRemove(p1, p2, cb) {
-    [p1, p2].forEach(p => {
-      const el = this.getCellEl(p.r, p.c);
-      if (el) {
-        el.classList.add('removing');
-        // spawn particles at peak of scale-up (140ms)
-        setTimeout(() => spawnParticles(el), 140);
-      }
-    });
-    setTimeout(cb, 360);
-  }
-
-  updateScore(score, best) {
-    this.scoreEl.textContent = score;
-    this.bestEl.textContent = best;
-  }
-
-  updateHintBadge(n) {
-    document.getElementById('hint-badge').textContent = n;
-    document.getElementById('btn-hint').disabled = n <= 0;
-  }
-
-  updateProgress(cleared, total) {
-    const pct = total > 0 ? (cleared / total) * 100 : 0;
-    const fill = document.getElementById('progress-fill');
-    const label = document.getElementById('progress-label');
-    fill.style.width = pct + '%';
-    fill.classList.toggle('active', pct > 0 && pct < 100);
-    label.textContent = `${cleared} / ${total}`;
-  }
-
-  showCombo(n) {
-    this.comboCount.textContent = n;
-    this.comboBadge.classList.remove('fade-out');
-    this.comboBadge.classList.add('visible');
-    clearTimeout(this._comboT);
-    clearTimeout(this._comboFade);
-    this._comboT = setTimeout(() => {
-      this.comboBadge.classList.add('fade-out');
-      this._comboFade = setTimeout(() => {
-        this.comboBadge.classList.remove('visible', 'fade-out');
-      }, 300);
-    }, 1200);
-  }
-
-  hideCombo() {
-    clearTimeout(this._comboT);
-    clearTimeout(this._comboFade);
-    this.comboBadge.classList.remove('visible', 'fade-out');
-  }
-}
-
-/* ─────────────────────────────────────────────
-   Modal & Toast helpers
-   ───────────────────────────────────────────── */
-const MODAL_ICONS = {
-  save: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>',
-  trophy: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h2"/><path d="M18 9h2a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2h-2"/><path d="M4 22h16"/><path d="M10 22V8a6 6 0 0 0 4 0v14"/><path d="M6 3h12v6a6 6 0 0 1-12 0V3z"/></svg>',
-  noMoves: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--yellow)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
-  gameOver: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--red)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M16 16s-1.5-2-4-2-4 2-4 2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
-  restart: '<svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>'
-};
-
-function showModal({icon='trophy', title, sub, yesText='Play Again', noText=null, onYes, onNo}) {
-  const iconEl = document.getElementById('modal-icon');
-  iconEl.innerHTML = MODAL_ICONS[icon] || MODAL_ICONS.trophy;
-  document.getElementById('modal-title').textContent = title;
-  document.getElementById('modal-sub').innerHTML = sub;
-  document.getElementById('modal-yes').textContent = yesText;
-  const noBtn = document.getElementById('modal-no');
-  if (noText) { noBtn.textContent = noText; noBtn.style.display = ''; }
-  else { noBtn.style.display = 'none'; }
-  document.getElementById('modal-yes').onclick = () => { hideModal(); onYes && onYes(); };
-  document.getElementById('modal-no').onclick = () => { hideModal(); onNo && onNo(); };
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function hideModal() {
-  document.getElementById('modal-overlay').classList.remove('open');
-}
-
-let _toastT;
-function showToast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.add('show');
-  clearTimeout(_toastT);
-  _toastT = setTimeout(() => el.classList.remove('show'), 2000);
-}
-
-/* ─────────────────────────────────────────────
-   GameController
-   ───────────────────────────────────────────── */
-class GameController {
-  constructor() {
-    this.board = new GameBoard(9);
-    this.ui = new GameUI();
-    this.score = 0;
-    this.best = parseInt(Storage.get('nm_highscore') || '0');
-    this.hintsLeft = 3;
-    this.addsLeft = 5;
-    this.combo = 0;
-    this.selected = null;
-    this.busy = false;
-    this.initialCount = 0; // total cells to clear (for progress)
-
-    document.getElementById('btn-hint').addEventListener('click', () => this.useHint());
-    document.getElementById('btn-add').addEventListener('click', () => this.addRows());
-    document.getElementById('btn-restart').addEventListener('click', () => this.confirmRestart());
-
-    this.checkResume();
-  }
-
-  checkResume() {
-    const saved = Storage.get('nm_board');
-    if (saved) {
-      try {
-        const state = JSON.parse(saved);
-        showModal({
-          icon: 'save', title: 'Продовжити?',
-          sub: 'Продовжити попередню гру?',
-          yesText: 'Продовжити', noText: 'Нова гра',
-          onYes: () => { this.loadState(state); this.renderFull(); },
-          onNo: () => { this.start(); }
-        });
-        return;
-      } catch(e) {}
-    }
-    this.start();
-  }
-
-  loadState(s) {
-    this.board.cells = s.cells;
-    this.score = s.score || 0;
-    this.hintsLeft = s.hints !== undefined ? s.hints : 3;
-    this.addsLeft = s.adds !== undefined ? s.adds : 5;
-    this.initialCount = s.initCount || this.board.countNonEmpty();
-    this.combo = 0;
-    this.selected = null;
-    this.best = parseInt(Storage.get('nm_highscore') || '0');
-  }
-
-  saveState() {
-    Storage.set('nm_board', JSON.stringify({
-      cells: this.board.cells, score: this.score, hints: this.hintsLeft, adds: this.addsLeft, initCount: this.initialCount
-    }));
-    Storage.set('nm_highscore', this.best);
-  }
-
-
-
-  updateAddBadge() {
-    document.getElementById('add-badge').textContent = this.addsLeft;
-    document.getElementById('btn-add').disabled = this.addsLeft <= 0;
-  }
-
-  start() {
-    this.board.generate();
-    this.score = 0;
-    this.hintsLeft = 3;
-    this.addsLeft = 5;
-    this.combo = 0;
-    this.selected = null;
-    this.busy = false;
-    this.initialCount = this.board.countNonEmpty();
-    Storage.remove('nm_board');
-    this.renderFull();
-  }
-
-  renderFull(newRowStartIdx = -1) {
-    this.ui.render(this.board, (r, c) => this.handleCellClick(r, c), newRowStartIdx);
-    this.ui.updateScore(this.score, this.best);
-    this.ui.updateHintBadge(this.hintsLeft);
-    this.updateAddBadge();
-    const remaining = this.board.countNonEmpty();
-    const cleared = this.initialCount - remaining;
-    this.ui.updateProgress(cleared, this.initialCount);
-  }
-
-  handleCellClick(r, c) {
-    if (this.busy) return;
-    if (this.board.isEmpty(r, c)) return;
-
-    // First selection
-    if (!this.selected) {
-      this.selected = {r, c};
-      this.ui.clearStates();
-      this.ui.selectCell(r, c);
-      return;
-    }
-
-    const s = this.selected;
-
-    // Same cell — deselect
-    if (s.r === r && s.c === c) {
-      this.selected = null;
-      this.ui.clearStates();
-      return;
-    }
-
-    const v1 = this.board.getCell(s.r, s.c);
-    const v2 = this.board.getCell(r, c);
-
-    // Show both cells selected briefly
-    this.ui.selectCell(r, c);
-
-    // Invalid match — show error, clear both
-    if (!Validator.isMatch(v1, v2) || !Validator.areNeighbors(this.board, s, {r, c})) {
-      this.busy = true;
-      const msg = !Validator.isMatch(v1, v2) ? 'Числа не збігаються!' : 'Клітинки не сусідні!';
-
-      setTimeout(() => {
-        this.ui.clearStates();
-        this.ui.showError(s, {r, c});
-        showToast(msg);
-        this.combo = 0;
-        this.ui.hideCombo();
-
-        setTimeout(() => {
-          this.selected = null;
-          this.busy = false;
-        }, 400);
-      }, 150);
-      return;
-    }
-
-    // Valid pair — save state before modifying
-    this.selected = null;
-    this.busy = true;
-    this.combo++;
-    let pts = 10;
-    if (this.combo > 1) { pts += 5 * (this.combo - 1); this.ui.showCombo(this.combo); }
-
-    // Earn a hint every 5 consecutive combos
-    if (this.combo > 0 && this.combo % 5 === 0) {
-      this.hintsLeft++;
-      this.ui.updateHintBadge(this.hintsLeft);
-      showToast('+1 підказка за комбо!');
-    }
-
-    this.score += pts;
-    if (this.score > this.best) { this.best = this.score; }
-    this.ui.updateScore(this.score, this.best);
-
-    setTimeout(() => {
-      this.ui.clearStates();
-      const el1 = this.ui.getCellEl(s.r, s.c);
-      spawnFloatPts(el1, pts, this.combo > 1);
-      this.board.removeCell(s.r, s.c);
-      this.board.removeCell(r, c);
-      this.ui.render(this.board, (r, c) => this.handleCellClick(r, c));
-      this.ui.animateRemove(s, {r, c}, () => {
-        this.busy = false;
-        this.saveState();
-        const remaining = this.board.countNonEmpty();
-        const cleared = this.initialCount - remaining;
-        this.ui.updateProgress(cleared, this.initialCount);
-
-        if (this.board.isCleared()) {
-          Storage.remove('nm_board');
-          showModal({
-            icon: 'trophy', title: 'Перемога!',
-            sub: `Фінальний рахунок: <strong>${this.score}</strong>`,
-            yesText: 'Грати знову',
-            onYes: () => this.start()
-          });
-          return;
+    <script>
+        class ProgressCard {
+            constructor(containerId) {
+                this.container = document.getElementById(containerId);
+                this.scoreEl = document.getElementById('scoreValue');
+                this.goalEl = document.getElementById('goalValue');
+                this.progressEl = document.getElementById('progressValue');
+                this.progressTextEl = document.getElementById('progressText');
+                this.progressBarFill = document.getElementById('progressBarFill');
+
+                this.level = 1;
+                this.totalScore = 0;
+                this.levelScore = 0;
+                this.levelGoal = 360;
+            }
+
+            setLevel(level) {
+                this.level = level;
+                this.updateProgressText();
+            }
+
+            addScore(points) {
+                this.levelScore += points;
+                this.totalScore += points;
+                this.scoreEl.textContent = this.totalScore;
+                this.animateStatUpdate(this.scoreEl);
+                this.updateProgress();
+
+                if (this.levelScore >= this.levelGoal) {
+                    this.nextLevel();
+                    renderGameGrid();
+                }
+            }
+
+            nextLevel() {
+                this.level++;
+                this.levelScore = 0;
+                this.goalEl.textContent = 360 * this.level;
+                this.animateStatUpdate(this.goalEl);
+                this.updateProgress();
+            }
+
+            updateProgress() {
+                const progressPercent = Math.min(Math.round((this.levelScore / this.levelGoal) * 100), 100);
+
+                this.progressEl.textContent = `${progressPercent}%`;
+                this.progressBarFill.style.width = `${progressPercent}%`;
+                this.updateProgressText();
+
+                this.animateStatUpdate(this.progressEl);
+            }
+
+            updateProgressText() {
+                this.progressTextEl.textContent = `Level ${this.level} • ${Math.round((this.levelScore / this.levelGoal) * 100)}%`;
+            }
+
+            animateStatUpdate(element) {
+                element.classList.remove('updated');
+                void element.offsetWidth;
+                element.classList.add('updated');
+            }
         }
 
-        if (!this.board.hasAnyMoves()) {
-          if (this.addsLeft > 0) {
-            this.promptAddRows();
-          } else {
-            showModal({
-              icon: 'gameOver', title: 'Гра завершена!',
-              sub: `Немає ходів і додавань. Рахунок: <strong>${this.score}</strong>`,
-              yesText: 'Грати знову',
-              onYes: () => this.start()
+        function generateNumbers() {
+            const numbers = [];
+            for (let i = 1; i <= 9; i++) {
+                for (let j = 0; j < 8; j++) {
+                    numbers.push(i);
+                }
+            }
+            for (let i = numbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [numbers[i], numbers[j]] = [numbers[j], numbers[i]];
+            }
+            return numbers;
+        }
+
+        let gameState = [];
+        let selectedCells = [];
+        let isProcessing = false;
+        let cachedFirstIdx = -1;
+        let cachedLastIdx = -1;
+
+        function updateBoundaryCache() {
+            cachedFirstIdx = -1;
+            cachedLastIdx = -1;
+            for (let i = 0; i < 72; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) {
+                    if (cachedFirstIdx === -1) cachedFirstIdx = i;
+                    cachedLastIdx = i;
+                }
+            }
+        }
+
+        function initState() {
+            const numbers = generateNumbers();
+            gameState = [];
+            for (let row = 0; row < 9; row++) {
+                gameState[row] = [];
+                for (let col = 0; col < 8; col++) {
+                    gameState[row][col] = numbers[row * 8 + col];
+                }
+            }
+            updateBoundaryCache();
+        }
+
+        function getCellPosition(cell) {
+            const index = parseInt(cell.dataset.index);
+            return { row: Math.floor(index / 8), col: index % 8 };
+        }
+
+        function applyGravity() {
+            const nonEmptyRows = gameState.filter(row => row.some(cell => cell !== null));
+            const emptyRows = gameState.filter(row => row.every(cell => cell === null));
+            gameState = [...nonEmptyRows, ...emptyRows];
+        }
+
+        function updateGridDisplay() {
+            const cells = document.querySelectorAll('.game-cell');
+            cells.forEach((cell, index) => {
+                cell.style.transition = 'none';
+                const row = Math.floor(index / 8);
+                const col = index % 8;
+                const value = gameState[row][col];
+                if (value === null) {
+                    cell.className = 'game-cell empty-glass';
+                    cell.textContent = '';
+                } else {
+                    cell.className = `game-cell num-${value}`;
+                    cell.textContent = value;
+                }
             });
-          }
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                document.querySelectorAll('.game-cell').forEach(cell => cell.style.transition = '');
+            }));
         }
-      });
-    }, 200);
-  }
 
-  useHint() {
-    if (this.hintsLeft <= 0 || this.busy) return;
-    const pair = this.board.hint();
-    if (!pair) { showToast('Немає доступних ходів!'); return; }
-    this.hintsLeft--;
-    this.ui.updateHintBadge(this.hintsLeft);
-    this.ui.clearStates();
-    this.selected = null;
-    this.ui.showHint(pair[0], pair[1]);
-    this.saveState();
-  }
+        function isMatch(num1, num2) {
+            return num1 === num2 || num1 + num2 === 10;
+        }
 
-  addRows() {
-    if (this.busy || this.addsLeft <= 0) return;
-    const prevLen = this.board.cells.length;
-    const prevNonEmpty = this.board.countNonEmpty();
-    const added = this.board.addRows();
-    if (!added) { showToast('Нічого додавати!'); return; }
-    const newNonEmpty = this.board.countNonEmpty() - prevNonEmpty;
-    this.initialCount += newNonEmpty;
-    this.addsLeft--;
-    this.combo = 0;
-    this.ui.hideCombo();
-    this.saveState();
-    this.renderFull(prevLen);
-  }
+        function isConnected(pos1, pos2) {
+            const r1 = pos1.row, c1 = pos1.col;
+            const r2 = pos2.row, c2 = pos2.col;
 
-  promptAddRows() {
-    showModal({
-      icon: 'noMoves', title: 'Немає ходів!',
-      sub: `Валідних пар не залишилось. Додати рядки? (залишилось: ${this.addsLeft})`,
-      yesText: 'Додати рядки', noText: 'Нова гра',
-      onYes: () => this.addRows(),
-      onNo: () => this.start()
-    });
-  }
+            const idx1 = r1 * 8 + c1;
+            const idx2 = r2 * 8 + c2;
+            if ((idx1 === cachedFirstIdx && idx2 === cachedLastIdx) || (idx1 === cachedLastIdx && idx2 === cachedFirstIdx)) {
+                return true;
+            }
 
-  confirmRestart() {
-    showModal({
-      icon: 'restart', title: 'Почати знову?',
-      sub: 'Поточний прогрес буде втрачено.',
-      yesText: 'Так', noText: 'Скасувати',
-      onYes: () => this.start(),
-      onNo: () => {}
-    });
-  }
-}
+            if (r1 === r2) {
+                const minC = Math.min(c1, c2);
+                const maxC = Math.max(c1, c2);
+                for (let c = minC + 1; c < maxC; c++) {
+                    if (gameState[r1][c] !== null) return false;
+                }
+                return true;
+            }
 
-/* ─────────────────────────────────────────────
-   Boot
-   ───────────────────────────────────────────── */
-const game = new GameController();
-</script>
+            if (c1 === c2) {
+                const minR = Math.min(r1, r2);
+                const maxR = Math.max(r1, r2);
+                for (let r = minR + 1; r < maxR; r++) {
+                    if (gameState[r][c1] !== null) return false;
+                }
+                return true;
+            }
+
+            if (Math.abs(r2 - r1) === Math.abs(c2 - c1)) {
+                const dr = r2 > r1 ? 1 : -1;
+                const dc = c2 > c1 ? 1 : -1;
+                let r = r1 + dr, c = c1 + dc;
+                while (r !== r2 || c !== c2) {
+                    if (gameState[r][c] !== null) return false;
+                    r += dr;
+                    c += dc;
+                }
+                return true;
+            }
+
+            const minIdx = Math.min(idx1, idx2);
+            const maxIdx = Math.max(idx1, idx2);
+            for (let i = minIdx + 1; i < maxIdx; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) return false;
+            }
+            return true;
+        }
+
+        function handleCellClick(event) {
+            const cell = event.target;
+
+            if (cell.classList.contains('empty-glass')) return;
+
+            if (cell.classList.contains('selected')) {
+                cell.classList.remove('selected');
+                selectedCells = selectedCells.filter(c => c !== cell);
+            } else {
+                if (isProcessing) return;
+
+                cell.classList.add('selected');
+                selectedCells.push(cell);
+
+                if (selectedCells.length === 2) {
+                    checkMatch();
+                }
+            }
+        }
+
+        function checkMatch() {
+            if (selectedCells.length !== 2) return;
+
+            isProcessing = true;
+            const cell1 = selectedCells[0];
+            const cell2 = selectedCells[1];
+            const num1 = parseInt(cell1.textContent);
+            const num2 = parseInt(cell2.textContent);
+            const pos1 = getCellPosition(cell1);
+            const pos2 = getCellPosition(cell2);
+
+            if (isMatch(num1, num2) && isConnected(pos1, pos2)) {
+                setTimeout(() => {
+                    matchCells(cell1, cell2);
+                }, 150);
+            } else {
+                cell1.classList.add('shake');
+                cell2.classList.add('shake');
+                setTimeout(() => {
+                    cell1.classList.remove('selected');
+                    cell2.classList.remove('selected');
+                    cell1.classList.remove('shake');
+                    cell2.classList.remove('shake');
+                    selectedCells = [];
+                    isProcessing = false;
+                }, 400);
+            }
+        }
+
+        function matchCells(cell1, cell2) {
+            const pos1 = getCellPosition(cell1);
+            const pos2 = getCellPosition(cell2);
+
+            gameState[pos1.row][pos1.col] = null;
+            gameState[pos2.row][pos2.col] = null;
+            updateBoundaryCache();
+
+            selectedCells = [];
+            isProcessing = false;
+
+            applyGravity();
+            updateGridDisplay();
+            progressCard.addScore(10);
+            checkDeadlock();
+        }
+
+        function renderGameGrid() {
+            const gameGrid = document.getElementById('gameGrid');
+            gameGrid.innerHTML = '';
+            initState();
+
+            for (let row = 0; row < 9; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    const value = gameState[row][col];
+                    cell.className = `game-cell num-${value}`;
+                    cell.textContent = value;
+                    cell.dataset.index = row * 8 + col;
+                    cell.addEventListener('click', handleCellClick);
+                    gameGrid.appendChild(cell);
+                }
+            }
+        }
+
+        function findValidPair() {
+            const cells = [];
+            for (let i = 0; i < 72; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) cells.push(i);
+            }
+            for (let a = 0; a < cells.length; a++) {
+                for (let b = a + 1; b < cells.length; b++) {
+                    const i1 = cells[a], i2 = cells[b];
+                    const v1 = gameState[Math.floor(i1 / 8)][i1 % 8];
+                    const v2 = gameState[Math.floor(i2 / 8)][i2 % 8];
+                    if (!isMatch(v1, v2)) continue;
+                    const pos1 = { row: Math.floor(i1 / 8), col: i1 % 8 };
+                    const pos2 = { row: Math.floor(i2 / 8), col: i2 % 8 };
+                    if (isConnected(pos1, pos2)) return [i1, i2];
+                }
+            }
+            return null;
+        }
+
+        function showHint() {
+            if (isProcessing) return;
+            const pair = findValidPair();
+            if (!pair) {
+                showDeadlock();
+                return;
+            }
+            const cells = document.querySelectorAll('.game-cell');
+            pair.forEach(idx => {
+                const cell = cells[idx];
+                cell.classList.remove('hint');
+                void cell.offsetWidth;
+                cell.classList.add('hint');
+                setTimeout(() => cell.classList.remove('hint'), 1200);
+            });
+        }
+
+        function checkDeadlock() {
+            if (!findValidPair()) showDeadlock();
+        }
+
+        function showDeadlock() {
+            document.getElementById('deadlockModal').classList.add('active');
+            document.querySelector('.container').classList.add('blurred');
+        }
+
+        function hideDeadlock() {
+            document.getElementById('deadlockModal').classList.remove('active');
+            document.querySelector('.container').classList.remove('blurred');
+        }
+
+        function newGame() {
+            hideDeadlock();
+            progressCard.level = 1;
+            progressCard.totalScore = 0;
+            progressCard.levelScore = 0;
+            progressCard.scoreEl.textContent = '0';
+            progressCard.goalEl.textContent = '360';
+            progressCard.updateProgress();
+            renderGameGrid();
+        }
+
+        document.getElementById('hintBtn').addEventListener('click', showHint);
+        document.getElementById('newGameBtn').addEventListener('click', newGame);
+
+        // Ініціалізація
+        const progressCard = new ProgressCard('progressCard');
+        progressCard.goalEl.textContent = '360';
+        progressCard.scoreEl.textContent = '0';
+        progressCard.progressEl.textContent = '0%';
+        progressCard.updateProgressText();
+
+        progressCard.animateStatUpdate(progressCard.scoreEl);
+        progressCard.animateStatUpdate(progressCard.goalEl);
+        progressCard.animateStatUpdate(progressCard.progressEl);
+
+        renderGameGrid();
+    </script>
 </body>
 </html>
