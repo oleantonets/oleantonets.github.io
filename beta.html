@@ -490,6 +490,9 @@
                 gameState[pos2.row][pos2.col] = null;
                 updateBoundaryCache();
 
+                cell1.classList.remove('matched');
+                cell2.classList.remove('matched');
+
                 selectedCells = [];
                 isProcessing = false;
 
