@@ -27,6 +27,11 @@
             padding-top: 40px;
             position: relative;
             z-index: 1;
+            transition: filter 0.3s ease;
+        }
+
+        .container.blurred {
+            filter: blur(10px);
         }
 
         /* Progress Card Styles */
@@ -237,7 +242,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(10, 14, 26, 0.75);
+            background: rgba(10, 14, 26, 0.45);
             z-index: 100;
             align-items: center;
             justify-content: center;
@@ -623,10 +628,12 @@
 
         function showDeadlock() {
             document.getElementById('deadlockModal').classList.add('active');
+            document.querySelector('.container').classList.add('blurred');
         }
 
         function hideDeadlock() {
             document.getElementById('deadlockModal').classList.remove('active');
+            document.querySelector('.container').classList.remove('blurred');
         }
 
         function newGame() {
