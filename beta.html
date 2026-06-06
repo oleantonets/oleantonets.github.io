@@ -473,38 +473,76 @@
             applyGravity();
             updateGridDisplay();
             progressCard.addScore(10);
+            saveGame();
         }
 
-        function renderGameGrid() {
+        function renderGameGrid(newBoard = true) {
             const gameGrid = document.getElementById('gameGrid');
             gameGrid.innerHTML = '';
-            initState();
+            if (newBoard) initState();
 
             for (let row = 0; row < 9; row++) {
                 for (let col = 0; col < 8; col++) {
                     const cell = document.createElement('div');
-                    const value = gameState[row][col];
-                    cell.className = `game-cell num-${value}`;
-                    cell.textContent = value;
                     cell.dataset.index = row * 8 + col;
                     cell.addEventListener('click', handleCellClick);
                     gameGrid.appendChild(cell);
                 }
             }
+            updateGridDisplay();
+        }
+
+        const SAVE_KEY = 'numberMatchSave';
+
+        function saveGame() {
+            try {
+                localStorage.setItem(SAVE_KEY, JSON.stringify({
+                    level: progressCard.level,
+                    totalScore: progressCard.totalScore,
+                    levelScore: progressCard.levelScore,
+                    gameState: gameState
+                }));
+            } catch (e) {
+                // localStorage недоступний (приватний режим / квота) — гра працює без збереження
+            }
+        }
+
+        function loadGame() {
+            try {
+                const raw = localStorage.getItem(SAVE_KEY);
+                if (!raw) return false;
+                const data = JSON.parse(raw);
+                if (!data || !Array.isArray(data.gameState)) return false;
+                progressCard.level = data.level;
+                progressCard.totalScore = data.totalScore;
+                progressCard.levelScore = data.levelScore;
+                gameState = data.gameState;
+                updateBoundaryCache();
+                return true;
+            } catch (e) {
+                return false;
+            }
         }
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
-        progressCard.goalEl.textContent = '360';
-        progressCard.scoreEl.textContent = '0';
-        progressCard.progressEl.textContent = '0%';
-        progressCard.updateProgressText();
+
+        if (loadGame()) {
+            progressCard.scoreEl.textContent = progressCard.totalScore;
+            progressCard.goalEl.textContent = 360 * progressCard.level;
+            progressCard.updateProgress();
+            renderGameGrid(false);
+        } else {
+            progressCard.goalEl.textContent = '360';
+            progressCard.scoreEl.textContent = '0';
+            progressCard.progressEl.textContent = '0%';
+            progressCard.updateProgressText();
+            renderGameGrid();
+        }
 
         progressCard.animateStatUpdate(progressCard.scoreEl);
         progressCard.animateStatUpdate(progressCard.goalEl);
         progressCard.animateStatUpdate(progressCard.progressEl);
-
-        renderGameGrid();
     </script>
 </body>
 </html>
