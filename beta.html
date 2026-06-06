@@ -193,6 +193,79 @@
             filter: none;
         }
 
+        /* Hint button */
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-top: 24px;
+        }
+
+        .hint-btn {
+            background: rgba(167, 139, 250, 0.2);
+            border: 2px solid rgba(167, 139, 250, 0.4);
+            color: #f1f5f9;
+            font-family: inherit;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 12px 28px;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .hint-btn:hover {
+            background: rgba(167, 139, 250, 0.35);
+        }
+
+        .hint-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* Hint highlight animation */
+        @keyframes hintPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
+            50% { transform: scale(1.2); box-shadow: 0 0 24px rgba(251, 191, 36, 0.9); }
+        }
+
+        .game-cell.hint {
+            animation: hintPulse 0.6s ease 2;
+        }
+
+        /* No-moves (deadlock) modal — single CSS for macOS & iOS, no backdrop-filter */
+        .deadlock-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 14, 26, 0.75);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+
+        .deadlock-overlay.active {
+            display: flex;
+        }
+
+        .deadlock-content {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 400px;
+        }
+
+        .deadlock-content h2 {
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        .deadlock-content p {
+            color: #cbd5e1;
+            margin-bottom: 24px;
+        }
+
     </style>
 </head>
 <body>
@@ -219,6 +292,18 @@
         </div>
 
         <div class="game-grid" id="gameGrid"></div>
+
+        <div class="controls">
+            <button class="hint-btn" id="hintBtn">💡 Підказка</button>
+        </div>
+    </div>
+
+    <div class="deadlock-overlay" id="deadlockModal">
+        <div class="deadlock-content">
+            <h2>Немає ходів 😕</h2>
+            <p>Більше немає доступних з'єднань на полі.</p>
+            <button class="hint-btn" id="newGameBtn">Нова гра</button>
+        </div>
     </div>
 
     <script>
@@ -473,6 +558,7 @@
             applyGravity();
             updateGridDisplay();
             progressCard.addScore(10);
+            checkDeadlock();
         }
 
         function renderGameGrid() {
@@ -492,6 +578,68 @@
                 }
             }
         }
+
+        function findValidPair() {
+            const cells = [];
+            for (let i = 0; i < 72; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) cells.push(i);
+            }
+            for (let a = 0; a < cells.length; a++) {
+                for (let b = a + 1; b < cells.length; b++) {
+                    const i1 = cells[a], i2 = cells[b];
+                    const v1 = gameState[Math.floor(i1 / 8)][i1 % 8];
+                    const v2 = gameState[Math.floor(i2 / 8)][i2 % 8];
+                    if (!isMatch(v1, v2)) continue;
+                    const pos1 = { row: Math.floor(i1 / 8), col: i1 % 8 };
+                    const pos2 = { row: Math.floor(i2 / 8), col: i2 % 8 };
+                    if (isConnected(pos1, pos2)) return [i1, i2];
+                }
+            }
+            return null;
+        }
+
+        function showHint() {
+            if (isProcessing) return;
+            const pair = findValidPair();
+            if (!pair) {
+                showDeadlock();
+                return;
+            }
+            const cells = document.querySelectorAll('.game-cell');
+            pair.forEach(idx => {
+                const cell = cells[idx];
+                cell.classList.remove('hint');
+                void cell.offsetWidth;
+                cell.classList.add('hint');
+                setTimeout(() => cell.classList.remove('hint'), 1200);
+            });
+        }
+
+        function checkDeadlock() {
+            if (!findValidPair()) showDeadlock();
+        }
+
+        function showDeadlock() {
+            document.getElementById('deadlockModal').classList.add('active');
+        }
+
+        function hideDeadlock() {
+            document.getElementById('deadlockModal').classList.remove('active');
+        }
+
+        function newGame() {
+            hideDeadlock();
+            progressCard.level = 1;
+            progressCard.totalScore = 0;
+            progressCard.levelScore = 0;
+            progressCard.scoreEl.textContent = '0';
+            progressCard.goalEl.textContent = '360';
+            progressCard.updateProgress();
+            renderGameGrid();
+        }
+
+        document.getElementById('hintBtn').addEventListener('click', showHint);
+        document.getElementById('newGameBtn').addEventListener('click', newGame);
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
