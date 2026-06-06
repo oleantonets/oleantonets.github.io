@@ -460,19 +460,24 @@
         }
 
         function matchCells(cell1, cell2) {
-            const pos1 = getCellPosition(cell1);
-            const pos2 = getCellPosition(cell2);
+            cell1.classList.add('matched');
+            cell2.classList.add('matched');
 
-            gameState[pos1.row][pos1.col] = null;
-            gameState[pos2.row][pos2.col] = null;
-            updateBoundaryCache();
+            setTimeout(() => {
+                const pos1 = getCellPosition(cell1);
+                const pos2 = getCellPosition(cell2);
 
-            selectedCells = [];
-            isProcessing = false;
+                gameState[pos1.row][pos1.col] = null;
+                gameState[pos2.row][pos2.col] = null;
+                updateBoundaryCache();
 
-            applyGravity();
-            updateGridDisplay();
-            progressCard.addScore(10);
+                selectedCells = [];
+                isProcessing = false;
+
+                applyGravity();
+                updateGridDisplay();
+                progressCard.addScore(10);
+            }, 500);
         }
 
         function renderGameGrid() {
