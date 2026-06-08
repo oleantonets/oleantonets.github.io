@@ -433,7 +433,7 @@
                 this.level = 1;
                 this.totalScore = 0;
                 this.levelScore = 0;
-                this.levelGoal = 50;
+                this.levelGoal = 360;
             }
 
             setLevel(level) {
@@ -457,7 +457,7 @@
             nextLevel() {
                 this.level++;
                 this.levelScore = 0;
-                this.goalEl.textContent = 50 * this.level;
+                this.goalEl.textContent = 360 * this.level;
                 this.animateStatUpdate(this.goalEl);
                 this.updateProgress();
                 saveProgress();
@@ -519,10 +519,10 @@
                     const progress = JSON.parse(saved);
                     progressCard.level = progress.level || 1;
                     progressCard.levelScore = 0;
-                    progressCard.totalScore = (progress.completedLevels || progress.level - 1) * 50;
+                    progressCard.totalScore = (progress.completedLevels || progress.level - 1) * 360;
 
                     progressCard.scoreEl.textContent = progressCard.totalScore;
-                    progressCard.goalEl.textContent = 50 * progressCard.level;
+                    progressCard.goalEl.textContent = 360 * progressCard.level;
                     progressCard.updateProgress();
 
                     progressCard.animateStatUpdate(progressCard.scoreEl);
@@ -636,12 +636,7 @@
                 return true;
             }
 
-            const minIdx = Math.min(idx1, idx2);
-            const maxIdx = Math.max(idx1, idx2);
-            for (let i = minIdx + 1; i < maxIdx; i++) {
-                if (gameState[Math.floor(i / 8)][i % 8] !== null) return false;
-            }
-            return true;
+            return false;
         }
 
         function handleCellClick(event) {
@@ -780,11 +775,20 @@
 
         function newGame() {
             hideDeadlock();
+            progressCard.levelScore = 0;
+            progressCard.scoreEl.textContent = progressCard.totalScore;
+            progressCard.goalEl.textContent = 360 * progressCard.level;
+            progressCard.updateProgress();
+            saveProgress();
+            renderGameGrid();
+        }
+
+        function resetGame() {
             progressCard.level = 1;
             progressCard.totalScore = 0;
             progressCard.levelScore = 0;
             progressCard.scoreEl.textContent = '0';
-            progressCard.goalEl.textContent = '50';
+            progressCard.goalEl.textContent = '360';
             progressCard.updateProgress();
             localStorage.removeItem('numberMatchProgress');
             renderGameGrid();
@@ -801,7 +805,7 @@
         const hasProgress = loadProgress();
 
         if (!hasProgress) {
-            progressCard.goalEl.textContent = '50';
+            progressCard.goalEl.textContent = '360';
             progressCard.scoreEl.textContent = '0';
             progressCard.progressEl.textContent = '0%';
             progressCard.updateProgressText();
