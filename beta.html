@@ -206,25 +206,38 @@
             margin-top: 24px;
         }
 
-        .hint-btn {
-            background: rgba(167, 139, 250, 0.2);
-            border: 2px solid rgba(167, 139, 250, 0.4);
-            color: #f1f5f9;
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 600;
-            padding: 12px 28px;
-            border-radius: 16px;
+        .fab {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            transition: all 0.15s ease;
+            position: relative;
+            transition: transform 0.15s, box-shadow 0.15s;
+            font-family: inherit;
+            font-weight: 700;
         }
 
-        .hint-btn:hover {
-            background: rgba(167, 139, 250, 0.35);
+        .fab svg {
+            display: block;
+            flex-shrink: 0;
         }
 
-        .hint-btn:active {
-            transform: scale(0.96);
+        .fab:active {
+            transform: scale(0.93);
+        }
+
+        .fab-hint {
+            background: linear-gradient(135deg, #fbbf24, #fb923c);
+            color: #1a1200;
+            box-shadow: 0 4px 18px rgba(251, 191, 36, 0.35);
+        }
+
+        .fab-hint:hover {
+            box-shadow: 0 6px 24px rgba(251, 191, 36, 0.45);
         }
 
         #newGameBtn {
@@ -311,7 +324,9 @@
         <div class="game-grid" id="gameGrid"></div>
 
         <div class="controls">
-            <button class="hint-btn" id="hintBtn">💡 Підказка</button>
+            <button class="fab fab-hint" id="hintBtn" title="Підказка">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
+            </button>
         </div>
     </div>
 
@@ -427,6 +442,9 @@
                     progressCard.scoreEl.textContent = progressCard.totalScore;
                     progressCard.goalEl.textContent = 360 * progressCard.level;
                     progressCard.updateProgress();
+
+                    progressCard.animateStatUpdate(progressCard.scoreEl);
+                    progressCard.animateStatUpdate(progressCard.goalEl);
 
                     return true;
                 } catch (e) {
