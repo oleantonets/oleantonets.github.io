@@ -261,12 +261,14 @@
             animation: hintPulse 0.6s ease 2;
         }
 
-        /* No-moves (deadlock) modal — single CSS for macOS & iOS, no backdrop-filter */
+        /* Modal Overlay */
         .deadlock-overlay {
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(10, 14, 26, 0.45);
+            background: rgba(10, 14, 26, 0.75);
+            backdrop-filter: blur(6px);
+            -webkit-backdrop-filter: blur(6px);
             z-index: 100;
             align-items: center;
             justify-content: center;
@@ -278,22 +280,92 @@
         }
 
         .deadlock-content {
-            background: rgba(255, 255, 255, 0.1);
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-radius: 24px;
-            padding: 40px;
+            background: linear-gradient(135deg, rgba(30, 41, 59, 0.95) 0%, rgba(15, 23, 42, 0.95) 100%);
+            border: 1px solid rgba(167, 139, 250, 0.3);
+            border-radius: 28px;
+            padding: 48px 32px;
             text-align: center;
-            max-width: 400px;
+            max-width: 380px;
+            width: 100%;
+            animation: modalSlideIn 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.85) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .deadlock-icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a78bfa;
         }
 
         .deadlock-content h2 {
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 700;
             margin-bottom: 12px;
+            color: #f8fafc;
         }
 
         .deadlock-content p {
+            color: #94a3b8;
+            margin-bottom: 32px;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .deadlock-buttons {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .deadlock-btn {
+            padding: 12px 32px;
+            border-radius: 14px;
+            border: none;
+            font-family: inherit;
+            font-weight: 700;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .deadlock-btn-cancel {
+            background: rgba(167, 139, 250, 0.1);
             color: #cbd5e1;
-            margin-bottom: 24px;
+            border: 1px solid rgba(167, 139, 250, 0.2);
+        }
+
+        .deadlock-btn-cancel:hover {
+            background: rgba(167, 139, 250, 0.15);
+            border-color: rgba(167, 139, 250, 0.3);
+        }
+
+        .deadlock-btn-yes {
+            background: linear-gradient(135deg, #a78bfa, #ec4899);
+            color: white;
+            box-shadow: 0 4px 16px rgba(167, 139, 250, 0.4);
+        }
+
+        .deadlock-btn-yes:hover {
+            box-shadow: 0 6px 24px rgba(167, 139, 250, 0.5);
+        }
+
+        .deadlock-btn:active {
+            transform: scale(0.96);
         }
 
     </style>
@@ -327,14 +399,27 @@
             <button class="fab fab-hint" id="hintBtn" title="Підказка">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
             </button>
+            <button class="fab fab-test" id="testBtn" title="Тест модалу" style="background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 18px rgba(239, 68, 68, 0.35);">
+                T
+            </button>
         </div>
     </div>
 
     <div class="deadlock-overlay" id="deadlockModal">
         <div class="deadlock-content">
-            <h2>Немає ходів 😕</h2>
-            <p>Більше немає доступних з'єднань на полі.</p>
-            <button class="hint-btn" id="newGameBtn">Нова гра</button>
+            <div class="deadlock-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M8 12h8"/>
+                    <path d="M12 8v8"/>
+                </svg>
+            </div>
+            <h2>Немає ходів</h2>
+            <p>Більше немає доступних з'єднань на полі. Почати нову гру?</p>
+            <div class="deadlock-buttons">
+                <button class="deadlock-btn deadlock-btn-cancel" id="cancelBtn">Скасувати</button>
+                <button class="deadlock-btn deadlock-btn-yes" id="newGameBtn">Нова гра</button>
+            </div>
         </div>
     </div>
 
@@ -710,6 +795,8 @@
 
         document.getElementById('hintBtn').addEventListener('click', showHint);
         document.getElementById('newGameBtn').addEventListener('click', newGame);
+        document.getElementById('cancelBtn').addEventListener('click', hideDeadlock);
+        document.getElementById('testBtn').addEventListener('click', showDeadlock);
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
