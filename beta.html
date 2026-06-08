@@ -781,6 +781,7 @@
         function newGame() {
             hideDeadlock();
             progressCard.levelScore = 0;
+            progressCard.totalScore = (progressCard.level - 1) * 360;
             progressCard.scoreEl.textContent = progressCard.totalScore;
             progressCard.goalEl.textContent = 360 * progressCard.level;
             progressCard.updateProgress();
