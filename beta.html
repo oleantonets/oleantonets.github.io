@@ -399,9 +399,6 @@
             <button class="fab fab-hint" id="hintBtn" title="Підказка">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6"/><path d="M10 22h4"/><path d="M12 2a7 7 0 0 0-4 12.7V17h8v-2.3A7 7 0 0 0 12 2z"/></svg>
             </button>
-            <button class="fab fab-test" id="testBtn" title="Тест модалу" style="background: linear-gradient(135deg, #ef4444, #dc2626); box-shadow: 0 4px 18px rgba(239, 68, 68, 0.35);">
-                T
-            </button>
         </div>
     </div>
 
@@ -796,7 +793,6 @@
         document.getElementById('hintBtn').addEventListener('click', showHint);
         document.getElementById('newGameBtn').addEventListener('click', newGame);
         document.getElementById('cancelBtn').addEventListener('click', hideDeadlock);
-        document.getElementById('testBtn').addEventListener('click', showDeadlock);
 
         // Ініціалізація
         const progressCard = new ProgressCard('progressCard');
