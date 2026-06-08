@@ -636,11 +636,12 @@
                 return true;
             }
 
-            if (Math.abs(idx1 - idx2) === 1) {
-                return true;
+            const minIdx = Math.min(idx1, idx2);
+            const maxIdx = Math.max(idx1, idx2);
+            for (let i = minIdx + 1; i < maxIdx; i++) {
+                if (gameState[Math.floor(i / 8)][i % 8] !== null) return false;
             }
-
-            return false;
+            return true;
         }
 
         function handleCellClick(event) {
